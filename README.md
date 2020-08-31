@@ -3,69 +3,87 @@
 [![Node CI Workflow Status][github-actions-ci-badge]][github-actions-ci-link]
 [![Dependabot][dependabot-badge]][dependabot-link]
 
-This GitHub App syncs repository settings defined in `.github/settings.yml` to GitHub, enabling Pull Requests for repository settings.
+This is a modified version of [Settings Probot](https://github.com/probot/settings) GitHub App. This differs from the original probot settings app in 2 key ways:
+1. It does not use [probot-config](https://github.com/probot/probot-config). Instead, it reads the settings from `.github/settings.yml` file contained in the `admin` repo in the organization. The `admin` repo should be a restricted repository and contains the settings for all the repos within the organization.
+1. It manages the settings for all the repositories in the organization. Repositories could be explicitly defined in the settings config, but the app also manages any repo that is created in the organization.
 
 ## Usage
 
-1. __[Install the app](https://github.com/apps/settings)__.
-1. Create a `.github/settings.yml` file in your repository. Changes to this file on the default branch will be synced to GitHub.
-
-All top-level settings are optional. Some plugins do have required fields.
+1. __[Install the app](https://github.com/decyjphr-org/safe-settings)__.
+1. Create an `admin` repo within your organization (the repository must be called `admin`).
+1. Create a `.github/settings.yml` file in the `admin` repository. Changes to this file on the default branch will be synced to GitHub.
 
 ```yaml
-# These settings are synced to GitHub by https://probot.github.io/apps/settings/
+# These settings are synced to GitHub by https://github.com/decyjphr-org/safe-settings
 
-repository:
-  # See https://developer.github.com/v3/repos/#edit for all available settings.
+repositories: 
+  # This is a list of repositories that need to be synced. If the repository is not listed in the settings.yml, it will still be synced once it is manually created. The app manages all the repos in the organization__
 
-  # The name of the repository. Changing this will rename the repository
-  name: repo-name
+  # See https://developer.github.com/v3/repos/#edit for all available settings for a repository
+  - name: new-repo
+    
+    # The Organization the repo belongs to
+    org: decyjphr-org
+    
+    # A short description of the repository that will show up on GitHub
+    description: description of the repo
+  
+    # A URL with more information about the repository
+    homepage: https://example.github.io/
+    
+    # Keep this as true for most cases
+    # A lot of the policies below cannot be implemented on bare repos
+    auto_init: true
+    
+    # A comma-separated list of topics to set on the repository
+    topics: github, probot, new-topic, another-topic, topic-12
+  
+    # Either `true` to make the repository private, or `false` to make it public. 
+    private: false
+  
+    # Either `true` to enable issues for this repository, `false` to disable them.
+    has_issues: true
+  
+    # Either `true` to enable projects for this repository, or `false` to disable them.
+    # If projects are disabled for the organization, passing `true` will cause an API error.
+    has_projects: true
+  
+    # Either `true` to enable the wiki for this repository, `false` to disable it.
+    has_wiki: true
+  
+    # Either `true` to enable downloads for this repository, `false` to disable them.
+    has_downloads: true
+  
+    # Updates the default branch for this repository.
+    default_branch: main-enterprise
+  
+    # Either `true` to allow squash-merging pull requests, or `false` to prevent
+    # squash-merging.
+    allow_squash_merge: true
+  
+    # Either `true` to allow merging pull requests with a merge commit, or `false`
+    # to prevent merging pull requests with merge commits.
+    allow_merge_commit: true
+  
+    # Either `true` to allow rebase-merging pull requests, or `false` to prevent
+    # rebase-merging.
+    allow_rebase_merge: true
+    
+  # This is another repo
+  - name: another-repo
+    # Keep this as true as branch protections will not be applied otherwise
+    auto_init: true
+    org: decyjphr-org
+    # A short description of the repository that will show up on GitHub
+    description: description of another repo
+ 
+# The following attributes are applied to any repo within the org
 
-  # A short description of the repository that will show up on GitHub
-  description: description of repo
-
-  # A URL with more information about the repository
-  homepage: https://example.github.io/
-
-  # A comma-separated list of topics to set on the repository
-  topics: github, probot
-
-  # Either `true` to make the repository private, or `false` to make it public.
-  private: false
-
-  # Either `true` to enable issues for this repository, `false` to disable them.
-  has_issues: true
-
-  # Either `true` to enable projects for this repository, or `false` to disable them.
-  # If projects are disabled for the organization, passing `true` will cause an API error.
-  has_projects: true
-
-  # Either `true` to enable the wiki for this repository, `false` to disable it.
-  has_wiki: true
-
-  # Either `true` to enable downloads for this repository, `false` to disable them.
-  has_downloads: true
-
-  # Updates the default branch for this repository.
-  default_branch: master
-
-  # Either `true` to allow squash-merging pull requests, or `false` to prevent
-  # squash-merging.
-  allow_squash_merge: true
-
-  # Either `true` to allow merging pull requests with a merge commit, or `false`
-  # to prevent merging pull requests with merge commits.
-  allow_merge_commit: true
-
-  # Either `true` to allow rebase-merging pull requests, or `false` to prevent
-  # rebase-merging.
-  allow_rebase_merge: true
-
-# Labels: define labels for Issues and Pull Requests
 labels:
+  # Labels: define labels for Issues and Pull Requests
   - name: bug
     color: CC0000
-    description: An issue with the system 🐛.
+    description: An issue with the system
 
   - name: feature
     # If including a `#`, make sure to wrap it with quotes!
@@ -75,27 +93,23 @@ labels:
   - name: first-timers-only
     # include the old name to rename an existing label
     oldname: Help Wanted
+    color: '#326699'
+  - name: new-label
+    # include the old name to rename an existing label
+    oldname: Help Wanted
+    color: '#326699'
 
-# Milestones: define milestones for Issues and Pull Requests
-milestones:
-  - title: milestone-title
-    description: milestone-description
-    # The state of the milestone. Either `open` or `closed`
-    state: open
-
-# Collaborators: give specific users access to this repository.
-# See https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator for available options
 collaborators:
-  - username: bkeepers
-    # Note: Only valid on organization-owned repositories.
-    # The permission to grant the collaborator. Can be one of:
-    # * `pull` - can pull, but not push to or administer this repository.
-    # * `push` - can pull and push, but not administer this repository.
-    # * `admin` - can pull, push and administer this repository.
-    permission: push
+# Collaborators: give specific users access to any repository.
+# See https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator for available options
 
-  - username: hubot
-    permission: pull
+- username: regpaco
+  permission: push
+# Note: Only valid on organization-owned repositories.
+# The permission to grant the collaborator. Can be one of:
+# * `pull` - can pull, but not push to or administer this repository.
+# * `push` - can pull and push, but not administer this repository.
+# * `admin` - can pull, push and administer this repository.
 
 # See https://developer.github.com/v3/teams/#add-or-update-team-repository for available options
 teams:
@@ -105,11 +119,14 @@ teams:
     # * `push` - can pull and push, but not administer this repository.
     # * `admin` - can pull, push and administer this repository.
     permission: admin
-  - name: docs
+  - name: docss
     permission: push
+  - name: docs
+    permission: pull
 
 branches:
-  - name: master
+  # If the name of the branch is default, it will create a branch protection for the default branch in the repo
+  - name: default
     # https://developer.github.com/v3/repos/branches/#update-branch-protection
     # Branch Protection settings. Set to null to disable
     protection:
@@ -138,6 +155,8 @@ branches:
         apps: []
         users: []
         teams: []
+        
+
 ```
 
 ### Notes
@@ -147,18 +166,14 @@ branches:
 
 ### Inheritance
 
-This app uses [probot-config](https://github.com/probot/probot-config). This means you can inherit settings from another repo, and only override what you want to change.
+This app __DOES NOT USE__ [probot-config](https://github.com/probot/probot-config). This probot will only use the `.github/settings.yml` in the `admin` repo. This means with the 'safe-settings' probot you cannot inherit settings from another repo, nor can you override the settings.
 
-Individual settings in the arrays listed under `labels`, `teams` (once it is supported) and `branches` will be merged with the base repo if the `name` of an element in the array matches the `name` of an element in the corresponding array in the base repo. A possible future enhancement would be to make that work for the other settings arrays based on `username`, or `title`. This is not currently supported.
-
-To further clarify: Inheritance within the Protected Branches plugin allows you to override specific settings per branch. For example, your `.github` repo may set default protection on the `master` branch. You can then include `master` in your `branches` array, and only override the `required_approving_review_count`.
-Alternatively, you might only have a branch like `develop` in your `branches` array, and would still get `master` protection from your base repo.
 
 ## Security Implications
 
-__WARNING:__ Note that this app inherently _escalates anyone with `push` permissions to the __admin__ role_, since they can push config settings to the `master` branch, which will be synced. In a future, we may add restrictions to allow changes to the config file to be merged only by specific people/teams, or those with __admin__ access _(via a combination of protected branches, required statuses, and branch restrictions)_. Until then, use caution when merging PRs and adding collaborators.
+:OK: Note that this app is protected against _privilege escalation_. Unlike the orginal settings probot, this does not users with `write` permissions on a repo to override the settings. Only admin users with `write` permissions on the `admin` repo could make changes to the settings. Which means anyone with _push_ permissions _cannot_ elevate themselves to the admin role.
 
-Until restrictions are added in this app, one way to preserve admin/push permissions is to utilize the [GitHub CodeOwners feature](https://help.github.com/articles/about-codeowners/) to set one or more administrative users as the code owner of the `.github/settings.yml` file, and turn on "require code owner review" for the master branch. This does have the side effect of requiring code owner review for the entire branch, but helps preserve permission levels.
+Within the `admin` repo, you can also increase the oversight by utilizing  the [GitHub CodeOwners feature](https://help.github.com/articles/about-codeowners/) to set one or more administrative users as the code owner of the `.github/settings.yml` file, and turn on "require code owner review" for the master branch. This does have the side effect of requiring code owner review for the entire branch, but helps preserve permission levels.
 
 ## Deployment
 
