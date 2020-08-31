@@ -166,12 +166,12 @@ branches:
 1. Label color can also start with `#`, e.g. `color: '#F341B2'`. Make sure to wrap it with quotes!
 1. Each top-level element under branch protection must be filled (eg: `required_pull_request_reviews`, `required_status_checks`, `enforce_admins` and `restrictions`). If you don't want to use one of them you must set it to `null` (see comments in the example above). Otherwise, none of the settings will be applied.
 
-### Inheritance
+### Inheritance (there is none)
 
 This app __DOES NOT USE__ [probot-config](https://github.com/probot/probot-config). This probot will only use the `.github/settings.yml` in the `admin` repo. This means with the 'safe-settings' probot you cannot inherit settings from another repo, nor can you override the settings.
 
 
-## Security Implications
+## Security Implications (much better)
 
 :OK: Note that this app is protected against _privilege escalation_. Unlike the orginal settings probot, this does not users with `write` permissions on a repo to override the settings. Only admin users with `write` permissions on the `admin` repo could make changes to the settings. Which means anyone with _push_ permissions _cannot_ elevate themselves to the admin role.
 
