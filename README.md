@@ -173,7 +173,7 @@ This app __DOES NOT USE__ [probot-config](https://github.com/probot/probot-confi
 
 ## Security Implications (much better)
 
-:OK: Note that this app is protected against _privilege escalation_. Unlike the orginal settings probot, this does not users with `write` permissions on a repo to override the settings. Only admin users with `write` permissions on the `admin` repo could make changes to the settings. Which means anyone with _push_ permissions _cannot_ elevate themselves to the admin role.
+:+1: Note that this app is protected against _privilege escalation_. Unlike the orginal settings probot, this does not allow users with `write` permissions on a repo to override the settings. Which means anyone with _push_ permissions _cannot_ elevate themselves to the admin role; only users with `write` permissions on the `admin` repo could make changes to the permissions. 
 
 Within the `admin` repo, you can also increase the oversight by utilizing  the [GitHub CodeOwners feature](https://help.github.com/articles/about-codeowners/) to set one or more administrative users as the code owner of the `.github/settings.yml` file, and turn on "require code owner review" for the master branch. This does have the side effect of requiring code owner review for the entire branch, but helps preserve permission levels.
 
