@@ -17,7 +17,8 @@ This is a modified version of [Settings Probot](https://github.com/probot/settin
 # These settings are synced to GitHub by https://github.com/decyjphr-org/safe-settings
 
 repositories: 
-  # This is a list of repositories that need to be synced. If the repository is not listed in the settings.yml, it will still be synced once it is manually created. The app manages all the repos in the organization__
+  # This is a list of repositories that need to be synced. 
+  # If the repository is not listed in the settings.yml, it will still be synced once it is manually created. 
 
   # See https://developer.github.com/v3/repos/#edit for all available settings for a repository
   - name: new-repo
@@ -78,7 +79,8 @@ repositories:
     description: description of another repo
  
 # The following attributes are applied to any repo within the org
-
+# So if a repo is not listed above is created or edited
+# The app will apply the following settings to it
 labels:
   # Labels: define labels for Issues and Pull Requests
   - name: bug
