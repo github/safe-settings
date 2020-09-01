@@ -3,9 +3,10 @@
 [![Node CI Workflow Status][github-actions-ci-badge]][github-actions-ci-link]
 [![Dependabot][dependabot-badge]][dependabot-link]
 
-This is a modified version of [Settings Probot](https://github.com/probot/settings) GitHub App. This differs from the original probot settings app in 2 key ways:
+This is a modified version of [Settings Probot](https://github.com/probot/settings) GitHub App. This differs from the original probot settings app in several ways:
 1. It does not use [probot-config](https://github.com/probot/probot-config). Instead, it reads the settings from `.github/settings.yml` file contained in the `admin` repo in the organization. The `admin` repo should be a restricted repository and contains the settings for all the repos within the organization.
 1. It manages the settings for all the repositories in the organization. Repositories could be explicitly defined in the settings config, but the app also manages any repo that is created in the organization.
+1. It will allow you to set branch protections on the `default` branch no matter what it is called by calling it `default` in `.github/settings.yml`.
 
 ## Usage
 
