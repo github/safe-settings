@@ -1,9 +1,5 @@
 # Deployment
 
-Every app can either be deployed stand-alone, or combined with other apps in one deployment.
-
-> **Heads up!** Note that most [apps in the @probot organization](https://github.com/search?q=topic%3Aprobot-app+org%3Aprobot&type=Repositories) have an official hosted app that you can use for your open source project. Use the hosted instance if you don't want to deploy your own.
-
 **Contents:**
 
 1. [Create the GitHub App](#create-the-github-app)
