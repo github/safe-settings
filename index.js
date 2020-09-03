@@ -1,45 +1,6 @@
 const mergeArrayByName = require('./lib/mergeArrayByName')
 const path = require('path')
 const yaml = require('js-yaml')
-/*
-const default_config = {
-  labels: [
-    {
-      name: 'bug',
-      color: 'CC0000',
-      description: 'An issue with the system'
-    },
-    {
-      name: 'feature',
-      color: '#336699',
-      description: 'New functionality.'
-    },
-    {
-      name: 'first-timers-only',
-      oldname: 'Help Wanted',
-      color: '#326699'
-    },
-    { name: 'new-label', oldname: 'Help Wanted', color: '#326699' }
-  ],
-  collaborators: [ { username: 'regpaco', permission: 'pull' } ],
-  teams: [
-    { name: 'core', permission: 'admin' },
-    { name: 'docss', permission: 'push' },
-    { name: 'docs', permission: 'pull' }
-  ],
-  branches: [
-    {
-      name: 'main-enterprise',
-      protection: {
-        required_pull_request_reviews: [Object],
-        required_status_checks: [Object],
-        enforce_admins: true,
-        restrictions: [Object]
-      }
-    }
-  ]
-}
-*/
 
 module.exports = (robot, _, Settings = require('./lib/settings')) => {
   async function syncAllSettings (context, repo = context.repo()) {
