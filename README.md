@@ -1,4 +1,4 @@
-# GitHub Settings
+# GitHub Safe Settings
 
 [![Node CI Workflow Status][github-actions-ci-badge]][github-actions-ci-link]
 [![Dependabot][dependabot-badge]][dependabot-link]
