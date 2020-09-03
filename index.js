@@ -23,7 +23,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
    */
   async function loadYaml (context) {
     try {
-      const repo = {owner: 'decyjphr-org', repo: 'admin'}
+      const repo = {owner: context.repo().owner, repo: 'admin'}
       const CONFIG_PATH = '.github'
       const params = Object.assign(repo,{ path: path.posix.join(CONFIG_PATH, 'settings.yml') })
       const response = await context.github.repos.getContents(params).catch(e=>{
