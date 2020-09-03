@@ -4,15 +4,12 @@ const yaml = require('js-yaml')
 
 module.exports = (robot, _, Settings = require('./lib/settings')) => {
   async function syncAllSettings (context, repo = context.repo()) {
-    //const config = await context.config('settings.yml', default_config, { arrayMerge: mergeArrayByName })
     const config = await loadYaml(context)
     robot.log(`config is ${JSON.stringify(config)}`)
     return Settings.syncAll(context, repo, config)
   }
 
   async function syncSettings (context, repo = context.repo()) {
-    //const config = await context.config('settings.yml', default_config, { arrayMerge: mergeArrayByName })
-    //const config = await context.config('settings.yml')
     const config = await loadYaml(context)
     robot.log(`config is ${JSON.stringify(config)}`)
     return Settings.sync(context, repo, config)
@@ -33,7 +30,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
         console.log(e)
         console.error(`Error getting settings ${e}`)
       })
-      //console.log(response)
       // Ignore in case path is a folder
       // - https://developer.github.com/v3/repos/contents/#response-if-content-is-a-directory
       if (Array.isArray(response.data)) {
