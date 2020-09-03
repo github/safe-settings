@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  probot:
+    image: safe-settings
+    build: .
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3000:3000
