@@ -18,7 +18,7 @@ COPY  lib /opt/safe-settings/lib
 ## Future updates to this Dockerfile _may_ move this over to
 ## pure environment variables in Docker, so it can be passed at the CLI.
 ## This will be purely based on demand
-COPY  .env /opt/safe-settings/
+##COPY  .env /opt/safe-settings/
 
 ## This can probably be removed, but users will have to make sure they
 ## run the container, then copy the key. This helps avoid that for folks
