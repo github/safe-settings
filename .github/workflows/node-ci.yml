@@ -15,4 +15,10 @@ jobs:
         with:
           node-version: 12.x
       - run: npm install
-      - run: npm test
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: yadhav/safe-settings
+          tag_with_ref: true
