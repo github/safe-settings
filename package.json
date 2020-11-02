@@ -22,20 +22,20 @@
   "dependencies": {
     "deepmerge": "^4.2.2",
     "js-yaml": "^3.14.0",
-    "probot": "9.13.0"
+    "probot": "10.10.1"
   },
   "devDependencies": {
     "@travi/any": "^2.0.10",
-    "check-engine": "^1.8.1",
+    "check-engine": "^1.10.0",
     "http-status-codes": "^1.4.0",
-    "jest": "^26.1.0",
-    "jest-when": "^2.7.2",
+    "jest": "^26.6.2",
+    "jest-when": "^3.0.1",
     "lockfile-lint": "^4.3.7",
     "nock": "^13.0.3",
     "nodemon": "^2.0.4",
     "npm-run-all": "^4.1.5",
     "smee-client": "^1.0.2",
-    "standard": "^14.3.4"
+    "standard": "^16.0.1"
   },
   "standard": {
     "env": [
