@@ -1,4 +1,3 @@
-const mergeArrayByName = require('./lib/mergeArrayByName')
 const path = require('path')
 const yaml = require('js-yaml')
 
@@ -15,7 +14,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     return Settings.sync(context, repo, config)
   }
 
-    /**
+  /**
    * Loads a file from GitHub
    *
    * @param params Params to fetch the file with
@@ -23,10 +22,10 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
    */
   async function loadYaml (context) {
     try {
-      const repo = {owner: context.repo().owner, repo: 'admin'}
+      const repo = { owner: context.repo().owner, repo: 'admin' }
       const CONFIG_PATH = '.github'
-      const params = Object.assign(repo,{ path: path.posix.join(CONFIG_PATH, 'settings.yml') })
-      const response = await context.github.repos.getContents(params).catch(e=>{
+      const params = Object.assign(repo, { path: path.posix.join(CONFIG_PATH, 'settings.yml') })
+      const response = await context.github.repos.getContents(params).catch(e => {
         console.log(e)
         console.error(`Error getting settings ${e}`)
       })
@@ -57,7 +56,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const { payload } = context
     const { repository } = payload
 
-    const adminRepo =  repository.name === 'admin'
+    const adminRepo = repository.name === 'admin'
     if (!adminRepo) {
       robot.log('Not working on the Admin repo, returning...')
       return
@@ -78,14 +77,13 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
       return
     }
-
     return syncAllSettings(context)
   })
 
   robot.on('repository.edited', async context => {
     const { payload } = context
     const { changes, repository, sender } = payload
-    robot.log("repository.edited payload from ",JSON.stringify(sender))
+    robot.log('repository.edited payload from ', JSON.stringify(sender))
     if (sender.type === 'Bot') {
       robot.log('Repository Edited by a Bot')
       return
@@ -103,8 +101,8 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
   robot.on('repository.created', async context => {
     const { payload } = context
-    const { changes, repository, sender } = payload
-    robot.log("repository.created payload from ",JSON.stringify(sender))
+    const { sender } = payload
+    robot.log('repository.created payload from ', JSON.stringify(sender))
     if (sender.type === 'Bot') {
       robot.log('Repository created by a Bot')
       return
@@ -112,5 +110,4 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     robot.log('Repository created by a Human')
     return syncSettings(context)
   })
-
 }
