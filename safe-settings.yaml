@@ -22,4 +22,6 @@ spec:
       containers:
       - image: yadhav/safe-settings:main-enterprise
         name: safe-settings
+        envFrom:
+          secretRef: app-env
         
