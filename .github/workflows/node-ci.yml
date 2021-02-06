@@ -7,10 +7,12 @@ name: Node.js CI
       - synchronize
 env:
   DOCKER_IMAGE_NAME: yadhav/safe-settings
-  IMAGE_REGISTRY_URL: docker.pkg.github.com
+  #IMAGE_REGISTRY_URL: docker.pkg.github.com
+  IMAGE_REGISTRY_URL: docker.io
   AZURE_RESOURCE_GROUP: aks-actions
   AZURE_AKS_CLUSTER: actionsAKSCluster
   AZURE_LOCATION: '"East US"'
+  AZURE_AKS_NAMESPACE: default
 
 jobs:
   deploy-to-k8s:
@@ -25,3 +27,12 @@ jobs:
         id: login
       - run: |
           kubectl get deployment
+      - name: Set imagePullSecret
+        uses: azure/k8s-create-secret@v1
+        with:
+          namespace: ${{env.AZURE_AKS_NAMESPACE}}
+          container-registry-url: ${{env.IMAGE_REGISTRY_URL}}
+          container-registry-username: ${{ secrets.DOCKER_USERNAME }}
+          container-registry-password: ${{ secrets.DOCKER_PASSWORD }}
+          secret-name: 'image-pull-secret'
+        id: create-secret
