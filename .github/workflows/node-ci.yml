@@ -15,15 +15,15 @@ env:
   AZURE_AKS_NAMESPACE: default
 
 jobs:
-#  build:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Setup node
-#        uses: actions/setup-node@v2.1.2
-#        with:
-#          node-version: 12.x
-#      - run: npm install
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: 12.x
+      - run: npm install
 #      - name: Push to Docker Hub
 #        uses: docker/build-push-action@v1
 #        with:
@@ -31,44 +31,3 @@ jobs:
 #          password: ${{ secrets.DOCKER_PASSWORD }}
 #          repository: yadhav/safe-settings
 #          tag_with_ref: true
-  deploy-to-k8s:
-    name: Deploy to Kubernetes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - uses: azure/aks-set-context@v1
-        with:
-          creds: "${{ secrets.AZ_SERVICE_PRINCIPAL }}" # Azure credentials
-          resource-group: ${{env.AZURE_RESOURCE_GROUP}}
-          cluster-name: ${{env.AZURE_AKS_CLUSTER}}
-        id: login
-      - run: |
-          kubectl get deployment
-      - name: app-env
-        uses: azure/k8s-create-secret@v1
-        with:
-          namespace: 'default'
-          secret-type: 'generic'
-          arguments:  --from-literal=APP_ID=${{ secrets.APP_ID }} --from-literal=PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --from-literal=WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }}
-          secret-name: app-env
-      - name: Set imagePullSecret
-        uses: azure/k8s-create-secret@v1
-        with:
-          namespace: ${{env.AZURE_AKS_NAMESPACE}}
-          container-registry-url: ${{env.IMAGE_REGISTRY_URL}}
-          container-registry-username: ${{ secrets.DOCKER_USERNAME }}
-          container-registry-password: ${{ secrets.DOCKER_PASSWORD }}
-          secret-name: 'image-pull-secret'
-        id: create-secret
-      - uses: Azure/k8s-deploy@v1
-        with:
-          namespace: ${{env.AZURE_AKS_NAMESPACE}}
-          manifests: |
-            safe-settings.yaml
-            svc-safe-settings.yaml
-          #images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{ github.sha }}
-          images: ${{env.IMAGE_REGISTRY_URL}}/yadhav/safe-settings:main-enterprise
-          imagepullsecrets: |
-            image-pull-secret
-          kubectl-version: 'latest'        
