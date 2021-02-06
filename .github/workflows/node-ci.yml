@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: azure/aks-set-context@v1
         with:
-          creds: "${{ secrets.AZURE_SERVICE_PRINCIPAL }}" # Azure credentials
+          creds: "${{ secrets.AZ_SERVICE_PRINCIPAL }}" # Azure credentials
           resource-group: ${{env.AZURE_RESOURCE_GROUP}}
           cluster-name: ${{env.AZURE_AKS_CLUSTER}}
         id: login
