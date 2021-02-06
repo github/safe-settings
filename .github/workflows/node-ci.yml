@@ -45,7 +45,12 @@ jobs:
 #          password: ${{ secrets.DOCKER_PASSWORD }}
 #          repository: yadhav/safe-settings
 #          tag_with_ref: true
-      -
-        name: Inspect
+      - name: Inspect
         run: |
           docker image inspect yadhav/safe-settings:main-enterprise
+      - name: Test
+        id: test
+        run: |
+          docker run -d -p 3000:3000 yadhav/safe-settings:main-enterprise
+          curl http://localhost:3000
+ 
