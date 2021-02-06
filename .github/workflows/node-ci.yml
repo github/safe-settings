@@ -1,24 +1,27 @@
 name: Node.js CI
-'on': 
+"on":
   push:
   pull_request:
     types:
       - opened
       - synchronize
+env:
+  DOCKER_IMAGE_NAME: yadhav/safe-settings
+  IMAGE_REGISTRY_URL: docker.pkg.github.com
+  AZURE_RESOURCE_GROUP: aks-actions
+  AZURE_AKS_CLUSTER: actionsAKSCluster
+  AZURE_LOCATION: '"East US"'
+
 jobs:
-  build:
+  deploy-to-k8s:
+    name: Deploy to Kubernetes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v2.1.2
+      - uses: azure/aks-set-context@v1
         with:
-          node-version: 12.x
-      - run: npm install
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: yadhav/safe-settings
-          tag_with_ref: true
+          creds: "${{ secrets.AZURE_CREDENTIALS }}" # Azure credentials
+          resource-group: ${{env.AZURE_RESOURCE_GROUP}}
+          cluster-name: ${{env.AZURE_AKS_CLUSTER}}
+        id: login
+      - run: |
+          kubectl get deployment
