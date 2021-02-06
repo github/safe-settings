@@ -52,5 +52,6 @@ jobs:
         id: test
         run: |
           docker run -d -p 3000:3000 yadhav/safe-settings:main-enterprise
+          sleep 5000
           curl http://localhost:3000
  
