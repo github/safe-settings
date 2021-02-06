@@ -46,4 +46,4 @@ jobs:
       -
         name: Inspect
         run: |
-          docker image inspect ${{ env.DOCKER_IMAGE_NAME }}:${{ github.event.pull_request.head.sha || github.sh }}
+          docker image inspect ${{ env.DOCKER_IMAGE_NAME }}:${{ github.event.pull_request.head.sha || github.sha }}
