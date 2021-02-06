@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-safe-settings
+  labels:
+    app: safe-settings
+spec:
+  selector:
+    app: safe-settings
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 3000
+  type: LoadBalancer
