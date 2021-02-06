@@ -51,7 +51,7 @@ jobs:
       - name: Test
         id: test
         run: |
-          docker run -d -p 3000:3000 yadhav/safe-settings:main-enterprise
+          docker run --env APP_ID=${{ secrets.APP_ID }} --env PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --env WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }} -d -p 3000:3000 yadhav/safe-settings:main-enterprise
           sleep 5
           curl http://localhost:3000
  
