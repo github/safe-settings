@@ -35,6 +35,8 @@ jobs:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - uses: azure/aks-set-context@v1
         with:
           creds: "${{ secrets.AZ_SERVICE_PRINCIPAL }}" # Azure credentials
