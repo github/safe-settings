@@ -74,7 +74,7 @@ jobs:
         run: |
           docker push yadhav/safe-settings:main-enterprise    
                   
-  deploy:
+  trigger-deployment:
     needs: build
     runs-on: ubuntu-latest
     steps:
