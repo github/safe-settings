@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Deploy to Kubernetes
 on: 
   workflow_dispatch:
     inputs:
