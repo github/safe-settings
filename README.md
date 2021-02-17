@@ -1,7 +1,8 @@
 # GitHub Safe Settings
 
 [![Node CI Workflow Status][github-actions-ci-badge]][github-actions-ci-link]
-[![Dependabot][dependabot-badge]][dependabot-link]
+
+<!-->[![Dependabot][dependabot-badge]][dependabot-link]</>
 
 This is a modified version of [Settings Probot](https://github.com/probot/settings) GitHub App. This differs from the original probot settings app in several ways:
 1. It does not use [probot-config](https://github.com/probot/probot-config). Instead, it reads the settings from `.github/settings.yml` file contained in the `admin` repo in the organization. The `admin` repo should be a restricted repository and contains the settings for all the repos within the organization.
