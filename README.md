@@ -4,18 +4,19 @@
 [![Dependabot][dependabot-badge]][dependabot-link]
 
 This is a modified version of [Settings Probot](https://github.com/probot/settings) GitHub App. This differs from the original probot settings app in several ways:
+
 1. It does not use [probot-config](https://github.com/probot/probot-config). Instead, it reads the settings from `.github/settings.yml` file contained in the `admin` repo in the organization. The `admin` repo should be a restricted repository and contains the settings for all the repos within the organization.
 1. It manages the settings for all the repositories in the organization. Repositories could be explicitly defined in the settings config, but the app also manages any repo that is created in the organization.
 1. It will allow you to set branch protections on the `default` branch no matter what it is called by calling it `default` in `.github/settings.yml`.
 
 ## Usage
 
-1. __[Install the app](https://github.com/decyjphr-org/safe-settings)__.
+1. __[Install the app](https://github.com/github/safe-settings)__.
 1. Create an `admin` repo within your organization (the repository must be called `admin`).
 1. Create a `.github/settings.yml` file in the `admin` repository. Changes to this file on the default branch will be synced to GitHub.
 
 ```yaml
-# These settings are synced to GitHub by https://github.com/decyjphr-org/safe-settings
+# These settings are synced to GitHub by https://github.com/github/safe-settings
 
 repositories: 
   # This is a list of repositories that need to be synced. 
@@ -25,7 +26,7 @@ repositories:
   - name: new-repo
     
     # The Organization the repo belongs to
-    org: decyjphr-org
+    org: github
     
     # A short description of the repository that will show up on GitHub
     description: description of the repo
@@ -75,7 +76,7 @@ repositories:
   - name: another-repo
     # Keep this as true as branch protections will not be applied otherwise
     auto_init: true
-    org: decyjphr-org
+    org: github
     # A short description of the repository that will show up on GitHub
     description: description of another repo
  
@@ -171,10 +172,9 @@ branches:
 
 This app __DOES NOT USE__ [probot-config](https://github.com/probot/probot-config). This probot will only use the `.github/settings.yml` in the `admin` repo. This means with the 'safe-settings' probot you cannot inherit settings from another repo, nor can you override the settings.
 
-
 ## Security Implications (much better)
 
-:+1: Note that this app is protected against _privilege escalation_. Unlike the orginal settings probot, this does not allow users with `write` permissions on a repo to override the settings. Which means anyone with _push_ permissions _cannot_ elevate themselves to the admin role; only users with `write` permissions on the `admin` repo could make changes to the permissions. 
+:+1: Note that this app is protected against _privilege escalation_. Unlike the original settings probot, this does not allow users with `write` permissions on a repo to override the settings. Which means anyone with _push_ permissions _cannot_ elevate themselves to the admin role; only users with `write` permissions on the `admin` repo could make changes to the permissions.
 
 Within the `admin` repo, you can also increase the oversight by utilizing  the [GitHub CodeOwners feature](https://help.github.com/articles/about-codeowners/) to set one or more administrative users as the code owner of the `.github/settings.yml` file, and turn on "require code owner review" for the master branch. This does have the side effect of requiring code owner review for the entire branch, but helps preserve permission levels.
 
