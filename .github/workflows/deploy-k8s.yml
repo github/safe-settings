@@ -6,6 +6,9 @@ on:
         description: 'Status of the previous workflow'     
         required: true
         default: 'passed'
+      release:
+        description: 'Release tag from the previous workflow'     
+        required: true
 env:
   DOCKER_IMAGE_NAME: yadhav/safe-settings
   #IMAGE_REGISTRY_URL: docker.pkg.github.com

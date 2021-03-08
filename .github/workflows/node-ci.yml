@@ -17,6 +17,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.rcrelease.outputs.release }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
@@ -69,10 +71,16 @@ jobs:
           docker run --env APP_ID=${{ secrets.APP_ID }} --env PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --env WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }} -d -p 3000:3000 yadhav/safe-settings:main-enterprise
           sleep 5
           curl http://localhost:3000
+      - name: Tag a rc release 
+        id: rcrelease
+        uses: actionsdesk/semver@0.6.0-rc.8
+        with:
+          prerelease: withBuildNumber
+          prelabel: rc
       - name: Push Docker Image
         if: ${{ success() }}
         run: |
-          docker push yadhav/safe-settings:main-enterprise    
+          docker push yadhav/safe-settings:${{ steps.rcrelease.outputs.release }}    
                   
   trigger-deployment:
     needs: build
@@ -84,4 +92,4 @@ jobs:
         workflow: deploy-k8s.yml
         token: ${{ secrets.pat }}
         ref: ${{ github.ref }}
-        inputs: '{"status":"passed"}'    
+        inputs: '{"release": ${{needs.build.outputs.release}}, "status": "passed" }'    
