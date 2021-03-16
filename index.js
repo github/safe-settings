@@ -1,17 +1,43 @@
 const path = require('path')
 const yaml = require('js-yaml')
-
+const fs = require('fs')
+let deploymentConfig
 module.exports = (robot, _, Settings = require('./lib/settings')) => {
   async function syncAllSettings (context, repo = context.repo()) {
-    const config = await loadYaml(context)
+    deploymentConfig = await loadYamlFileSystem()
+    robot.log(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+    const runtimeConfig = await loadYaml(context)
+    const config = Object.assign({}, deploymentConfig, runtimeConfig)
     robot.log(`config is ${JSON.stringify(config)}`)
     return Settings.syncAll(context, repo, config)
   }
 
   async function syncSettings (context, repo = context.repo()) {
-    const config = await loadYaml(context)
+    deploymentConfig = await loadYamlFileSystem()
+    robot.log(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+    const runtimeConfig = await loadYaml(context)
+    const config = Object.assign({}, deploymentConfig, runtimeConfig)
     robot.log(`config is ${JSON.stringify(config)}`)
     return Settings.sync(context, repo, config)
+  }
+
+  /**
+   * Loads the deployment config file from file system
+   * Do this once when the app starts and then return the cached value
+   *
+   * @return The parsed YAML file
+   */
+  async function loadYamlFileSystem () {
+    if (deploymentConfig === undefined) {
+      const deploymentConfigPath = process.env.DEPLOYMENT_CONFIG_FILE ? process.env.DEPLOYMENT_CONFIG_FILE : 'deployment-settings.yml'
+      if (fs.existsSync(deploymentConfigPath)) {
+        deploymentConfig = yaml.safeLoad(fs.readFileSync(deploymentConfigPath))
+      } else {
+        console.error(`Safe-settings load deployment config failed: file ${deploymentConfigPath} not found`)
+        process.exit(1)
+      }
+    }
+    return deploymentConfig
   }
 
   /**
