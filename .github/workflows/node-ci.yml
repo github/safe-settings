@@ -97,4 +97,4 @@ jobs:
         workflow: deploy-k8s.yml
         token: ${{ secrets.pat }}
         ref: ${{ github.ref }}
-        inputs: '{"release": ${{needs.build.outputs.release}}, "status": "passed" }'    
+        inputs: '{"release": "${{needs.build.outputs.release}}", "status": "passed" }'    
