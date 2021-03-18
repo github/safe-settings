@@ -57,7 +57,7 @@ jobs:
             safe-settings.yaml
             svc-safe-settings.yaml
           #images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{ github.sha }}
-          images: ${{env.IMAGE_REGISTRY_URL}}/yadhav/safe-settings:main-enterprise
+          images: ${{env.IMAGE_REGISTRY_URL}}/yadhav/safe-settings:${{ github.event.inputs.release }}
           imagepullsecrets: |
             image-pull-secret
           kubectl-version: 'latest'        
