@@ -1,8 +1,8 @@
 {
-  "name": "probot-settings",
+  "name": "safe-settings",
   "version": "1.0.0",
   "description": "",
-  "repository": "https://github.com/probot/settings.git",
+  "repository": "https://github.com/github/safe-settings.git",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon",
@@ -17,25 +17,25 @@
     "test:integration": "jest 'test/integration/'",
     "test:integration:debug": "LOG_LEVEL=debug DEBUG=nock run-s test:integration"
   },
-  "author": "Brandon Keepers",
+  "author": "Yadhav Jayaraman",
   "license": "ISC",
   "dependencies": {
     "deepmerge": "^4.2.2",
-    "js-yaml": "^3.14.0",
-    "probot": "9.13.0"
+    "js-yaml": "^4.0.0",
+    "probot": "11.0.6"
   },
   "devDependencies": {
-    "@travi/any": "^2.0.10",
-    "check-engine": "^1.8.1",
-    "http-status-codes": "^1.4.0",
-    "jest": "^26.1.0",
-    "jest-when": "^2.7.2",
+    "@travi/any": "^2.0.15",
+    "check-engine": "^1.10.0",
+    "http-status-codes": "^2.1.4",
+    "jest": "^26.6.3",
+    "jest-when": "^3.2.0",
     "lockfile-lint": "^4.3.7",
-    "nock": "^13.0.3",
-    "nodemon": "^2.0.4",
+    "nock": "^13.0.7",
+    "nodemon": "^2.0.7",
     "npm-run-all": "^4.1.5",
-    "smee-client": "^1.0.2",
-    "standard": "^14.3.4"
+    "smee-client": "^1.2.2",
+    "standard": "^16.0.3"
   },
   "standard": {
     "env": [

@@ -31,7 +31,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     if (deploymentConfig === undefined) {
       const deploymentConfigPath = process.env.DEPLOYMENT_CONFIG_FILE ? process.env.DEPLOYMENT_CONFIG_FILE : 'deployment-settings.yml'
       if (fs.existsSync(deploymentConfigPath)) {
-        deploymentConfig = yaml.safeLoad(fs.readFileSync(deploymentConfigPath))
+        deploymentConfig = yaml.load(fs.readFileSync(deploymentConfigPath))
       } else {
         console.error(`Safe-settings load deployment config failed: file ${deploymentConfigPath} not found`)
         process.exit(1)
@@ -51,7 +51,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       const repo = { owner: context.repo().owner, repo: 'admin' }
       const CONFIG_PATH = '.github'
       const params = Object.assign(repo, { path: path.posix.join(CONFIG_PATH, 'settings.yml') })
-      const response = await context.github.repos.getContents(params).catch(e => {
+      const response = await context.octokit.repos.getContent(params).catch(e => {
         console.log(e)
         console.error(`Error getting settings ${e}`)
       })
@@ -68,7 +68,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
         return
       }
 
-      return yaml.safeLoad(Buffer.from(response.data.content, 'base64').toString()) || {}
+      return yaml.load(Buffer.from(response.data.content, 'base64').toString()) || {}
     } catch (e) {
       if (e.status === 404) {
         return null
