@@ -1,6 +1,6 @@
 {
   "name": "safe-settings",
-  "version": "1.0.0",
+  "version": "0.1.0-rc.26",
   "description": "",
   "repository": "https://github.com/github/safe-settings.git",
   "main": "index.js",
