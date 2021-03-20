@@ -20,7 +20,7 @@ spec:
         app: safe-settings
     spec:
       containers:
-      - image: yadhav/safe-settings:0.1.0-rc.29
+      - image: docker.io/yadhav/safe-settings:0.1.0-rc.29
         name: safe-settings
         envFrom:
         - secretRef: 
