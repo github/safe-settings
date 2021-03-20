@@ -33,8 +33,9 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       if (fs.existsSync(deploymentConfigPath)) {
         deploymentConfig = yaml.load(fs.readFileSync(deploymentConfigPath))
       } else {
-        console.error(`Safe-settings load deployment config failed: file ${deploymentConfigPath} not found`)
-        process.exit(1)
+        //console.error(`Safe-settings load deployment config failed: file ${deploymentConfigPath} not found`)
+        //process.exit(1)
+        deploymentConfig = { restrictedRepos: [ 'admin', '.github', 'safe-settings' ] }
       }
     }
     return deploymentConfig
