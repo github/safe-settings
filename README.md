@@ -1,6 +1,6 @@
 # GitHub Safe Settings
 
-[![Node CI Workflow Status][github-actions-ci-badge]][github-actions-ci-link]
+[![Node.js CI](https://github.com/github/safe-settings/actions/workflows/node-ci.yml/badge.svg)](https://github.com/github/safe-settings/actions/workflows/node-ci.yml)
 [![Dependabot][dependabot-badge]][dependabot-link]
 
 This is a modified version of [Settings Probot](https://github.com/probot/settings) GitHub App. This differs from the original probot settings app in several ways:
