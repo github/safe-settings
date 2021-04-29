@@ -182,6 +182,13 @@ Within the `admin` repo, you can also increase the oversight by utilizing  the [
 
 See [docs/deploy.md](docs/deploy.md) if you would like to run your own instance of this plugin.
 
+## License
+
+`safe-settings` is licensed under the [ISC license](https://github.com/github/safe-settings/blob/master/LICENSE)
+
+`safe-settings` uses 3rd party libraries, each with their own license. These are found [here](https://github.com/github/safe-settings/blob/master/NOTICE.md).
+
+
 [dependabot-link]: https://dependabot.com/
 
 [dependabot-badge]: https://badgen.net/dependabot/probot/settings/?icon=dependabot
