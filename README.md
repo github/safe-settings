@@ -11,17 +11,33 @@ This is a modified version of [Settings Probot](https://github.com/probot/settin
 
 ## Usage
 
-1. __[Install the app](https://github.com/github/safe-settings)__.
+1. __[Install the app](docs/deploy.md)__.
 1. Create an `admin` repo within your organization (the repository must be called `admin`).
-1. Create a `.github/settings.yml` file in the `admin` repository. Changes to this file on the default branch will be synced to GitHub.
+
+### Config
+
+1. Create a `.github/settings.yml` file in the `admin` repository. Changes to this file on the default branch will be synced to all the repos in the Org.
+1. The `repositories` section in the `settings` file contains repositories that need to be configured explicitly. If a repository in this section is not present, it would be created according to the configuration. Typical use cases are to configure repo specific items like `topics`, `issues`, `pages`, etc.
+1. The `labels` section contains that labels that need to be created for all the repositories in the org
+1. The `collaborators` section contains the list of collaborators that need to be added to all the repositories in the org. It is possible to provide an `include` or `exclude` settings to restrict the collaborator to a list of repos or exclude a set of repos for a collaborator.
+1. The `teams` section contains the list of teams that need to be added to all the repositories in the org.
+1. The `branches`section contains the list of `branch protections` that need to be applied to all the repos in the org.
+1. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
+
+### Global config
+
+1. Besides the `.github/settings.yml` the application can be bootstrapped with `global` settings.
+2. The `global` settings are configured in `deployment-settings.yml` that is in the directory from where the GitHub app is running.
+3. Currently the only setting that is possible are `restrictedRepos: [... ]` which allows you to configure a list of repos within your `org` that are excluded from the settings. If the `deployment-settings.yml` is not present, the following repos are added by default to the `restricted`repos list: `'admin', '.github', 'safe-settings'`
 
 ```yaml
-# These settings are synced to GitHub by https://github.com/github/safe-settings
+# These settings are synced by https://github.com/github/safe-settings
+# The `repositories` section contains repositories that need to be configured explicitly
+#
+# The `labels` section 
 
 repositories: 
-  # This is a list of repositories that need to be synced. 
-  # If the repository is not listed in the settings.yml, it will still be synced once it is manually created. 
-
+  # If the repository is not listed in the settings.yml, it will be created and synced.
   # See https://developer.github.com/v3/repos/#edit for all available settings for a repository
   - name: new-repo
     
@@ -109,11 +125,21 @@ collaborators:
 
 - username: regpaco
   permission: push
-# Note: Only valid on organization-owned repositories.
 # The permission to grant the collaborator. Can be one of:
 # * `pull` - can pull, but not push to or administer this repository.
 # * `push` - can pull and push, but not administer this repository.
 # * `admin` - can pull, push and administer this repository.
+- username: beetlejuice
+  permission: pull
+  exclude:
+  - actions-demo
+# You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator
+- username: thor
+  permission: push
+  include:
+  - actions-demo
+  - another-repo
+# You can include a list of repos for this collaborator and only those repos would have this collaborator
 
 # See https://developer.github.com/v3/teams/#add-or-update-team-repository for available options
 teams:
