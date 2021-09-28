@@ -76,6 +76,7 @@ labels:
     # include the old name to rename an existing label
     oldname: Help Wanted
     color: '#326699'
+
   - name: new-label
     # include the old name to rename an existing label
     oldname: Help Wanted
