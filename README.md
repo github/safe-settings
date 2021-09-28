@@ -15,12 +15,6 @@ It is loosely based on [Settings Probot](https://github.com/probot/settings) Git
 1. `Safe-settings` explicitly looks in the `admin` repo in the organization for the settings files. The `admin` repo should be a restricted repository with `branch protections` and `codeowners` . 
 1. To address the scalability concerns for large organizations having thousands of repos, it is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to be define and manage policies for their specific projects or business units.
 
-
-
-## Table of Contents
-[TOC]
-
-
 ## How it works
 
 The App listens to the following webhook events and does the following:
