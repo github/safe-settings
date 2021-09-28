@@ -27,7 +27,7 @@ The App listens to the following webhook events and does the following:
 
 - **push**: If settings are created or settings are modified, that is, if  push happens in the `default` branch of the `admin` repo and the file added or changed is `.github/settings.yml` or `.github/repos/*.yml`or `.github/suborgs/*.yml`, then the settings would be applied either globally to all the repos, or specific repos. For each repo the settings that would be applied depend on the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo.
   
-- **repository.created**: If a repository is created in the org, the settings for the repo - the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo - is applied. To prevent `infinite loop` if the repo created event is trigged by itself(bot), it would be ignored. This ensures that the policy is enforced even to nee repositories.
+- **repository.created**: If a repository is created in the org, the settings for the repo - the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo - is applied. To prevent `infinite loop` if the repo created event is trigged by itself(bot), it would be ignored. This ensures that the policy is enforced even to a single repositories.
 
 - **repository.edited**: If the `default` branch is changed if the the settings that would be applied for the repo
 
