@@ -117,7 +117,7 @@ teams:
     permission: pull
 
 branches:
-  # If the name of the branch is default, it will create a branch protection for the default branch in the repo
+  # If the name of the branch value is specified as `default`, then the app will create a branch protection rule to apply against the default branch in the repo
   - name: default
     # https://developer.github.com/v3/repos/branches/#update-branch-protection
     # Branch Protection settings. Set to null to disable
