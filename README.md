@@ -83,9 +83,6 @@ repository:
   # Either `true` to enable the wiki for this repository, `false` to disable it.
   has_wiki: true
   
-  # Either `true` to enable downloads for this repository, `false` to disable them.
-  has_downloads: true
-  
   # The default branch for this repository.
   default_branch: main-enterprise
   
@@ -273,9 +270,6 @@ repository:
   # Either `true` to enable the wiki for this repository, `false` to disable it.
   has_wiki: true
   
-  # Either `true` to enable downloads for this repository, `false` to disable them.
-  has_downloads: true
-  
   # The default branch for this repository.
   default_branch: main-enterprise
   
@@ -448,9 +442,6 @@ repository:
   
   # Either `true` to enable the wiki for this repository, `false` to disable it.
   has_wiki: true
-  
-  # Either `true` to enable downloads for this repository, `false` to disable them.
-  has_downloads: true
   
   # The default branch for this repository.
   default_branch: main-enterprise
