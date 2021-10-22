@@ -36,22 +36,92 @@ The App listens to the following webhook events and does the following:
 ### Settings files
 
 **.github/settings.yml:** This is the org-level settings file. The  `.github/settings.yml` file can have the following sections: 
-1. The `repositories`section contains repositories that need to be configured explicitly. This is kept for backward compatibility and is usually left blank as the repository settings are done seperately.
-1. The `labels` section contains that labels that need to be created for all the repositories in the org
-1. The `collaborators` section contains the list of collaborators that need to be added to all the repositories in the org. It is possible to provide an `include` or `exclude` settings to restrict the collaborator to a list of repos or exclude a set of repos for a collaborator.
-1. The `teams` section contains the list of teams that need to be added to all the repositories in the org.
-1. The `branches`section contains the list of `branch protections` that need to be applied to all the repos in the org.
-1. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
-1. `Validator`section to validate repo names using `regex`patterns
+1. The `repository`section contains the settings that would be applied to all the repositories in the org
+2. The `labels` section contains that labels that need to be created for all the repositories in the org
+4. The `collaborators` section contains the list of collaborators that need to be added to all the repositories in the org. It is possible to provide an `include` or `exclude` settings to restrict the collaborator to a list of repos or exclude a set of repos for a collaborator.
+5. The `teams` section contains the list of teams that need to be added to all the repositories in the org.
+6. The `branches`section contains the list of `branch protections` that need to be applied to all the repos in the org.
+7. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
+8. `Validator`section to validate repo names using `regex`patterns
 
 ```yaml
-# These settings are synced by https://github.com/github/safe-settings
-# The `repositories` section contains repositories that need to be configured explicitly
-#
-# The `labels` section 
+# These settings are synced to GitHub by https://github.com/github/safe-settings
 
-repositories: []
- 
+repository: 
+  # This is the settings that need to be applied to all repositories in the org 
+  # See https://developer.github.com/v3/repos/#edit for all available settings for a repository  
+  # A short description of the repository that will show up on GitHub
+  description: description of the repo
+  
+  # A URL with more information about the repository
+  homepage: https://example.github.io/
+    
+  # Keep this as true for most cases
+  # A lot of the policies below cannot be implemented on bare repos
+  # Pass true to create an initial commit with empty README.
+  auto_init: true
+    
+  # A comma-separated list of topics to set on the repository
+  topics: github, probot, new-topic, another-topic, topic-12
+  
+  # Either `true` to make the repository private, or `false` to make it public. 
+  # If this value is changed and if Org members cannot change the visibility of repos
+  # it would result in an error when updating a repo
+  private: true
+  
+  # Can be public or private. If your organization is associated with an enterprise account using 
+  # GitHub Enterprise Cloud or GitHub Enterprise Server 2.20+, visibility can also be internal. 
+  visibility: private
+  
+  # Either `true` to enable issues for this repository, `false` to disable them.
+  has_issues: true
+  
+  # Either `true` to enable projects for this repository, or `false` to disable them.
+  # If projects are disabled for the organization, passing `true` will cause an API error.
+  has_projects: true
+  
+  # Either `true` to enable the wiki for this repository, `false` to disable it.
+  has_wiki: true
+  
+  # Either `true` to enable downloads for this repository, `false` to disable them.
+  has_downloads: true
+  
+  # The default branch for this repository.
+  default_branch: main-enterprise
+  
+  # Desired language or platform [.gitignore template](https://github.com/github/gitignore) 
+  # to apply. Use the name of the template without the extension. 
+  # For example, "Haskell".
+  gitignore_template: node
+  
+  # Choose an [open source license template](https://choosealicense.com/) 
+  # that best suits your needs, and then use the 
+  # [license keyword](https://help.github.com/articles/licensing-a-repository/#searching-github-by-license-type) 
+  # as the `license_template` string. For example, "mit" or "mpl-2.0".
+  license_template: mit
+  
+  # Either `true` to allow squash-merging pull requests, or `false` to prevent
+  # squash-merging.
+  allow_squash_merge: true
+  
+  # Either `true` to allow merging pull requests with a merge commit, or `false`
+  # to prevent merging pull requests with merge commits.
+  allow_merge_commit: true
+  
+  # Either `true` to allow rebase-merging pull requests, or `false` to prevent
+  # rebase-merging.
+  allow_rebase_merge: true
+  
+  # Either `true` to allow auto-merge on pull requests, 
+  # or `false` to disallow auto-merge.
+  # Default: `false`
+  allow_auto_merge: true
+  
+  # Either `true` to allow automatically deleting head branches 
+  # when pull requests are merged, or `false` to prevent automatic deletion.
+  # Default: `false`
+  delete_branch_on_merge: true  
+      
 # The following attributes are applied to any repo within the org
 # So if a repo is not listed above is created or edited
 # The app will apply the following settings to it
@@ -150,7 +220,13 @@ validator:
 **.github/suborgs/*.yml:** These files are for suborg settings. The file can have the following sections: 
 
 1. The `suborgrepos`section contains list of repositories that belong to the suborg. The repo names could be a `Glob` pattern to allow wild-card expression to specify repos in a suborg
-1. The rest of the sections could be `labels`,`collaborators`, `teams`, `branches`, `Validator` and they would be applied to all the repos in the `suborg`
+2. The `suborgteams` section contains a list of teams whose repos belong to the suborg
+3. The `repository`section contains the settings that would be applied to all the repositories in the suborg
+4. The `labels` section contains that labels that need to be created for all the repositories in the suborg
+5. The `collaborators` section contains the list of collaborators that need to be added to all the repositories in the suborg. It is possible to provide an `include` or `exclude` settings to restrict the collaborator to a list of repos or exclude a set of repos for a collaborator.
+6. The `teams` section contains the list of teams that need to be added to all the repositories in the suborg.
+7. The `branches`section contains the list of `branch protections` that need to be applied to all the repos in the suborg.
+8. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
 
 
 ```yaml
@@ -158,6 +234,84 @@ suborgrepos:
 - new-repo
 - test* 
 
+suborgteams:
+- core
+
+repository: 
+  # This is the settings that need to be applied to all repositories in the suborg 
+  # See https://developer.github.com/v3/repos/#edit for all available settings for a repository  
+  # A short description of the repository that will show up on GitHub
+  description: description of the repo
+  
+  # A URL with more information about the repository
+  homepage: https://example.github.io/
+    
+  # Keep this as true for most cases
+  # A lot of the policies below cannot be implemented on bare repos
+  # Pass true to create an initial commit with empty README.
+  auto_init: true
+    
+  # A comma-separated list of topics to set on the repository
+  topics: github, probot, new-topic, another-topic, topic-12
+  
+  # Either `true` to make the repository private, or `false` to make it public. 
+  # If this value is changed and if Org members cannot change the visibility of repos
+  # it would result in an error when updating a repo
+  private: true
+  
+  # Can be public or private. If your organization is associated with an enterprise account using 
+  # GitHub Enterprise Cloud or GitHub Enterprise Server 2.20+, visibility can also be internal. 
+  visibility: private
+  
+  # Either `true` to enable issues for this repository, `false` to disable them.
+  has_issues: true
+  
+  # Either `true` to enable projects for this repository, or `false` to disable them.
+  # If projects are disabled for the organization, passing `true` will cause an API error.
+  has_projects: true
+  
+  # Either `true` to enable the wiki for this repository, `false` to disable it.
+  has_wiki: true
+  
+  # Either `true` to enable downloads for this repository, `false` to disable them.
+  has_downloads: true
+  
+  # The default branch for this repository.
+  default_branch: main-enterprise
+  
+  # Desired language or platform [.gitignore template](https://github.com/github/gitignore) 
+  # to apply. Use the name of the template without the extension. 
+  # For example, "Haskell".
+  gitignore_template: node
+  
+  # Choose an [open source license template](https://choosealicense.com/) 
+  # that best suits your needs, and then use the 
+  # [license keyword](https://help.github.com/articles/licensing-a-repository/#searching-github-by-license-type) 
+  # as the `license_template` string. For example, "mit" or "mpl-2.0".
+  license_template: mit
+  
+  # Either `true` to allow squash-merging pull requests, or `false` to prevent
+  # squash-merging.
+  allow_squash_merge: true
+  
+  # Either `true` to allow merging pull requests with a merge commit, or `false`
+  # to prevent merging pull requests with merge commits.
+  allow_merge_commit: true
+  
+  # Either `true` to allow rebase-merging pull requests, or `false` to prevent
+  # rebase-merging.
+  allow_rebase_merge: true
+  
+  # Either `true` to allow auto-merge on pull requests, 
+  # or `false` to disallow auto-merge.
+  # Default: `false`
+  allow_auto_merge: true
+  
+  # Either `true` to allow automatically deleting head branches 
+  # when pull requests are merged, or `false` to prevent automatic deletion.
+  # Default: `false`
+  delete_branch_on_merge: true  
+  
 # The following attributes are applied to any repo within the suborg
 # So if a repo is not listed above is created or edited
 # The app will apply the following settings to it
@@ -259,56 +413,80 @@ validator:
 1. The rest of the sections could be `labels`,`collaborators`, `teams`, `branches`, `Validator` and they would be applied to that specific repo only.
 
 ```yaml
-repository:
-  # See https://developer.github.com/v3/repos/#edit for all available settings for a repository
-    name: new-repo
+repository: 
+  # This is the settings that need to be applied to all repositories in the org 
+  # See https://developer.github.com/v3/repos/#edit for all available settings for a repository  
+  # A short description of the repository that will show up on GitHub
+  description: description of the repo
+  
+  # A URL with more information about the repository
+  homepage: https://example.github.io/
     
-    # The Organization the repo belongs to
-    org: github
+  # Keep this as true for most cases
+  # A lot of the policies below cannot be implemented on bare repos
+  # Pass true to create an initial commit with empty README.
+  auto_init: true
     
-    # A short description of the repository that will show up on GitHub
-    description: description of the repo
+  # A comma-separated list of topics to set on the repository
+  topics: github, probot, new-topic, another-topic, topic-12
   
-    # A URL with more information about the repository
-    homepage: https://example.github.io/
-    
-    # Keep this as true for most cases
-    # A lot of the policies below cannot be implemented on bare repos
-    auto_init: true
-    
-    # A comma-separated list of topics to set on the repository
-    topics: github, probot, new-topic, another-topic, topic-12
+  # Either `true` to make the repository private, or `false` to make it public. 
+  # If this value is changed and if Org members cannot change the visibility of repos
+  # it would result in an error when updating a repo
+  private: true
   
-    # Either `true` to make the repository private, or `false` to make it public. 
-    private: false
+  # Can be public or private. If your organization is associated with an enterprise account using 
+  # GitHub Enterprise Cloud or GitHub Enterprise Server 2.20+, visibility can also be internal. 
+  visibility: private
   
-    # Either `true` to enable issues for this repository, `false` to disable them.
-    has_issues: true
+  # Either `true` to enable issues for this repository, `false` to disable them.
+  has_issues: true
   
-    # Either `true` to enable projects for this repository, or `false` to disable them.
-    # If projects are disabled for the organization, passing `true` will cause an API error.
-    has_projects: true
+  # Either `true` to enable projects for this repository, or `false` to disable them.
+  # If projects are disabled for the organization, passing `true` will cause an API error.
+  has_projects: true
   
-    # Either `true` to enable the wiki for this repository, `false` to disable it.
-    has_wiki: true
+  # Either `true` to enable the wiki for this repository, `false` to disable it.
+  has_wiki: true
   
-    # Either `true` to enable downloads for this repository, `false` to disable them.
-    has_downloads: true
+  # Either `true` to enable downloads for this repository, `false` to disable them.
+  has_downloads: true
   
-    # Updates the default branch for this repository.
-    default_branch: main-enterprise
+  # The default branch for this repository.
+  default_branch: main-enterprise
   
-    # Either `true` to allow squash-merging pull requests, or `false` to prevent
-    # squash-merging.
-    allow_squash_merge: true
+  # Desired language or platform [.gitignore template](https://github.com/github/gitignore) 
+  # to apply. Use the name of the template without the extension. 
+  # For example, "Haskell".
+  gitignore_template: node
   
-    # Either `true` to allow merging pull requests with a merge commit, or `false`
-    # to prevent merging pull requests with merge commits.
-    allow_merge_commit: true
+  # Choose an [open source license template](https://choosealicense.com/) 
+  # that best suits your needs, and then use the 
+  # [license keyword](https://help.github.com/articles/licensing-a-repository/#searching-github-by-license-type) 
+  # as the `license_template` string. For example, "mit" or "mpl-2.0".
+  license_template: mit
   
-    # Either `true` to allow rebase-merging pull requests, or `false` to prevent
-    # rebase-merging.
-    allow_rebase_merge: true
+  # Either `true` to allow squash-merging pull requests, or `false` to prevent
+  # squash-merging.
+  allow_squash_merge: true
+  
+  # Either `true` to allow merging pull requests with a merge commit, or `false`
+  # to prevent merging pull requests with merge commits.
+  allow_merge_commit: true
+  
+  # Either `true` to allow rebase-merging pull requests, or `false` to prevent
+  # rebase-merging.
+  allow_rebase_merge: true
+  
+  # Either `true` to allow auto-merge on pull requests, 
+  # or `false` to disallow auto-merge.
+  # Default: `false`
+  allow_auto_merge: true
+  
+  # Either `true` to allow automatically deleting head branches 
+  # when pull requests are merged, or `false` to prevent automatic deletion.
+  # Default: `false`
+  delete_branch_on_merge: true  
 
 # The following attributes are applied to any repo within the org
 # So if a repo is not listed above is created or edited
@@ -415,6 +593,7 @@ validator:
 
 1. Label color can also start with `#`, e.g. `color: '#F341B2'`. Make sure to wrap it with quotes!
 1. Each top-level element under branch protection must be filled (eg: `required_pull_request_reviews`, `required_status_checks`, `enforce_admins` and `restrictions`). If you don't want to use one of them you must set it to `null` (see comments in the example above). Otherwise, none of the settings will be applied.
+2. The precedence order is repository > suborg > org (.github/repos/*.yml > .github/suborgs/*.yml > .github/settings.yml
 
 ### Inheritance (there is none)
 
