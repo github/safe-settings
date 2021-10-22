@@ -1,8 +1,10 @@
 const path = require('path')
 const yaml = require('js-yaml')
 const fs = require('fs')
+const cron = require('node-cron');
 const Glob = require('./lib/glob')
 const ConfigManager = require('./lib/configManager')
+
 let deploymentConfig
 module.exports = (robot, _, Settings = require('./lib/settings')) => {
   
@@ -200,6 +202,29 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     robot.log.debug(JSON.stringify(res,null))
   }
 
+  async function syncInstallation () {
+    robot.log.trace('Fetching installations')
+    const github = await robot.auth()
+
+    const installations = await github.paginate(
+      github.apps.listInstallations.endpoint.merge({ per_page: 100 })
+    )
+
+    for (installation of installations) {
+      robot.log.trace(`${JSON.stringify(installation)}`)
+      const github = await robot.auth(installation.id)
+      const context = {
+        payload: {
+          installation: installation
+        },
+        octokit: github,
+        log: robot.log,
+        repo: () => { return {repo: "admin", owner: installation.account.login}}
+      }
+      return syncAllSettings(false, context)
+    }
+    retrun
+  }
 
   robot.on('push', async context => {
     const { payload } = context
@@ -258,7 +283,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     console.log('Branch Protection edited by a Human')
     return syncSettings(false, context)
   })
-
 
   robot.on('repository.edited', async context => {
     const { payload } = context
@@ -412,5 +436,24 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     robot.log.debug('Repository created by a Human')
     return syncSettings(false, context)
   })
+
+  if (process.env.CRON) {
+    /*
+    # ┌────────────── second (optional)
+    # │ ┌──────────── minute
+    # │ │ ┌────────── hour
+    # │ │ │ ┌──────── day of month
+    # │ │ │ │ ┌────── month
+    # │ │ │ │ │ ┌──── day of week
+    # │ │ │ │ │ │
+    # │ │ │ │ │ │
+    # * * * * * *
+    */
+    cron.schedule(process.env.CRON, () => {
+      console.log('running a task every minute');
+      syncInstallation()
+    });
+  }
+
   
 }
