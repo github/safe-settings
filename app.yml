@@ -46,11 +46,11 @@ default_events:
   # - team_add
   # - watch
   
-  # The set of permissions needed by the GitHub App. The format of the object uses
-  # the permission name for the key (for example, issues) and the access type for
-  # the value (for example, write).
-  # Valid values are `read`, `write`, and `none`
-  default_permissions:
+# The set of permissions needed by the GitHub App. The format of the object uses
+# the permission name for the key (for example, issues) and the access type for
+# the value (for example, write).
+# Valid values are `read`, `write`, and `none`
+default_permissions:
     # Repository creation, deletion, settings, teams, and collaborators.
     # https://developer.github.com/v3/apps/permissions/#permission-on-administration
     administration: write
@@ -124,16 +124,16 @@ default_events:
     organization_administration: write
   
   
-  # The name of the GitHub App. Defaults to the name specified in package.json
-  name: Safe Settings
+# The name of the GitHub App. Defaults to the name specified in package.json
+name: Safe Settings
   
-  # The homepage of your GitHub App.
-  url: https://github.com/github/safe-settings
+# The homepage of your GitHub App.
+url: https://github.com/github/safe-settings
   
-  # A description of the GitHub App.
-  # description: A description of my awesome app
+# A description of the GitHub App.
+# description: A description of my awesome app
   
-  # Set to true when your GitHub App is available to the public or false when it is only accessible to the owner of the app.
-  # Default: true
-  public: false
+# Set to true when your GitHub App is available to the public or false when it is only accessible to the owner of the app.
+# Default: true
+public: false
   
