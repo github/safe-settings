@@ -15,6 +15,7 @@
 default_events:
   - check_run
   - check_suite
+  - branch_protection_rule
   # - commit_comment
   # - create
   # - delete
@@ -36,11 +37,9 @@ default_events:
   # - project_column
   # - public
   - pull_request
-  - pull_request_review
-  - pull_request_review_comment
   - push
   # - release
-  # - repository
+  - repository
   # - repository_import
   # - status
   # - team
