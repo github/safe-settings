@@ -5,20 +5,19 @@
 
 `Safe-settings`– an app to manage policy-as-code and apply repository settings to repositories across an organization.
 
-It is loosely based on [Settings Probot](https://github.com/probot/settings) GitHub App. However, it differs from the original probot settings app in several important ways:
-
-1. In `safe-settings` all the settings are stored centrally in an `admin` repo within the organization. 
+1. In `safe-settings` all the settings are stored centrally in an `admin` repo within the organization. This is important. Unlike [Settings Probot](https://github.com/probot/settings), the settings files cannot be in individual repositories.
 1. There are 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml` 
-   1. The org-level settings could be overridden at a  `suborg` level. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg`settings reside in the `.github/suborgs`folder.
-   1. Lastly, we could override settings for individual repos by creating a repo specific yaml in `.github/repos`folder
-1. `Safe-settings` explicitly looks in the `admin` repo in the organization for the settings files. The `admin` repo should be a restricted repository with `branch protections` and `codeowners` . 
-1. To address the scalability concerns for large organizations having thousands of repos, it is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to be define and manage policies for their specific projects or business units.
+   1. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg`settings reside in a yaml file for each `suborg` in the `.github/suborgs`folder.
+   1. `Repo` level settings. They reside in a repo specific yaml in `.github/repos`folder
+1. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to be define and manage policies for their specific projects or business units.With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
+
+**Note:** The settings file must have a `.yml`extension only. `.yaml` extension is ignored, for now.
 
 ## How it works
 
 ### Events
-The App listens to the following webhook events and does the following:
+The App listens to the following webhook events:
 
 - **push**: If the settings are created or modified, that is, if  push happens in the `default` branch of the `admin` repo and the file added or changed is `.github/settings.yml` or `.github/repos/*.yml`or `.github/suborgs/*.yml`, then the settings would be applied either globally to all the repos, or specific repos. For each repo, the settings that is actually applied depend on the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo.
   
@@ -30,27 +29,39 @@ The App listens to the following webhook events and does the following:
 
 - **pull_request.opened**, **pull_request.reopened**, **check_suite.requested**: If the settings are changed, but it is not in the `default` branch, and there is an existing PR, the code will validate the settings changes by running safe-settings in `nop` mode and update the PR with the `dry-run` status. 
 
-**Exceptions:** Certain repos may be exempted by specifying them in a runtime config file called `depolyment-settings.yml`. If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.
+**Exceptions:** Certain repos may be exempted from policy enforcement by specifying them in a runtime config file called `deployment-settings.yml`. If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.
 
-### NOP/Dry-run mode
-When a changes happen to the settings files and there is a PR for merging the changes back to the `default` branch in the `admin` repo, `safe-settings` will run in a `**nop**` mode. The code will be executed but no API would be called; instead, the API calls and the Payload would be logged and the potential impact of the change will be displayed in the PR
+### Schedule
 
-## How to use
+The App can be configured to apply the settings on a schedule. This could a way to address configuration drift since webhooks have not always guaranteed to be delivered.
 
-1. __[Install the app](docs/deploy.md)__.
-1. Create an `admin` repo within your organization (the repository must be called `admin`).
-2. Add the files for `org`,`suborg`, and `repo` settings.
+ To set periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#Env variables).
 
-### Settings file
+### Pull Request Workflow
+`Safe-settings` explicitly looks in the `admin` repo in the organization for the settings files. The `admin` repo could be a restricted repository with `branch protections` and `codeowners`  
 
-The settings file can have the following sections:
-1. The `repository`section contains the settings that would be applied to all the repositories in the org
-2. The `labels` section contains that labels that need to be created for all the repositories in the org
-4. The `collaborators` section contains the list of collaborators that need to be added to all the repositories in the org. It is possible to provide an `include` or `exclude` settings to restrict the collaborator to a list of repos or exclude a set of repos for a collaborator.
-5. The `teams` section contains the list of teams that need to be added to all the repositories in the org.
-6. The `branches`section contains the list of `branch protections` that need to be applied to all the repos in the org.
-7. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
-8. `Validator`section to validate repo names using `regex`patterns
+In that set up, when a changes happen to the settings files and there is a PR for merging the changes back to the `default` branch in the `admin` repo, `safe-settings` will run `checks`  – which will run in **nop** mode and produce a report of the changes that would happen, including the API calls and the payload. 
+
+The checks will fail if `org-level`branch protections are overridden at the repo or suborg level with a lesser number of required approvers.
+
+### The Settings file
+
+The settings file can be used to set the policies at the `Org`, `suborg` or `repo` level. 
+
+Using the settings, the following things could be configured:
+
+- `Repository settings` - home page, url, visibility, has_issues, has_projects, wikis, etc.
+- `default branch`naming and renaming 
+- `Repository Topics`
+- `Teams and permissions`
+- `Collaborators and permissions`
+- `Issue labels`
+- `Branch protections`. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
+- `repository name validation` using regex pattern
+
+It is possible to provide an `include` or `exclude` settings to restrict the `collaborators`, `teams`, `labels` to a list of repos or exclude a set of repos for a collaborator.
+
+Here is an example settings file:
 
 
 ```yaml
@@ -155,7 +166,6 @@ labels:
 collaborators:
 # Collaborators: give specific users access to any repository.
 # See https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator for available options
-
 - username: regpaco
   permission: push
 # The permission to grant the collaborator. Can be one of:
@@ -164,15 +174,16 @@ collaborators:
 # * `admin` - can pull, push and administer this repository.
 - username: beetlejuice
   permission: pull
+# You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator
   exclude:
   - actions-demo
-# You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator
+
 - username: thor
   permission: push
+# You can include a list of repos for this collaborator and only those repos would have this collaborator
   include:
   - actions-demo
   - another-repo
-# You can include a list of repos for this collaborator and only those repos would have this collaborator
 
 # See https://developer.github.com/v3/teams/#add-or-update-team-repository for available options
 teams:
@@ -224,13 +235,24 @@ validator:
   pattern: '[a-zA-Z0-9_-]+'
 ```
 
-In addition to these settings, **.github/suborgs/\*.yml** can also have the following settings:
-1. The `suborgrepos`section contains list of repositories that belong to the suborg. The repo names could be a `Glob` pattern to allow wild-card expression to specify repos in a suborg
-2. The `suborgteams` section contains a list of teams whose repos belong to the suborg
+
+
+### Additional values
+
+In addition to these values above, the settings file can have some addtional values
+
+1.  `force_create`: This is set in the repo-level settings to force create the repo if the repo does not exist. 
+2. `template`: This is set in the repo-level settings, and is used with the `force_create`flag to use a specific repo template when creating the repo
+3. `suborgrepos`: This is set in the suborg-level settings to define an array of repos. This field can also take a `glob` pattern to allow wild-card expression to specify repos in a suborg. For e.g. `test*`would include `test`, `test1`, `testing`, etc.
+4. The `suborgteams` section contains a list of teams, and all the repos belonging to the teams would be part of the `suborg` 
+
 
 
 ### Env variables
-1. __CRON__ you can pass a cron input to run `safe-settings` at a regular cadence. This is based on [node-cron](https://www.npmjs.com/package/node-cron). For eg.
+
+You can pass environment variables; easiest way to do it is in a `.env`file.
+
+1. __CRON__ you can pass a cron input to run `safe-settings` at a regular schedule. This is based on [node-cron](https://www.npmjs.com/package/node-cron). For eg.
 ```
 # ┌────────────── second (optional)
 # │ ┌──────────── minute
@@ -261,15 +283,17 @@ LOG_LEVEL=trace
 1. Each top-level element under branch protection must be filled (eg: `required_pull_request_reviews`, `required_status_checks`, `enforce_admins` and `restrictions`). If you don't want to use one of them you must set it to `null` (see comments in the example above). Otherwise, none of the settings will be applied.
 2. The precedence order is repository > suborg > org (.github/repos/*.yml > .github/suborgs/*.yml > .github/settings.yml
 
-### Inheritance (there is none)
 
-This app __DOES NOT USE__ [probot-config](https://github.com/probot/probot-config). This probot will only use the `.github/settings.yml` in the `admin` repo. This means with the 'safe-settings' probot you cannot inherit settings from another repo, nor can you override the settings.
 
-## Security Implications (much better)
+## How to use
 
-:+1: Note that this app is protected against _privilege escalation_. Unlike the original settings probot, this does not allow users with `write` permissions on a repo to override the settings. Which means anyone with _push_ permissions _cannot_ elevate themselves to the admin role; only users with `write` permissions on the `admin` repo could make changes to the permissions.
+1. __[Install the app](docs/deploy.md)__. 
 
-Within the `admin` repo, you can also increase the oversight by utilizing  the [GitHub CodeOwners feature](https://help.github.com/articles/about-codeowners/) to set one or more administrative users as the code owner of the `.github/settings.yml` file, and turn on "require code owner review" for the master branch. This does have the side effect of requiring code owner review for the entire branch, but helps preserve permission levels.
+2. Create an `admin` repo within your organization (the repository must be called `admin`). 
+
+3. Add the settings for the `org`, `suborgs`, and `repos` . List of sample files could be found here.
+
+   
 
 ## Deployment
 
