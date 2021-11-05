@@ -1,7 +1,7 @@
 # GitHub Safe-Settings
 
 [![Node.js CI](https://github.com/github/safe-settings/actions/workflows/node-ci.yml/badge.svg)](https://github.com/github/safe-settings/actions/workflows/node-ci.yml)
-[![Dependabot][dependabot-badge]][dependabot-link]
+[![Dependabot](https://badgen.net/dependabot/probot/settings/?icon=dependabot)](https://dependabot.com/)
 
 `Safe-settings`– an app to manage policy-as-code and apply repository settings to repositories across an organization.
 
