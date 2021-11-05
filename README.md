@@ -1,7 +1,7 @@
 # GitHub Safe-Settings
 
 [![Node.js CI](https://github.com/github/safe-settings/actions/workflows/node-ci.yml/badge.svg)](https://github.com/github/safe-settings/actions/workflows/node-ci.yml)
-[![Dependabot](https://badgen.net/dependabot/probot/settings/?icon=dependabot)](https://dependabot.com/)
+[![Dependabot][dependabot-badge]][dependabot-link]
 
 `Safe-settings`– an app to manage policy-as-code and apply repository settings to repositories across an organization.
 
@@ -291,7 +291,7 @@ LOG_LEVEL=trace
 
 2. Create an `admin` repo within your organization (the repository must be called `admin`). 
 
-3. Add the settings for the `org`, `suborgs`, and `repos` . List of sample files could be found here.
+3. Add the settings for the `org`, `suborgs`, and `repos` . List of sample files could be found [here](docs/sample-settings).
 
    
 
