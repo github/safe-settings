@@ -11,10 +11,10 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
     deploymentConfig = await loadYamlFileSystem()
     robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-    const configManager = new ConfigManager(context)
+    const configManager = new ConfigManager(context,ref)
     const runtimeConfig = await configManager.loadGlobalSettingsYaml();
     const config = Object.assign({}, deploymentConfig, runtimeConfig)
-    robot.log.debug(`config is ${JSON.stringify(config)}`)
+    robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
     if (ref) {
       return Settings.syncAll(nop, context, repo, config, ref)
     } else {
@@ -25,19 +25,21 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   async function syncSubOrgSettings (nop, context, suborg, repo = context.repo(), ref) {
     deploymentConfig = await loadYamlFileSystem()
     robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-    const configManager = new ConfigManager(context)
+    const configManager = new ConfigManager(context, ref)
     const runtimeConfig = await configManager.loadGlobalSettingsYaml();
     const config = Object.assign({}, deploymentConfig, runtimeConfig)
-    robot.log.debug(`config is ${JSON.stringify(config)}`)
+    robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
     return Settings.syncAll(nop, context, repo, config, ref)
   }
 
   async function syncSettings (nop, context, repo = context.repo(), ref) {
     deploymentConfig = await loadYamlFileSystem()
     robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-    const runtimeConfig = await loadYaml(context)
+    //const runtimeConfig = await loadYaml(context)
+    const configManager = new ConfigManager(context,ref)
+    const runtimeConfig = await configManager.loadGlobalSettingsYaml();
     const config = Object.assign({}, deploymentConfig, runtimeConfig)
-    robot.log.debug(`config is ${JSON.stringify(config)}`)
+    robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
     return Settings.sync(nop, context, repo, config, ref)
   }
 
