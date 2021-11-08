@@ -1,0 +1,1 @@
+restrictedRepos: [ 'admin', '.github', 'safe-settings', 'specs', 'lfs', 'actions_test',  'demo', 'dependotest']
