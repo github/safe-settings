@@ -1,6 +1,8 @@
 name: Node.js CI
 "on":
   push:
+    branches:
+      - main-enterprise
   pull_request:
     types:
       - opened
@@ -97,5 +99,5 @@ jobs:
       with:
         workflow: deploy-k8s.yml
         token: ${{ secrets.pat }}
-        ref: ${{ github.ref }}
+        ref: ${{ github.event.pull_request.head.ref || github.ref }}
         inputs: '{"release": "${{needs.build.outputs.release}}", "status": "passed" }'    

@@ -1,67 +1,37 @@
 # Deployment
 
-**Contents:**
-
-1. [Create the GitHub App](#create-the-github-app)
-1. [Deploy the app](#deploy-the-app)
-   1. [Prepare the source code](#prepare-the-source-code)
-   1. [Docker](#docker)
-   1. [Glitch](#glitch)
-   1. [Heroku](#heroku)
-1. [Share the app](#share-the-app)
-1. [Combining apps](#combining-apps)
-1. [Error tracking](#error-tracking)
-1. [Serverless Deployments](#serverless)
-
-## Create the GitHub App
-
-Every deployment will need an [App](https://developer.github.com/apps/).
-
-1. [Create a new GitHub App](https://github.com/settings/apps/new) with:
-
-   - **Homepage URL**: the URL to the GitHub repository for your app
-   - **Webhook URL**: Use `https://example.com/` for now, we'll come back in a minute to update this with the URL of your deployed app.
-   - **Webhook Secret**: Generate a unique secret with `openssl rand -base64 32` and save it because you'll need it in a minute to configure your deployed app.
-## Permissions & events
-
-1. Set the correct **Permissions & events** for the GitHub Integration:
-
-### Permissions
-
-#### Repository Permissions
-- Administration: **Read & Write**
-- Contents: **Read only**
-- Issues: **Read & Write**
-- Single file: **Read & Write**
-  - Path: `.github/settings.yml`
-
-#### Organization Permissions
-- Members: **Read & Write**
-- Administration: **Read & Write**
-
-### Events
-
-- Push
-- Repository
-1. Download the private key from the app.
-
-1. Make sure that you click the green **Install** button on the top left of the app page. This gives you an option of installing the app on all or a subset of your repositories. __**Important: Install this App for `All` repos in the Org**__
-
 ## Deploy the app
 
 ### Prepare the source code
 You will first need to clone the source code to your local environment that will run the **Docker** container.
 - Clone the codebase
   - `git clone https://github.com/github/safe-settings.git` or `git clone <this repo>`
+  
 - Change directory to inside the code base
   - `cd safe-settings/`
+  
+- Run `npm install` to build the code
+
+- The easiest way to create the Github App is using the [manifest flow](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app-from-a-manifest#using-probot-to-implement-the-github-app-manifest-flow) . To set up the app in an org, provide the `GHE_ORG` env variable in the .env file
+
+- If using the `manifest` flow, create `.env` from `.env.example` and set the `GHE_ORG` variable if installing the app in an org.
+
+- Start the app, `npm run dev` if running locally, or `npm run prod`
+
+- If using the manifest flow, follow the steps [here](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app-from-a-manifest)
+
+- If not using the `manifest flow` then follow the steps in [Create the GitHub App](#Create the GitHub App)
+
 - Create `.env` from `.env.example`
+  
   - `cp .env.example .env`
+  
 - Update the `.env` with the needed fields.
 
-To deploy an app to any cloud provider, you will need 3 environment variables:
+  To deploy an app to any cloud provider, you will need 3 environment variables:
 
 - `APP_ID`: the ID of the app, which you can get from the [app settings page](https://github.com/settings/apps).
+
 - `WEBHOOK_SECRET`: the **Webhook Secret** that you generated when you created the app.
 
 And one of:
@@ -173,6 +143,46 @@ Probot runs like [any other Node app](https://devcenter.heroku.com/articles/depl
          $ heroku config:set LOG_LEVEL=trace
          $ heroku logs --tail
 
+## Create the GitHub App
+
+Every deployment will need an [App](https://developer.github.com/apps/).
+
+1. The easiest way to create the Github App is using the [manifest flow](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app-from-a-manifest#using-probot-to-implement-the-github-app-manifest-flow) . If you set up the app using the `manifest flow`, congrats, you are DONE!
+2. [Create a new GitHub App](https://github.com/settings/apps/new) with:
+   - **Homepage URL**: the URL to the GitHub repository for your app
+   - **Webhook URL**: Use `https://example.com/` for now, we'll come back in a minute to update this with the URL of your deployed app.
+   - **Webhook Secret**: Generate a unique secret with `openssl rand -base64 32` and save it because you'll need it in a minute to configure your deployed app.
+
+## Permissions & events
+
+1. Set the correct **Permissions & events** for the GitHub Integration:
+
+### Permissions
+
+#### Repository Permissions
+
+- Administration: **Read & Write**
+- Contents: **Read only**
+- Issues: **Read & Write**
+- Single file: **Read & Write**
+  - Path: `.github/settings.yml`
+
+#### Organization Permissions
+
+- Members: **Read & Write**
+- Administration: **Read & Write**
+
+### Events
+
+- Push
+- Repository
+
+1. Download the private key from the app.
+
+1. Make sure that you click the green **Install** button on the top left of the app page. This gives you an option of installing the app on all or a subset of your repositories. __**Important: Install this App for `All` repos in the Org**__
+
+
+
 ## Share the app
 
 The Probot website includes a list of [featured apps](https://probot.github.io/apps). Consider [adding your app to the website](https://github.com/probot/probot.github.io/blob/master/CONTRIBUTING.md#adding-your-app) so others can discover and use it.
@@ -197,5 +207,4 @@ To deploy multiple apps in one instance, create a new app that has the existing 
   }
 }
 ```
-
 
