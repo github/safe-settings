@@ -74,12 +74,13 @@ jobs:
           docker run --env APP_ID=${{ secrets.APP_ID }} --env PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --env WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }} -d -p 3000:3000 yadhav/safe-settings:main-enterprise
           sleep 5
           curl http://localhost:3000
-      - name: Tag a rc release 
+      - name: Tag a release 
         id: rcrelease
         uses: actionsdesk/semver@0.6.0-rc.8
         with:
+          bump: patch
           prerelease: withBuildNumber
-          prelabel: rc
+          prelabel: alpha
       - name: Push Docker Image
         if: ${{ success() }}
         uses: docker/build-push-action@v2

@@ -6,8 +6,21 @@ const Glob = require('./lib/glob')
 const ConfigManager = require('./lib/configManager')
 
 let deploymentConfig
-module.exports = (robot, _, Settings = require('./lib/settings')) => {
-  
+
+module.exports = (robot, { getRouter }) => {
+  // Get an express router to expose new HTTP endpoints
+  const router = getRouter("/admin")
+
+  // Use any middleware
+  router.use(require("express").static("public"))
+
+  // Add a new route
+  router.get("/report", async (req, res) => {
+    const report = await reportInstallation(true)
+    res.send(report)
+  })
+
+  const Settings = require('./lib/settings')
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
     deploymentConfig = await loadYamlFileSystem()
     robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
@@ -20,6 +33,16 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     } else {
       return Settings.syncAll(nop, context, repo, config)
     }
+  }
+
+  async function reportAllSettings (nop, context, repo = context.repo()) {
+    deploymentConfig = await loadYamlFileSystem()
+    robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+    const configManager = new ConfigManager(context)
+    const runtimeConfig = await configManager.loadGlobalSettingsYaml();
+    const config = Object.assign({}, deploymentConfig, runtimeConfig)
+    robot.log.debug(`config is ${JSON.stringify(config)}`)
+    return await Settings.reportAll(nop, context, repo, config)
   }
 
   async function syncSubOrgSettings (nop, context, suborg, repo = context.repo(), ref) {
@@ -204,28 +227,34 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     robot.log.debug(JSON.stringify(res,null))
   }
 
-  async function syncInstallation () {
-    robot.log.trace('Fetching installations')
-    const github = await robot.auth()
+  async function reportInstallation(nop = false) {
+    const context = await getAppInstallationContext()
+    return await reportAllSettings(nop, context)
+  }
 
+  async function syncInstallation() {
+    const context = await getAppInstallationContext()
+    return syncAllSettings(false, context)
+  }
+
+  async function getAppInstallationContext() {
+    robot.log.trace('Fetching installations')
+    let github = await robot.auth()
     const installations = await github.paginate(
       github.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
-
-    for (installation of installations) {
-      robot.log.trace(`${JSON.stringify(installation)}`)
-      const github = await robot.auth(installation.id)
-      const context = {
-        payload: {
-          installation: installation
-        },
-        octokit: github,
-        log: robot.log,
-        repo: () => { return {repo: "admin", owner: installation.account.login}}
-      }
-      return syncAllSettings(false, context)
-    }
-    retrun
+    const installation = installations[0]
+    robot.log.trace(`${JSON.stringify(installation)}`)
+    github = await robot.auth(installation.id)
+    const context = {
+      payload: {
+        installation: installation
+      },
+      octokit: github,
+      log: robot.log,
+      repo: () => { return {repo: "admin", owner: installation.account.login}}
+    } 
+    return context
   }
 
   robot.on('push', async context => {
@@ -452,10 +481,8 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     # * * * * * *
     */
     cron.schedule(process.env.CRON, () => {
-      console.log('running a task every minute');
+      robot.log.debug('running a task every minute');
       syncInstallation()
     });
-  }
-
-  
+  }  
 }
