@@ -12,9 +12,9 @@ You will first need to clone the source code to your local environment that will
   
 - Run `npm install` to build the code
 
-- The easiest way to create the Github App is using the [manifest flow](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app-from-a-manifest#using-probot-to-implement-the-github-app-manifest-flow) . To set up the app in an org, provide the `GH_ORG` env variable in the .env file
+- The easiest way to create the Github App is using the [manifest flow](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app-from-a-manifest#using-probot-to-implement-the-github-app-manifest-flow) . To set up the app in an org, provide the `GHE_ORG` env variable in the .env file
 
-- If using the `manifest` flow, create `.env` from `.env.example` and set the `GH_ORG` variable if installing the app in an org.
+- If using the `manifest` flow, create `.env` from `.env.example` and set the `GHE_ORG` variable if installing the app in an org.
 
 - Start the app, `npm run dev` if running locally, or `npm run prod`
 
