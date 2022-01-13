@@ -69,7 +69,7 @@ Here is an example settings file:
 
 repository: 
   # This is the settings that need to be applied to all repositories in the org 
-  # See https://developer.github.com/v3/repos/#edit for all available settings for a repository  
+  # See https://docs.github.com/en/rest/reference/repos#create-an-organization-repository for all available settings for a repository  
   # A short description of the repository that will show up on GitHub
   description: description of the repo
   
@@ -165,7 +165,7 @@ labels:
 
 collaborators:
 # Collaborators: give specific users access to any repository.
-# See https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator for available options
+# See https://docs.github.com/en/rest/reference/collaborators#add-a-repository-collaborator for available options
 - username: regpaco
   permission: push
 # The permission to grant the collaborator. Can be one of:
@@ -185,7 +185,7 @@ collaborators:
   - actions-demo
   - another-repo
 
-# See https://developer.github.com/v3/teams/#add-or-update-team-repository for available options
+# See https://docs.github.com/en/rest/reference/teams#create-a-team for available options
 teams:
   - name: core
     # The permission to grant the team. Can be one of:
@@ -201,7 +201,7 @@ teams:
 branches:
   # If the name of the branch value is specified as `default`, then the app will create a branch protection rule to apply against the default branch in the repo
   - name: default
-    # https://developer.github.com/v3/repos/branches/#update-branch-protection
+    # https://docs.github.com/en/rest/reference/branches#update-branch-protection
     # Branch Protection settings. Set to null to disable
     protection:
       # Required. Require at least one approving review on a pull request, before merging. Set to null to disable.
