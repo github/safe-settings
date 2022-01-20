@@ -10,10 +10,11 @@ let deploymentConfig
 module.exports = (robot, _, Settings = require('./lib/settings')) => {
   
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
-    deploymentConfig = await loadYamlFileSystem()
-    robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-    const configManager = new ConfigManager(context,ref)
+
     try {
+      deploymentConfig = await loadYamlFileSystem()
+      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+      const configManager = new ConfigManager(context,ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml();
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
@@ -24,7 +25,12 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       }
     } catch(e) {
       if (nop) {
-        const nopcommand = new NopCommand("settings.yml", repo, null,e, "ERROR")
+        let filename="settings.yml"
+        if (!deploymentConfig) {
+          filename="deployment-settings.yml"
+          deploymentConfig={}
+        }
+        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
         console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
@@ -35,17 +41,22 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   }
 
   async function syncSubOrgSettings (nop, context, suborg, repo = context.repo(), ref) {
-    deploymentConfig = await loadYamlFileSystem()
-    robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-    const configManager = new ConfigManager(context, ref)
     try {
+      deploymentConfig = await loadYamlFileSystem()
+      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+      const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml();
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       return Settings.syncAll(nop, context, repo, config, ref)
     } catch(e) {
       if (nop) {
-        const nopcommand = new NopCommand("settings.yml", repo, null,e, "ERROR")
+        let filename="settings.yml"
+        if (!deploymentConfig) {
+          filename="deployment-settings.yml"
+          deploymentConfig={}
+        }
+        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
         console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
@@ -55,18 +66,23 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   }
 
   async function syncSettings (nop, context, repo = context.repo(), ref) {
-    deploymentConfig = await loadYamlFileSystem()
-    robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-    //const runtimeConfig = await loadYaml(context)
-    const configManager = new ConfigManager(context,ref)
     try {
+      deploymentConfig = await loadYamlFileSystem()
+      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+      //const runtimeConfig = await loadYaml(context)
+      const configManager = new ConfigManager(context,ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml();
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       return Settings.sync(nop, context, repo, config, ref)
     } catch(e) {
       if (nop) {
-        const nopcommand = new NopCommand("settings.yml", repo, null,e, "ERROR")
+        let filename="settings.yml"
+        if (!deploymentConfig) {
+          filename="deployment-settings.yml"
+          deploymentConfig={}
+        }
+        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
         console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
