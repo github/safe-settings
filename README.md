@@ -34,12 +34,16 @@ The App listens to the following webhook events:
 If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.  
 A sample of `deployment-settings` file is found [here](docs/sample-settings/sample-deployment-settings.yml).
 
+To apply `safe-settings` only to a specific list of repos, add them to the `restrictedRepos` section as `include` array.
+
+To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
+
 ### Custom rules 
-Admins setting up `safe-settings` can include custom rules when applying a setting or when a broader scoped setting is overriden.
+Admins setting up `safe-settings` can include custom rules that would be used to validate before applying a setting or overridding a broader scoped setting.
 
-The code has to return `true` if validation is successful or `false` if it isn't.  
+The code has to return `true` if validation is successful, or `false` if it isn't.  
 
-If the validation fails the error specified would be reported in the logs or in the `PR checks`.
+If the validation fails, the `error` attribute specified would be used to create the error message in the logs or in the `PR checks`.
 
 The first use case is where a custom rule has to be applied for a setting on its own. For e.g. No collaborator should be given `admin` permissions. 
 
