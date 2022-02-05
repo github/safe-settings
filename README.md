@@ -29,10 +29,62 @@ The App listens to the following webhook events:
 
 - **pull_request.opened**, **pull_request.reopened**, **check_suite.requested**: If the settings are changed, but it is not in the `default` branch, and there is an existing PR, the code will validate the settings changes by running safe-settings in `nop` mode and update the PR with the `dry-run` status. 
 
-**Exceptions:** Certain repos may be exempted from policy enforcement by specifying them in a runtime config file called `deployment-settings.yml`. If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.
+### Restricting `safe-settings` for specific repos
+`safe-settings` can be turned on only to a subset of repos by specifying them in the runtime config file, `deployment-settings.yml`.  
+If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.  
+A sample of `deployment-settings` file is found [here](docs/sample-settings/sample-deployment-settings.yml).
+
+To apply `safe-settings` only to a specific list of repos, add them to the `restrictedRepos` section as `include` array.
+
+To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
+
+### Custom rules 
+Admins setting up `safe-settings` can include custom rules that would be used to validate before applying a setting or overridding a broader scoped setting.
+
+The code has to return `true` if validation is successful, or `false` if it isn't.  
+
+If the validation fails, the `error` attribute specified would be used to create the error message in the logs or in the `PR checks`.
+
+The first use case is where a custom rule has to be applied for a setting on its own. For e.g. No collaborator should be given `admin` permissions. 
+
+For this type of validations, admins can provide custom code as `configvalidators` which validates the setting by itself. 
+
+For e.g. for the case above, it would look like:
+```yaml
+configvalidators:
+  - plugin: collaborators
+    error: |
+      `Admin role cannot be assigned to collaborators`
+    script: |
+      console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
+      return baseconfig.permission != 'admin'
+```
+
+For convenience this script has access to a variable, `baseconfig`, that contains the setting that is be applied.
+
+The second use case is where custom rule has to be applied when a setting in the org or suborg level is being overridden. Such as, when default branch protection is being overridden.
+
+For this type of validations, admins can provide custom code as `overridevalidators`. The script can access two variables, `baseconfig` and `overrideconfig` which represent the base setting and the setting that is overridding it.  
+
+A sample would look like:
+
+```yaml
+overridevalidators:
+  - plugin: branches   
+    error: |
+      `Branch protection required_approving_review_count cannot be overidden to a lower value`
+    script: |
+      console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
+      console.log(`overrideConfig ${JSON.stringify(overrideconfig)}`)
+      if (baseconfig.protection.required_pull_request_reviews.required_approving_review_count && overrideconfig.protection.required_pull_request_reviews.required_approving_review_count ) {
+        return overrideconfig.protection.required_pull_request_reviews.required_approving_review_count >= baseconfig.protection.required_pull_request_reviews.required_approving_review_count 
+      }
+      return true
+```
+
+A sample of `deployment-settings` file is found [here](docs/sample-settings/sample-deployment-settings.yml).
 
 ### Schedule
-
 The App can be configured to apply the settings on a schedule. This could a way to address configuration drift since webhooks have not always guaranteed to be delivered.
 
  To set periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#Env variables).
