@@ -500,7 +500,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     # * * * * * *
     */
     cron.schedule(process.env.CRON, () => {
-      console.log('running a task every minute');
+      console.log(`running a reconciliation according to ${process.env.CRON}`);
       syncInstallation()
     });
   }
