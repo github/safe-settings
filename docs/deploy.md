@@ -20,7 +20,7 @@ You will first need to clone the source code to your local environment that will
 
 - If using the manifest flow, follow the steps [here](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app-from-a-manifest)
 
-- If not using the `manifest flow` then follow the steps in [Create the GitHub App](#Create the GitHub App)
+- If not using the `manifest flow` then follow the steps in [Create the GitHub App](#create-the-github-app)
 
 - Create `.env` from `.env.example`
   
