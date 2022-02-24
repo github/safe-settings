@@ -162,10 +162,11 @@ Every deployment will need an [App](https://developer.github.com/apps/).
 #### Repository Permissions
 
 - Administration: **Read & Write**
-- Contents: **Read only**
+- Checks: **Read & Write**
+- Commit statuses: **Read & Write**
+- Contents: **Read & Write**
 - Issues: **Read & Write**
-- Single file: **Read & Write**
-  - Path: `.github/settings.yml`
+- Pull requests: **Read & Write**
 
 #### Organization Permissions
 
@@ -174,7 +175,11 @@ Every deployment will need an [App](https://developer.github.com/apps/).
 
 ### Events
 
+- Branch protection rule
+- Check run
+- Check suite
 - Push
+- Pull request
 - Repository
 
 1. Download the private key from the app.
