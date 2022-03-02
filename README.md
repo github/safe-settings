@@ -133,8 +133,13 @@ repository:
   # Pass true to create an initial commit with empty README.
   auto_init: true
     
-  # A comma-separated list of topics to set on the repository
-  topics: github, probot, new-topic, another-topic, topic-12
+  # A list of topics to set on the repository - can alternatively set like this: [github, probot, new-topic, another-topic, topic-12]
+  topics:
+  - github
+  - probot
+  - new-topic
+  - another-topic
+  - topic-12
   
   # Either `true` to make the repository private, or `false` to make it public. 
   # If this value is changed and if Org members cannot change the visibility of repos
