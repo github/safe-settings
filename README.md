@@ -11,6 +11,7 @@
    1. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg`settings reside in a yaml file for each `suborg` in the `.github/suborgs`folder.
    1. `Repo` level settings. They reside in a repo specific yaml in `.github/repos`folder
 1. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to be define and manage policies for their specific projects or business units.With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
+2. `safe-settings` can create a compliance report of all repositories in the org
 
 **Note:** The settings file must have a `.yml`extension only. `.yaml` extension is ignored, for now.
 
@@ -88,6 +89,10 @@ A sample of `deployment-settings` file is found [here](docs/sample-settings/samp
 The App can be configured to apply the settings on a schedule. This could a way to address configuration drift since webhooks have not always guaranteed to be delivered.
 
  To set periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#Env variables).
+
+### Report
+
+If you go to <safe-settings-url>/admin/report, it will create a report of all the repositories in the org and what changes would be applied to them. This could be used to identify repositories that are non-compliant.
 
 ### Pull Request Workflow
 `Safe-settings` explicitly looks in the `admin` repo in the organization for the settings files. The `admin` repo could be a restricted repository with `branch protections` and `codeowners`  
