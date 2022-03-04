@@ -254,6 +254,11 @@ teams:
     permission: push
   - name: docs
     permission: pull
+  # Visibility is only honored when the team is created not for existing teams.
+  # It can be either secret (default) or closed (visible to all members of the org)
+  - name: globalteam
+    permission: push
+    visibility: closed
 
 branches:
   # If the name of the branch value is specified as `default`, then the app will create a branch protection rule to apply against the default branch in the repo
