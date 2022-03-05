@@ -220,6 +220,13 @@ labels:
     oldname: Help Wanted
     color: '#326699'
 
+milestones:
+# Milestones: define milestones for Issues and Pull Requests
+  - title: milestone-title
+    description: milestone-description
+    # The state of the milestone. Either `open` or `closed`
+    state: open
+
 collaborators:
 # Collaborators: give specific users access to any repository.
 # See https://docs.github.com/en/rest/reference/collaborators#add-a-repository-collaborator for available options
