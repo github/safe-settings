@@ -48,7 +48,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       const runtimeConfig = await configManager.loadGlobalSettingsYaml();
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
-      return Settings.syncAll(nop, context, repo, config, ref)
+      return Settings.syncSubOrgs(nop, context, suborg, repo, config, ref)
     } catch(e) {
       if (nop) {
         let filename="settings.yml"
@@ -111,44 +111,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     return deploymentConfig
   }
 
-  /**
-   * Loads a file from GitHub
-   *
-   * @param params Params to fetch the file with
-   * @return The parsed YAML file
-   */
-  async function loadYaml (context) {
-    try {
-      const repo = { owner: context.repo().owner, repo: 'admin' }
-      const CONFIG_PATH = '.github'
-      const params = Object.assign(repo, { path: path.posix.join(CONFIG_PATH, 'settings.yml') })
-      const response = await context.octokit.repos.getContent(params).catch(e => {
-        console.log.error(e)
-        console.error(`Error getting settings ${e}`)
-      })
-      // Ignore in case path is a folder
-      // - https://developer.github.com/v3/repos/contents/#response-if-content-is-a-directory
-      if (Array.isArray(response.data)) {
-        return null
-      }
-
-      // we don't handle symlinks or submodule
-      // - https://developer.github.com/v3/repos/contents/#response-if-content-is-a-symlink
-      // - https://developer.github.com/v3/repos/contents/#response-if-content-is-a-submodule
-      if (typeof response.data.content !== 'string') {
-        return
-      }
-
-      return yaml.load(Buffer.from(response.data.content, 'base64').toString()) || {}
-    } catch (e) {
-      if (e.status === 404) {
-        return null
-      }
-
-      throw e
-    }
-  }
-
   function getModifiedRepoConfigName(payload) {
     const repoSettingPattern = new Glob(".github/repos/*.yml")
 
@@ -188,18 +150,19 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   }
 
   function getAddedSubOrgConfigName(payload) {
-    const repoSettingPattern = new Glob(".github/suborgs/*.yml")
+    const settingPattern = new Glob(".github/suborgs/*.yml")
 
     let commit = payload.commits.find(c => {
       return ( c.added.find(s => {
         robot.log.debug(JSON.stringify(s))
-        return ( s.search(repoSettingPattern)>=0 )
+        return ( s.search(settingPattern)>=0 )
       }) !== undefined )
     })
 
     if (commit) {
-      robot.log.debug(`${JSON.stringify(commit)}`)
-      return {suborg: commit.added[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
+      const matches = commit.added[0].match(settingPattern)
+      robot.log.debug(`${JSON.stringify(commit)} \n ${matches[1]}`)
+      return { name: matches[1]+".yml", path: commit.added[0] }
     } else {
       robot.log.debug(`No additions to suborgs configs`)
     }
@@ -207,18 +170,19 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   }
 
   function getModifiedSubOrgConfigName(payload) {
-    const repoSettingPattern = new Glob(".github/suborgs/*.yml")
+    const settingPattern = new Glob(".github/suborgs/*.yml")
 
     let commit = payload.commits.find(c => {
       return ( c.modified.find(s => {
         robot.log.debug(JSON.stringify(s))
-        return ( s.search(repoSettingPattern)>=0 )
+        return ( s.search(settingPattern)>=0 )
       }) !== undefined )
     })
 
     if (commit) {
-      robot.log.debug(`${JSON.stringify(commit)} \n ${commit.modified[0].match(repoSettingPattern)[1]}`)
-      return repo = {suborg: commit.modified[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
+      const matches = commit.modified[0].match(settingPattern)
+      robot.log.debug(`${JSON.stringify(commit)} \n ${matches[1]}`)
+      return { name: matches[1]+".yml", path: commit.modified[0] }
     } else {
       robot.log.debug(`No modifications to suborgs configs`)
     }
@@ -307,6 +271,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
     let suborg = getModifiedSubOrgConfigName(payload)
     if (suborg) {
+      robot.log.debug(`modified Suborg ${JSON.stringify(suborg)}`)
       return syncSubOrgSettings(false, context, suborg)
     }
 
@@ -470,7 +435,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     }
     const suborg = getChangedConfigName(new Glob(".github/suborgs/*.yml"), files, context.repo().owner)
     if (suborg) {
-      return syncAllSettings(true, context, suborg, pull_request.head.ref )
+      return syncSubOrgSettings(true, context, suborg, context.repo(), pull_request.head.ref )
     }
     return syncAllSettings(true, context, context.repo(), pull_request.head.ref )
   })
