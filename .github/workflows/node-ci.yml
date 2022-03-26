@@ -30,7 +30,7 @@ jobs:
             npm-${{ env.cache-name }}-
             npm-
       - run: |
-          npx eslint
+          npm install eslint 
           npm run lint:es
           npm install
   
