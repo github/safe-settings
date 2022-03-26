@@ -8,6 +8,7 @@
     "dev": "nodemon",
     "start": "probot run ./index.js",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
+    "lint:es": "eslint .",
     "lint:js": "standard",
     "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --validate-https --allowed-hosts npm",
     "lint:engines": "check-engine",

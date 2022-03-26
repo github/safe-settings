@@ -29,6 +29,8 @@ jobs:
             npm-${{ env.cache-name }}-${{ matrix.node-version }}-
             npm-${{ env.cache-name }}-
             npm-
-      - run: npm install
+      - run: |
+          npm run lint:es
+          npm install
   
  
