@@ -256,6 +256,11 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
         commit.modified.includes(Settings.FILE_NAME)
     })
 
+    if (settingsModified) {
+      robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
+      return syncAllSettings(false, context)
+    }
+
     let repo = getModifiedRepoConfigName(payload)
     if (repo) {
       return syncSettings(false, context, repo)
@@ -279,9 +284,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
     if (!settingsModified) {
       robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
-      return
     }
-    return syncAllSettings(false, context)
   })
 
   robot.on('branch_protection_rule', async context => {
