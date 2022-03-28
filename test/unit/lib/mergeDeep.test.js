@@ -3,8 +3,8 @@ const MergeDeep = require('../../../lib/mergeDeep')
 const YAML = require('js-yaml')
 const log = require('pino')('test.log')
 
-describe('mergeDeep', () => {
-  it('works in a realistic scenario', () => {
+describe('MergeDeep Tests', () => {
+  it('CompareDeep basic test Works', () => {
     const target = YAML.load(`
           branches:
             - name: master
@@ -57,7 +57,91 @@ describe('mergeDeep', () => {
     expect(merged).toEqual(expected)
   })
 
-  it('from the api', () => {
+  it('CompareDeep Undefined target Works', () => {
+    const source = YAML.load(`
+              protection:
+                required_pull_request_reviews:
+                  required_approving_review_count: 2
+                  dismiss_stale_reviews: false
+                  require_code_owner_reviews: true
+                  dismissal_restrictions: {}
+                required_status_checks:
+                  strict: true
+                  contexts: []
+                enforce_admins: false
+        `)
+
+    const expected = {
+      additions: [
+        {
+          protection: {
+            required_pull_request_reviews: {
+              required_approving_review_count: 2,
+              dismiss_stale_reviews: false,
+              require_code_owner_reviews: true,
+              dismissal_restrictions: {}
+            },
+            required_status_checks: {
+              strict: true,
+              contexts: []
+            },
+            enforce_admins: false
+            }
+          }
+        ],
+        modifications: []
+      }
+
+    const ignorableFields = []
+    const mergeDeep = new MergeDeep(log, ignorableFields)
+    const merged = mergeDeep.compareDeep(undefined, source)
+    console.log(`${JSON.stringify(merged)}`)
+    expect(merged).toEqual(expected)
+  })
+
+  it('CompareDeep Empty target Works', () => {
+    const source = YAML.load(`
+              protection:
+                required_pull_request_reviews:
+                  required_approving_review_count: 2
+                  dismiss_stale_reviews: false
+                  require_code_owner_reviews: true
+                  dismissal_restrictions: {}
+                required_status_checks:
+                  strict: true
+                  contexts: []
+                enforce_admins: false
+        `)
+
+    const expected = {
+      additions:[
+        {
+          protection:{
+            required_pull_request_reviews:{
+              required_approving_review_count:2,
+              dismiss_stale_reviews:false,
+              require_code_owner_reviews:true,
+              dismissal_restrictions:{}},
+              required_status_checks:{
+                strict:true,
+                contexts:[]
+              },
+              enforce_admins:false
+            }
+          }
+        ],
+        modifications:[]
+      }
+
+
+    const ignorableFields = []
+    const mergeDeep = new MergeDeep(log, ignorableFields)
+    const merged = mergeDeep.compareDeep({}, source)
+    console.log(`${JSON.stringify(merged)}`)
+    expect(merged).toEqual(expected)
+  })
+
+  it('CompareDeep Test when target is from the api', () => {
     const protection = {
       url: 'https://api.github.com/repos/decyjphr-org/test/branches/develop/protection',
       required_status_checks: {
@@ -163,4 +247,6 @@ describe('mergeDeep', () => {
     console.log(`${JSON.stringify(merged)}`)
     expect(merged).toEqual(expected)
   })
+
+
 })
