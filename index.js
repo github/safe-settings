@@ -148,7 +148,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
   function getAddedSubOrgConfigName (payload) {
     const settingPattern = new Glob('.github/suborgs/*.yml')
-
     const commit = payload.commits.find(c => {
       return (c.added.find(s => {
         robot.log.debug(JSON.stringify(s))
@@ -168,7 +167,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
   function getModifiedSubOrgConfigName (payload) {
     const settingPattern = new Glob('.github/suborgs/*.yml')
-
     const commit = payload.commits.find(c => {
       return (c.modified.find(s => {
         robot.log.debug(JSON.stringify(s))
@@ -186,7 +184,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     return undefined
   }
 
-  function getChangedConfigName (glob, files, owner) {
+  function getChangedRepoConfigName (glob, files, owner) {
     const modifiedFile = files.find(s => {
       return (s.search(glob) >= 0)
     })
@@ -194,6 +192,20 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     if (modifiedFile) {
       robot.log.debug(`${JSON.stringify(modifiedFile)}`)
       return { repo: modifiedFile.match(glob)[1], owner: owner }
+    } else {
+      robot.log.debug('No changes to repo configs')
+    }
+    return undefined
+  }
+
+  function getChangedSubOrgConfigName (glob, files, owner) {
+    const modifiedFile = files.find(s => {
+      return (s.search(glob) >= 0)
+    })
+
+    if (modifiedFile) {
+      robot.log.debug(`${JSON.stringify(modifiedFile)}`)
+      return { name: modifiedFile.match(glob)[1] + '.yml', path: modifiedFile }
     } else {
       robot.log.debug('No changes to repo configs')
     }
@@ -256,11 +268,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
         commit.modified.includes(Settings.FILE_NAME)
     })
 
-    if (settingsModified) {
-      robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
-      return syncAllSettings(false, context)
-    }
-
     let repo = getModifiedRepoConfigName(payload)
     if (repo) {
       return syncSettings(false, context, repo)
@@ -281,7 +288,10 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     if (suborg) {
       return syncSubOrgSettings(false, context, suborg)
     }
-
+    if (settingsModified) {
+      robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
+      return syncAllSettings(false, context)
+    }
     if (!settingsModified) {
       robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
     }
@@ -295,7 +305,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug('Branch Protection edited by Bot')
       return
     }
-    console.log('Branch Protection edited by a Human')
+    robot.log.debug('Branch Protection edited by a Human')
     return syncSettings(false, context)
   })
 
@@ -307,7 +317,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug('Repository Edited by a Bot')
       return
     }
-    console.log('Repository Edited by a Human')
+    robot.log.debug('Repository Edited by a Human')
     if (!Object.prototype.hasOwnProperty.call(changes, 'default_branch')) {
       robot.log.debug('Repository configuration was edited but the default branch was not affected, returning...')
       return
@@ -354,7 +364,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return
     }
     const pull_request = payload.pull_request
-    console.log(JSON.stringify(pull_request, null, 2))
     createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
   })
 
@@ -376,7 +385,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug(' Working on the default branch, returning...')
       return
     }
-    console.log(JSON.stringify(pull_request, null, 2))
     createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
   })
 
@@ -435,12 +443,14 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     params = Object.assign(context.repo(), { basehead: `${check_suite.before}...${check_suite.after}` })
     const changes = await context.octokit.repos.compareCommitsWithBasehead(params)
     const files = changes.data.files.map(f => { return f.filename })
-    const repo = getChangedConfigName(new Glob('.github/repos/*.yml'), files, context.repo().owner)
+
+    const repo = getChangedRepoConfigName(new Glob('.github/repos/*.yml'), files, context.repo().owner)
     robot.log.debug(`${JSON.stringify(repo, null, 4)}`)
     if (repo) {
       return syncSettings(true, context, repo, pull_request.head.ref)
     }
-    const suborg = getChangedConfigName(new Glob('.github/suborgs/*.yml'), files, context.repo().owner)
+
+    const suborg = getChangedSubOrgConfigName(new Glob('.github/suborgs/*.yml'), files, context.repo().owner)
     if (suborg) {
       return syncSubOrgSettings(true, context, suborg, context.repo(), pull_request.head.ref)
     }
