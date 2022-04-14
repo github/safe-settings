@@ -23,6 +23,7 @@
   "license": "ISC",
   "dependencies": {
     "deepmerge": "^4.2.2",
+    "eta": "^1.12.3",
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.0",
     "probot": "12.2.0"

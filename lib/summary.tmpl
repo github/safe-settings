@@ -1,0 +1,13 @@
+## :robot: Safe-Settings Settings Change Summary
+### Run on: <%= new Date() %>
+
+### Number of repos that were considered: `<%= Object.keys(it.reposProcessed).length  %>` 
+
+### Breakdown of changes
+
+<% Object.keys(it.changes).forEach(plugin => { %>
+Number of repos with changes to <%= plugin %>: `<%= Object.keys(it.changes[plugin]).length %>` 
+<% }) %>
+
+
+ 
