@@ -400,7 +400,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const changes = await context.octokit.repos.compareCommitsWithBasehead(params)
     const files = changes.data.files.map(f => { return f.filename })
 
-    const settingsModified = files.includes(Settings.FILE_NAME) 
+    const settingsModified = files.includes(Settings.FILE_NAME)
 
     if (settingsModified) {
       robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
