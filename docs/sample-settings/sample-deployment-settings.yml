@@ -1,0 +1,29 @@
+restrictedRepos: 
+  # You can exclude certain repos from safe-settings processing
+  #  If no file is specified, then the following repositories - 'admin', '.github', 'safe-settings' are exempted by default
+  exclude: ['admin', '.github', 'safe-settings']
+  # Alternatively you can only include certain repos
+  include: ['test']
+configvalidators:
+  - plugin: collaborators
+    error: |
+      `Admin cannot be assigned to collaborators`
+    script: |
+      console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
+      return baseconfig.permission != 'admin'
+overridevalidators:
+  - plugin: branches   
+    error: |
+      `Branch protection required_approving_review_count cannot be overidden to a lower value`
+    script: |
+      console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
+      console.log(`overrideConfig ${JSON.stringify(overrideconfig)}`)
+      if (baseconfig.protection.required_pull_request_reviews.required_approving_review_count && overrideconfig.protection.required_pull_request_reviews.required_approving_review_count ) {
+        return overrideconfig.protection.required_pull_request_reviews.required_approving_review_count >= baseconfig.protection.required_pull_request_reviews.required_approving_review_count 
+      }
+      return true
+  - plugin: labels
+    error: |
+      Some error
+    script: |
+      return true
