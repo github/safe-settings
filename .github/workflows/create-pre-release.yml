@@ -1,13 +1,15 @@
-name: Node.js CI
+name: Create pre-release
 "on":
   pull_request:
     types:
-      - synchronize
+      - opened
 
 jobs:
   build:
     if: ${{ github.actor != 'dependabot'}}
     runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.rcrelease.outputs.release }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup node
@@ -30,5 +32,12 @@ jobs:
             npm-${{ env.cache-name }}-
             npm-
       - run: npm install
+      - name: Tag a rc release 
+        id: rcrelease
+        uses: actionsdesk/semver@0.6.0-rc.8
+        with:
+          bump: patch
+          prerelease: withBuildNumber
+          prelabel: rc
   
  
