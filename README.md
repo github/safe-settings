@@ -109,6 +109,7 @@ Using the settings, the following things could be configured:
 - `Collaborators and permissions`
 - `Issue labels`
 - `Branch protections`. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
+- `Autolinks`
 - `repository name validation` using regex pattern
 
 It is possible to provide an `include` or `exclude` settings to restrict the `collaborators`, `teams`, `labels` to a list of repos or exclude a set of repos for a collaborator.
@@ -133,8 +134,13 @@ repository:
   # Pass true to create an initial commit with empty README.
   auto_init: true
     
-  # A comma-separated list of topics to set on the repository
-  topics: github, probot, new-topic, another-topic, topic-12
+  # A list of topics to set on the repository - can alternatively set like this: [github, probot, new-topic, another-topic, topic-12]
+  topics:
+  - github
+  - probot
+  - new-topic
+  - another-topic
+  - topic-12
   
   # Either `true` to make the repository private, or `false` to make it public. 
   # If this value is changed and if Org members cannot change the visibility of repos
@@ -215,6 +221,13 @@ labels:
     oldname: Help Wanted
     color: '#326699'
 
+milestones:
+# Milestones: define milestones for Issues and Pull Requests
+  - title: milestone-title
+    description: milestone-description
+    # The state of the milestone. Either `open` or `closed`
+    state: open
+
 collaborators:
 # Collaborators: give specific users access to any repository.
 # See https://docs.github.com/en/rest/reference/collaborators#add-a-repository-collaborator for available options
@@ -249,6 +262,11 @@ teams:
     permission: push
   - name: docs
     permission: pull
+  # Visibility is only honored when the team is created not for existing teams.
+  # It can be either secret (default) or closed (visible to all members of the org)
+  - name: globalteam
+    permission: push
+    visibility: closed
 
 branches:
   # If the name of the branch value is specified as `default`, then the app will create a branch protection rule to apply against the default branch in the repo
@@ -281,6 +299,13 @@ branches:
         apps: []
         users: []
         teams: []
+
+# See the docs (https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/configuring-autolinks-to-reference-external-resources) for a description of autolinks and replacement values.
+autolinks:
+  - key_prefix: 'JIRA-'
+    url_template: 'https://jira.github.com/browse/JIRA-<num>'
+  - key_prefix: 'MYLINK-'
+    url_template: 'https://mywebsite.com/<num>'
         
 validator:
   #pattern: '[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*' 

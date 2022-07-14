@@ -241,7 +241,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
   async function createCheckRun(context, pull_request, head_sha, head_branch) {
     const { payload } = context
-    const { repository } = payload
     robot.log.debug(`Check suite was requested! for ${context.repo()} ${pull_request.number} ${head_sha} ${head_branch}`)
     const res = await context.octokit.checks.create({
       owner: payload.repository.owner.login,
@@ -455,11 +454,19 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       repo: payload.repository.name,
       check_run_id: payload.check_run.id,
       status: 'in_progress',
-      started_at: new Date((new Date()).setUTCHours(0, 0, 0, 0)).toISOString(),
+      started_at: new Date().toISOString(),
       output: { title: "Starting NOP", summary: "initiating..."}
     }
     robot.log.debug(`Updating check run ${JSON.stringify(params)}`)
     let res = await context.octokit.checks.update(params)
+
+    // guarding against null value from upstream libary that is 
+    // causing a 404 and the check to stall
+    // from issue: https://github.com/github/safe-settings/issues/185#issuecomment-1075240374
+    if (check_suite.before === "0000000000000000000000000000000000000000") 
+    {
+      check_suite.before = check_suite.pull_requests[0].base.sha;
+    }
     params = Object.assign(context.repo(), {  basehead: `${check_suite.before}...${check_suite.after}`  })
     const changes = await context.octokit.repos.compareCommitsWithBasehead(params)
     const files = changes.data.files.map(f => { return f.filename })

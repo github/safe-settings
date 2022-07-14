@@ -4,6 +4,9 @@
 
 ### Prepare the source code
 You will first need to clone the source code to your local environment that will run the **Docker** container.
+
+Note: If running locally without Docker, ensure that Node 14.x or later is installed.
+
 - Clone the codebase
   - `git clone https://github.com/github/safe-settings.git` or `git clone <this repo>`
   
@@ -20,7 +23,7 @@ You will first need to clone the source code to your local environment that will
 
 - If using the manifest flow, follow the steps [here](https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app-from-a-manifest)
 
-- If not using the `manifest flow` then follow the steps in [Create the GitHub App](#Create the GitHub App)
+- If not using the `manifest flow` then follow the steps in [Create the GitHub App](#create-the-github-app)
 
 - Create `.env` from `.env.example`
   
@@ -162,10 +165,11 @@ Every deployment will need an [App](https://developer.github.com/apps/).
 #### Repository Permissions
 
 - Administration: **Read & Write**
-- Contents: **Read only**
+- Checks: **Read & Write**
+- Commit statuses: **Read & Write**
+- Contents: **Read & Write**
 - Issues: **Read & Write**
-- Single file: **Read & Write**
-  - Path: `.github/settings.yml`
+- Pull requests: **Read & Write**
 
 #### Organization Permissions
 
@@ -174,7 +178,11 @@ Every deployment will need an [App](https://developer.github.com/apps/).
 
 ### Events
 
+- Branch protection rule
+- Check run
+- Check suite
 - Push
+- Pull request
 - Repository
 
 1. Download the private key from the app.
