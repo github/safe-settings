@@ -22,6 +22,7 @@
   "author": "Yadhav Jayaraman",
   "license": "ISC",
   "dependencies": {
+    "@probot/adapter-aws-lambda-serverless": "^3.0.1",
     "deepmerge": "^4.2.2",
     "eta": "^1.12.3",
     "js-yaml": "^4.1.0",
