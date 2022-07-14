@@ -1,5 +1,5 @@
 {
-  "name": "github-settings",
+  "name": "safe-settings",
   "description": "Pull Requests for GitHub repository settings",
   "keywords": ["node", "github"],
   "repository": "https://github.com/github/safe-settings",

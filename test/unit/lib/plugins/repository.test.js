@@ -2,9 +2,9 @@ const Repository = require('../../../../lib/plugins/repository')
 
 describe('Repository', () => {
   let github
-
+  let log
   function configure (config) {
-    return new Repository(github, { owner: 'bkeepers', repo: 'test' }, config)
+    return new Repository(github, { owner: 'bkeepers', repo: 'test' }, config, 1, log)
   }
 
   beforeEach(() => {
@@ -15,6 +15,7 @@ describe('Repository', () => {
         replaceTopics: jest.fn().mockImplementation(() => Promise.resolve())
       }
     }
+    log = jest.fn()
   })
 
   describe('sync', () => {

@@ -6,6 +6,9 @@ on:
         description: 'Status of the previous workflow'     
         required: true
         default: 'passed'
+      release:
+        description: 'Release tag from the previous workflow'     
+        required: true
 env:
   DOCKER_IMAGE_NAME: yadhav/safe-settings
   #IMAGE_REGISTRY_URL: docker.pkg.github.com
@@ -47,14 +50,14 @@ jobs:
           container-registry-password: ${{ secrets.DOCKER_PASSWORD }}
           secret-name: 'image-pull-secret'
         id: create-secret
-      - uses: Azure/k8s-deploy@v1
+      - uses: Azure/k8s-deploy@v1.4
         with:
           namespace: ${{env.AZURE_AKS_NAMESPACE}}
           manifests: |
             safe-settings.yaml
             svc-safe-settings.yaml
           #images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{ github.sha }}
-          images: ${{env.IMAGE_REGISTRY_URL}}/yadhav/safe-settings:main-enterprise
+          images: ${{env.IMAGE_REGISTRY_URL}}/yadhav/safe-settings:${{ github.event.inputs.release }}
           imagepullsecrets: |
             image-pull-secret
           kubectl-version: 'latest'        
