@@ -109,6 +109,7 @@ Using the settings, the following things could be configured:
 - `Collaborators and permissions`
 - `Issue labels`
 - `Branch protections`. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
+- `Autolinks`
 - `repository name validation` using regex pattern
 
 It is possible to provide an `include` or `exclude` settings to restrict the `collaborators`, `teams`, `labels` to a list of repos or exclude a set of repos for a collaborator.
@@ -298,6 +299,13 @@ branches:
         apps: []
         users: []
         teams: []
+
+# See the docs (https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/configuring-autolinks-to-reference-external-resources) for a description of autolinks and replacement values.
+autolinks:
+  - key_prefix: 'JIRA-'
+    url_template: 'https://jira.github.com/browse/JIRA-<num>'
+  - key_prefix: 'MYLINK-'
+    url_template: 'https://mywebsite.com/<num>'
         
 validator:
   #pattern: '[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*' 
