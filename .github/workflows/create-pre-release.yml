@@ -3,10 +3,10 @@ name: Create pre-release
   pull_request:
     types:
       - opened
+permissions: write-all
 
 jobs:
   build:
-    if: ${{ github.actor != 'dependabot'}}
     runs-on: ubuntu-latest
     outputs:
       release: ${{ steps.rcrelease.outputs.release }}
