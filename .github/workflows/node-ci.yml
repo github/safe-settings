@@ -9,29 +9,12 @@ jobs:
     if: ${{ github.actor != 'dependabot'}}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup node
-        uses: actions/setup-node@v2.1.2
+        uses: actions/setup-node@v3
         with:
           node-version: 12.x
-      - name: Get npm cache directory
-        id: npm-cache
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: npm-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            npm-${{ env.cache-name }}-${{ matrix.node-version }}-
-            npm-${{ env.cache-name }}-
-            npm-
-      - run: |
-          npm install eslint 
-          npm run lint:es
-          npm install
+          cache: 'npm'
+      - run: npm install
   
  
