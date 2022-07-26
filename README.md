@@ -1,7 +1,6 @@
 # GitHub Safe-Settings
 
-[![Node.js CI](https://github.com/github/safe-settings/actions/workflows/node-ci.yml/badge.svg)](https://github.com/github/safe-settings/actions/workflows/node-ci.yml)
-[![Dependabot][dependabot-badge]][dependabot-link]
+[![Create a release](https://github.com/github/safe-settings/actions/workflows/create-release.yml/badge.svg)](https://github.com/github/safe-settings/actions/workflows/create-release.yml)
 
 `Safe-settings`– an app to manage policy-as-code and apply repository settings to repositories across an organization.
 
