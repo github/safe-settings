@@ -486,11 +486,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const { payload } = context
     const { sender } = payload
     robot.log.debug('repository.created payload from ', JSON.stringify(sender))
-    if (sender.type === 'Bot') {
-      robot.log.debug('Repository created by a Bot')
-      return
-    }
-    robot.log.debug('Repository created by a Human')
     return syncSettings(false, context)
   })
 
