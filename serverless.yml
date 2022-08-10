@@ -1,0 +1,23 @@
+org: yadhav
+app: safe-settings
+service: safe-settings
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  environment:
+    APP_ID: ${param:APP_ID}
+    PRIVATE_KEY: ${param:PRIVATE_KEY}
+    WEBHOOK_SECRET: ${param:WEBHOOK_SECRET}
+    NODE_ENV: production
+    LOG_LEVEL: debug
+
+functions:
+  webhooks:
+    handler: handler.webhooks
+    events:
+      - httpApi:
+          path: /api/github/webhooks
+          method: post

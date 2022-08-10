@@ -86,6 +86,80 @@ This will start the container in the background and detached.
   - `sudo docker exec -it safe-settings /bin/sh`
 - You will now be inside the running **Docker** container and can perform any troubleshooting needed
 
+### Deploy the app to AWS Lambda
+[Serverless Framework Deployment of safe-settings on AWS](AWS-README.md)
+### Deploy the app in Kubernetes
+
+#### Deploying using kubectl
+- Create and push your image to a container registry
+- Create a `imagePullSecret` 
+  - For e.g. 
+	   `kubectl create secret docker-registry regcred --docker-server=DOCKER_REGISTRY_SERVER --docker-username=DOCKER_USER --docker-password=DOCKER_PASSWORD --docker-email=DOCKER_EMAIL`   
+- Create app secrets from the `.env` file
+    `kubectl create secret generic app-env --from-env-file=.env`
+- Deploy the app
+    `kubectl apply -f safe-settings.yml`
+> **_NOTE:_**  If your secrets' names are different; modify them in the deployment yaml.
+- Expose the app using a service
+    `kubectl apply -f svc-safe-settings.yml`
+
+#### Deploying using [helm](https://docs.helm.sh/using_helm/#Install-Helm)
+
+[Helm](https://helm.sh/) must be installed to use the charts. Please refer to Helm's [documentation](https://helm.sh/docs/) to get started.
+
+Once Helm is set up properly, add the repo as follows:
+
+```bash
+$ helm repo add decyjphr https://decyjphr-org.github.io/charts/
+```
+
+Run `helm search repo safe-settings` to see the charts.
+
+Run `helm show values decyjphr/safe-settings` to see the values.
+
+Install template with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--values` (Preferred approach)
+```bash
+helm install safe-settings decyjphr/safe-settings --values myvalues.yaml
+```
+
+Install template with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--set`
+```bash
+helm install safe-settings decyjphr/safe-settings --set appEnv.APP_ID="\"0000\"" --set appEnv.PRIVATE_KEY="TFM...==" --set appEnv.WEBHOOK_SECRET="ZjZlYTFjN...=="
+```
+
+Generate Kubernetes YAMLs
+```bash
+helm template safe-settings decyjphr/safe-settings --values myvalues.yaml
+```
+
+Chart documentation is available in [decyjphr charts repo](https://github.com/decyjphr-org/charts/).
+
+*See [helm repo](https://helm.sh/docs/helm/helm_repo/) for command documentation.*
+
+**Consider using a custom image**
+
+For production use cases one should consider to build a custom safe-settings app image which conforms to your org standards. 
+
+The [repository](https://github.com/decyjphr-org/safe-settings) contains [documentation](https://github.com/decyjphr-org/safe-settings/blob/main/docs/deploy.md#build-the-docker-container) how to do it.
+
+
+NOTE: If you want a reproducible build then you should specify a non floating tag for the image `yadhav/safe-settings:2.249.3` .
+
+Once you built the image and pushed it to your registry you can specify it in your values file like this:
+
+```yaml
+image:
+  repository: yadhav/safe-settings
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+```
+
+In case you are using a private registry you can use 'imagePullSecretName' to specify the name of the secret to use when pulling the image:
+
+```yaml
+imagePullSecrets: [regcred]
+```
 
 ### Glitch
 
