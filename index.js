@@ -147,7 +147,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const changes = added.concat(modified)
     const configs = changes.map(file => {
       robot.log.debug(`${JSON.stringify(file)}`)
-      return { repo: file.match(settingPattern)[1], owner: owner }
+      return { repo: file.match(settingPattern)[1], owner }
     })
     return configs
   }
@@ -159,7 +159,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     })
 
     return modifiedFiles.map(modifiedFile => {
-      return { repo: modifiedFile.match(glob)[1], owner: owner }
+      return { repo: modifiedFile.match(glob)[1], owner }
     })
   }
 
@@ -182,7 +182,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       owner: payload.repository.owner.login,
       repo: payload.repository.name,
       name: 'Safe-setting validator',
-      head_sha: head_sha
+      head_sha
     })
     robot.log.debug(JSON.stringify(res, null))
   }
@@ -201,7 +201,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       const github = await robot.auth(installation.id)
       const context = {
         payload: {
-          installation: installation
+          installation
         },
         octokit: github,
         log: robot.log,
