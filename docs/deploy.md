@@ -107,30 +107,46 @@ This will start the container in the background and detached.
 
 [Helm](https://helm.sh/) must be installed to use the charts. Please refer to Helm's [documentation](https://helm.sh/docs/) to get started.
 
-Once Helm is set up properly, add the repo as follows:
+Once Helm is set up properly, add the Helm Repository as follows:
 
 ```bash
 $ helm repo add decyjphr https://decyjphr-org.github.io/charts/
 ```
 
-Run `helm search repo safe-settings` to see the charts.
+Once a Helm Repository is added, it can be updated as follows:
 
-Run `helm show values decyjphr/safe-settings` to see the values that can be configured.
+```bash
+$ helm repo update decyjphr
+```
 
-__Configure required values.__
+See the charts.
+```bash
+helm search repo safe-settings
+``` 
+
+__Configure required values.__  
+
+See the values that can be configured.
+```bash
+helm show values decyjphr/safe-settings
+``` 
+
 - APP_ID
 - PRIVATE_KEY
 - WEBHOOK_SECRET
 
-__Configure Deployment Settings__  
-Override the default values in `values.yaml`
+Optionally, you can set other values like LOG_LEVEL.
 
-__Install template with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--values` (Preferred approach)__
+You can also override the `deploymentConfig` value.  
+
+__Install the chart__
+Set the values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--values` (Preferred approach)
 ```bash
 helm install safe-settings decyjphr/safe-settings --values myvalues.yaml
 ```
 
-__Install template with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--set`__
+Set the with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--set`
+
 ```bash
 helm install safe-settings decyjphr/safe-settings --set appEnv.APP_ID="\"0000\"" --set appEnv.PRIVATE_KEY="TFM...==" --set appEnv.WEBHOOK_SECRET="ZjZlYTFjN...=="
 ```
