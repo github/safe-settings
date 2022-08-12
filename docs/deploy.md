@@ -139,7 +139,7 @@ Optionally, you can set other values like LOG_LEVEL.
 
 You can also override the `deploymentConfig` value.  
 
-__Install the chart__
+__Install the chart__  
 Set the values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--values` (Preferred approach)
 ```bash
 helm install safe-settings decyjphr/safe-settings --values myvalues.yaml
