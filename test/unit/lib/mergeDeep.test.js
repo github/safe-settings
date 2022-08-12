@@ -4,6 +4,7 @@ const YAML = require('js-yaml')
 const log = require('pino')('test.log')
 
 describe('MergeDeep Tests', () => {
+
   it('CompareDeep basic test Works', () => {
     const target = YAML.load(`
           branches:
@@ -36,10 +37,9 @@ describe('MergeDeep Tests', () => {
         `)
 
     const expected = {
-      additions: [
-        undefined
-      ],
-      modifications: [
+      additions: {},
+      modifications: {
+        branches: [
         {
           protection: {
             required_pull_request_reviews: {
@@ -48,14 +48,18 @@ describe('MergeDeep Tests', () => {
           }
         }
       ]
+      }, 
+      hasChanges: true
     }
 
     const ignorableFields = []
     const mergeDeep = new MergeDeep(log, ignorableFields)
-    const merged = mergeDeep.compareDeep(target.branches, source.branches)
+    const merged = mergeDeep.compareDeep(target, source)
     console.log(`${JSON.stringify(merged)}`)
+    console.log(`${JSON.stringify(expected)}`)
     expect(merged).toEqual(expected)
   })
+
 
   it('CompareDeep Undefined target Works', () => {
     const source = YAML.load(`
@@ -72,7 +76,7 @@ describe('MergeDeep Tests', () => {
         `)
 
     const expected = {
-      additions: [
+      additions: 
         {
           protection: {
             required_pull_request_reviews: {
@@ -88,8 +92,9 @@ describe('MergeDeep Tests', () => {
             enforce_admins: false
             }
           }
-        ],
-        modifications: []
+        ,
+        modifications: {},
+        hasChanges: true
       }
 
     const ignorableFields = []
@@ -114,7 +119,7 @@ describe('MergeDeep Tests', () => {
         `)
 
     const expected = {
-      additions:[
+      additions:
         {
           protection:{
             required_pull_request_reviews:{
@@ -129,8 +134,9 @@ describe('MergeDeep Tests', () => {
               enforce_admins:false
             }
           }
-        ],
-        modifications:[]
+        ,
+        modifications:{},
+        hasChanges: true
       }
 
 
@@ -140,6 +146,7 @@ describe('MergeDeep Tests', () => {
     console.log(`${JSON.stringify(merged)}`)
     expect(merged).toEqual(expected)
   })
+      
 
   it('CompareDeep Test when target is from the api', () => {
     const protection = {
@@ -227,9 +234,7 @@ describe('MergeDeep Tests', () => {
         `)
 
     const expected = {
-      additions: [
-        undefined
-      ],
+      additions: [],
       modifications: [
         {
           protection: {
@@ -238,7 +243,8 @@ describe('MergeDeep Tests', () => {
             }
           }
         }
-      ]
+      ],
+      hasChanges: true
     }
 
     const ignorableFields = []
@@ -248,14 +254,52 @@ describe('MergeDeep Tests', () => {
     expect(merged).toEqual(expected)
   })
 
-  it('CompareDeep label test Works', () => {
+  it('CompareDeep label with ignorable extra info Works', () => {
     const source = { entries: [{"id":3954990840,"node_id":"LA_kwDOHC6_Gc7rvF74","url":"https://api.github.com/repos/decyjphr-org/test2/labels/bug","name":"bug","color":"CC0000","default":true,"description":"An issue with the system"},{"id":4015763857,"node_id":"LA_kwDOHC6_Gc7vW7GR","url":"https://api.github.com/repos/decyjphr-org/test2/labels/feature","name":"feature","color":"336699","default":false,"description":"New functionality."},{"id":4015763934,"node_id":"LA_kwDOHC6_Gc7vW7He","url":"https://api.github.com/repos/decyjphr-org/test2/labels/first-timers-only","name":"first-timers-only","color":"326699","default":false,"description":null},{"id":4015763984,"node_id":"LA_kwDOHC6_Gc7vW7IQ","url":"https://api.github.com/repos/decyjphr-org/test2/labels/new-label","name":"new-label","color":"326699","default":false,"description":null}]}
     const target = { entries: [{"name":"bug","color":"CC0000","description":"An issue with the system"},{"name":"feature","color":"336699","description":"New functionality."},{"name":"first-timers-only","oldname":"Help Wanted","color":"326699"},{"name":"new-label","oldname":"Help Wanted","color":"326699"}]}
   
 
     const expected = {
-      additions:[],
-      modifications:[]
+      additions: {},
+      modifications: {}
+    }
+
+    const ignorableFields = []
+    const mergeDeep = new MergeDeep(log, ignorableFields)
+    const merged = mergeDeep.compareDeep(target, source)
+    console.log(`${JSON.stringify(merged)}`)
+    expect(merged.additions).toEqual(expected.additions)
+    expect(merged.modifications.length).toEqual(expected.modifications.length)
+  })
+    
+  it('CompareDeep topics ', () => {
+    const source = { entries: ["blue","green","newone","red","uber","yellow"]}
+    const target = { entries: ["red","blu"]}
+  
+
+    const expected = {
+      additions: {
+        entries:["blue","green","newone","uber","yellow"]
+      },
+      modifications:{}
+    }
+
+    const ignorableFields = []
+    const mergeDeep = new MergeDeep(log, ignorableFields)
+    const merged = mergeDeep.compareDeep(target, source)
+    console.log(`${JSON.stringify(merged)}`)
+    expect(merged.additions).toEqual(expected.additions)
+    expect(merged.modifications.length).toEqual(expected.modifications.length)
+  })
+
+  it('CompareDeep arrays deep ', () => {
+    const source = [{name: "blue", color: "green"},{name: "newone",color: "red"},{ name: "uber",color: "yellow"}]
+    const target = [{name: "blue", color: "blue"}]
+  
+    const expected = {
+      additions:[{name:"newone",color:"red"},{name:"uber",color:"yellow"}],
+      modifications:[{color:"green",name:"blue"}],
+      hasChanges:true
     }
 
     const ignorableFields = []
