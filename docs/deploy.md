@@ -88,9 +88,9 @@ This will start the container in the background and detached.
 
 ### Deploy the app to AWS Lambda
 [Serverless Framework Deployment of safe-settings on AWS](AWS-README.md)
-### Deploy the app in Kubernetes
+## Deploy the app in Kubernetes
 
-#### Deploying using kubectl
+### __Deploying using kubectl__
 - Create and push your image to a container registry
 - Create a `imagePullSecret` 
   - For e.g. 
@@ -103,7 +103,7 @@ This will start the container in the background and detached.
 - Expose the app using a service
     `kubectl apply -f svc-safe-settings.yml`
 
-#### Deploying using [helm](https://docs.helm.sh/using_helm/#Install-Helm)
+### __Deploying using [helm](https://docs.helm.sh/using_helm/#Install-Helm)__
 
 [Helm](https://helm.sh/) must be installed to use the charts. Please refer to Helm's [documentation](https://helm.sh/docs/) to get started.
 
@@ -115,19 +115,30 @@ $ helm repo add decyjphr https://decyjphr-org.github.io/charts/
 
 Run `helm search repo safe-settings` to see the charts.
 
-Run `helm show values decyjphr/safe-settings` to see the values.
+Run `helm show values decyjphr/safe-settings` to see the values that can be configured.
 
-Install template with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--values` (Preferred approach)
+__Configure required values.__
+- APP_ID
+- PRIVATE_KEY
+- WEBHOOK_SECRET
+
+__Configure Deployment Settings__  
+Override the default values in `values.yaml`
+
+__Install template with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--values` (Preferred approach)__
 ```bash
 helm install safe-settings decyjphr/safe-settings --values myvalues.yaml
 ```
 
-Install template with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--set`
+__Install template with values for APP_ID, PRIVATE_KEY, WEBHOOK_SECRET using `--set`__
 ```bash
 helm install safe-settings decyjphr/safe-settings --set appEnv.APP_ID="\"0000\"" --set appEnv.PRIVATE_KEY="TFM...==" --set appEnv.WEBHOOK_SECRET="ZjZlYTFjN...=="
 ```
 
-Generate Kubernetes YAMLs
+`NOTE:`Setting up Ingress controller is out of scope of this doc, but is recommended.
+
+
+__If not doing an install using Helm. Generate Kubernetes YAMLs__
 ```bash
 helm template safe-settings decyjphr/safe-settings --values myvalues.yaml
 ```
@@ -143,9 +154,9 @@ For production use cases one should consider to build a custom safe-settings app
 The [repository](https://github.com/decyjphr-org/safe-settings) contains [documentation](https://github.com/decyjphr-org/safe-settings/blob/main/docs/deploy.md#build-the-docker-container) how to do it.
 
 
-NOTE: If you want a reproducible build then you should specify a non floating tag for the image `yadhav/safe-settings:2.249.3` .
+`NOTE:` If you want a reproducible build then you should specify a non floating tag for the image `yadhav/safe-settings:2.0.3` .
 
-Once you built the image and pushed it to your registry you can specify it in your values file like this:
+Once you built the image and pushed it to your registry you can specify it in your `values` file like this:
 
 ```yaml
 image:
@@ -155,7 +166,7 @@ image:
   tag: ""
 ```
 
-In case you are using a private registry you can use 'imagePullSecretName' to specify the name of the secret to use when pulling the image:
+In case you are using a private registry you can use `imagePullSecretName` to specify the name of the secret to use when pulling the image:
 
 ```yaml
 imagePullSecrets: [regcred]
