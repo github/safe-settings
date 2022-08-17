@@ -123,8 +123,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       const CONFIG_PATH = '.github'
       const params = Object.assign(repo, { path: path.posix.join(CONFIG_PATH, 'settings.yml') })
       const response = await context.octokit.repos.getContent(params).catch(e => {
-        console.log.error(e)
-        console.error(`Error getting settings ${e}`)
+        robot.log.error(e, 'Error getting settings')
       })
       // Ignore in case path is a folder
       // - https://developer.github.com/v3/repos/contents/#response-if-content-is-a-directory
@@ -329,7 +328,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug('Branch Protection edited by Bot')
       return
     }
-    console.log('Branch Protection edited by a Human')
+    robot.log.debug('Branch Protection edited by a Human')
     return syncSettings(false, context)
   })
 
@@ -341,7 +340,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug('Repository Edited by a Bot')
       return
     }
-    console.log('Repository Edited by a Human')
+    robot.log.debug('Repository Edited by a Human')
     if (!Object.prototype.hasOwnProperty.call(changes, 'default_branch')) {
       robot.log.debug('Repository configuration was edited but the default branch was not affected, returning...')
       return
@@ -388,7 +387,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return
     }
     const pull_request = payload.pull_request
-    console.log(JSON.stringify(pull_request,null,2))
+    robot.log.debug(pull_request)
     createCheckRun(context,pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
   })
 
@@ -410,7 +409,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug(' Working on the default branch, returning...')
       return
     }
-    console.log(JSON.stringify(pull_request,null,2))
+    robot.log.debug(pull_request)
     createCheckRun(context,pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
   })
 
@@ -471,7 +470,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const changes = await context.octokit.repos.compareCommitsWithBasehead(params)
     const files = changes.data.files.map(f => { return f.filename })
     const repo = getChangedConfigName(new Glob(".github/repos/*.yml"), files, context.repo().owner)
-    robot.log.debug(`${JSON.stringify(repo, null, 4)}`)
+    robot.log.debug(repo)
     if (repo) {
       return syncSettings(true, context, repo, pull_request.head.ref)
     }
@@ -502,7 +501,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     # * * * * * *
     */
     cron.schedule(process.env.CRON, () => {
-      console.log('running a task every minute');
+      robot.log.debug('running a task every minute');
       syncInstallation()
     });
   }
