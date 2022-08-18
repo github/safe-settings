@@ -1,5 +1,5 @@
 FROM node:14.17.6-alpine
-ENV NODE_ENV production
+#ENV NODE_ENV production
 ## Set the Labels
 LABEL version="1.0" \
       description="Probot app which is a modified version of Settings Probot GitHub App" \
@@ -36,6 +36,10 @@ RUN apk add --no-cache make python
 
 ## Install the app and dependencies
 RUN npm install
+
+RUN mkdir -p /opt/runtime/safe-settings
+COPY default-deployment-settings.yml /opt/runtime/safe-settings/deployment-settings.yml
+RUN ln -s /opt/runtime/safe-settings/deployment-settings.yml /opt/safe-settings/deployment-settings.yml
 
 ## This app will listen on port 3000
 EXPOSE 3000
