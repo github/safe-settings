@@ -52,6 +52,37 @@ Other Optional values in the .env are:
 
 Once you have the `.env` file configured, you are ready to start the building of the container.
 
+### Helm
+#### Dependencies
+
+|Dependency|Description|Note|
+|---|---|---|
+|Helm|Kubernetes package manager for deployment management||
+|Docker Image|Docker image of safe-settings application||
+|Kubernetes Cluster|Target cluster to deploy the application to||
+|GitHub Probot configuartions|Probot-required connection information.  These include:<br/>- WEBHOOK_PROXY_URL<br/>- APP_ID<br/>- PRIVATE_KEY<br/>- WEBHOOK_SECRET<br/>- GITHUB_CLIENT_ID<br/>- GITHUB_CLIENT_SECRET|These can be optained from the .env file generated. |
+|safe-settings runtime configurations|These include:<br/>- CRON<br/>- LOG_LEVEL<br/>- NODE_ENV<br/>- includes and excludes from deployment-settings|Helm chart will default to excluding all repositories, unless they are:<br/>- Added to include array<sup>1</sup><br/>- include array is removed from values.yaml|
+
+
+
+All the variables generated during the GitHub Probot setup process will need to be added.  The include and exclude from the deployment-settings.yml will also need to be added to the values.yaml.
+
+#### Example deployment steps
+
+1. Copy & rename template-values.yaml to values.yaml<sup>2</sup>
+2. Replace all values that have <> in them to the appropriate corresponding value.
+   *Example*:  app_id: "<app_id>" becomes app_id: "12345" if the app_id is 12345
+3. From inside the project repository, install the chart via helm
+   ```
+   helm install safe-settings ./helm-safe-settings
+   ```
+
+#### Additional notes about using the helm chart in this project
+<br/>
+<sup>1</sup>  The helm chart is setup to be passive by default. However, it will role the appropopriate pods on any upgrade where the configuration values are changed.  This allows for incremental roleout of configuration checking at the repo level.<br/><br/>
+<sup>2</sup>  .gitignore is seutp to ignore all files matching the pattern values*.yaml.  This allows for multipel values files, if necessary, and helps reduce risk of accidentally commiting sensitive configuration infromation.
+
+
 ### Docker
 #### Build the Docker container
 Once you have configured the **GitHub App** and updated the source code, you should be ready to build the container.
