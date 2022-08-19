@@ -31,6 +31,7 @@ jobs:
             npm-
       - run: npm install
   tag-rc:
+    needs: [build]
     if: ${{github.event.pull_request.head.repo.full_name == 'github/safe-settings' }}
     runs-on: ubuntu-latest
     outputs:
