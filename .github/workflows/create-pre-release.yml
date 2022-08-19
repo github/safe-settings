@@ -8,8 +8,6 @@ permissions: write-all
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      release: ${{ steps.rcrelease.outputs.release }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup node
@@ -18,6 +16,13 @@ jobs:
           node-version: 12.x
           cache: 'npm'
       - run: npm install
+  tag-rc:
+    needs: [build]
+    if: ${{github.event.pull_request.head.repo.full_name == 'github/safe-settings' }}
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.rcrelease.outputs.release }}
+    steps: 
       - name: Tag a rc release 
         id: rcrelease
         uses: actionsdesk/semver@0.6.0-rc.8
