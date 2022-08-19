@@ -6,12 +6,7 @@ name: Create a release
 
 env:
   DOCKER_IMAGE_NAME: yadhav/safe-settings
-  #IMAGE_REGISTRY_URL: docker.pkg.github.com
   IMAGE_REGISTRY_URL: docker.io
-  AZURE_RESOURCE_GROUP: aks-actions
-  AZURE_AKS_CLUSTER: actionsAKSCluster
-  AZURE_LOCATION: '"East US"'
-  AZURE_AKS_NAMESPACE: default
 
 jobs:
   build:
@@ -43,11 +38,6 @@ jobs:
           load: true
           tags:  |
             yadhav/safe-settings:main-enterprise
-#          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ github.event.pull_request.head.sha || github.sha }}
-#          username: ${{ secrets.DOCKER_USERNAME }}
-#          password: ${{ secrets.DOCKER_PASSWORD }}
-#          repository: yadhav/safe-settings
-#          tag_with_ref: true
       - name: Inspect the Docker Image
         run: |
           docker image inspect yadhav/safe-settings:main-enterprise
@@ -72,14 +62,14 @@ jobs:
           tags:  |
             yadhav/safe-settings:${{ steps.finalrelease.outputs.release }}    
                   
-  trigger-deployment:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: decyjphr-actions/workflow-trigger@v0.1-alpha
-      with:
-        workflow: deploy-k8s.yml
-        token: ${{ secrets.pat }}
-        ref: ${{ github.event.pull_request.head.ref || github.ref }}
-        inputs: '{"release": "${{needs.build.outputs.release}}", "status": "passed" }'    
+#   trigger-deployment:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v2
+#     - uses: decyjphr-actions/workflow-trigger@v0.1-alpha
+#       with:
+#         workflow: deploy-k8s.yml
+#         token: ${{ secrets.pat }}
+#         ref: ${{ github.event.pull_request.head.ref || github.ref }}
+#         inputs: '{"release": "${{needs.build.outputs.release}}", "status": "passed" }'    

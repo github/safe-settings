@@ -271,7 +271,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       }
       return syncAllSettings(false, context)
     }
-    retrun
+    return
   }
 
   robot.on('push', async context => {
@@ -323,7 +323,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   robot.on('branch_protection_rule', async context => {
     const { payload } = context
     const { changes, repository, sender } = payload
-    robot.log.debug('Branch Protection edited by ', JSON.stringify(sender))
     if (sender.type === 'Bot') {
       robot.log.debug('Branch Protection edited by Bot')
       return
