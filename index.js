@@ -271,7 +271,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       }
       return syncAllSettings(false, context)
     }
-    retrun
+    return
   }
 
   robot.on('push', async context => {
