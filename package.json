@@ -27,7 +27,7 @@
     "eta": "^1.12.3",
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.1",
-    "probot": "^12.2.4"
+    "probot": "^12.2.5"
   },
   "devDependencies": {
     "@travi/any": "^2.1.5",
