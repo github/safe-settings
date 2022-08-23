@@ -7,8 +7,13 @@ describe('Validator Tests', () => {
 
   it('Branch override validator test', () => {
     const overrideMock = jest.fn((baseconfig, overrideconfig) => {
-      console.log(`Branch override validator, baseconfig ${baseconfig} overrideconfig ${overrideconfig}`)
-      return false
+      if (baseconfig.protection.required_pull_request_reviews.required_approving_review_count && overrideconfig.protection.required_pull_request_reviews.required_approving_review_count ) {
+        return overrideconfig.protection.required_pull_request_reviews.required_approving_review_count >= baseconfig.protection.required_pull_request_reviews.required_approving_review_count 
+      }
+      return true
+      
+      //console.log(`Branch override validator, baseconfig ${baseconfig} overrideconfig ${overrideconfig}`)
+      //return false
     })
   
     const configMock = jest.fn((baseconfig) => {
@@ -18,7 +23,7 @@ describe('Validator Tests', () => {
     const overrideValidators = { branches: { canOverride: overrideMock, error: 'Branch overrideValidators.error' } }
     const configValidators = { branches: { isValid: configMock, error: 'Branch configValidators.error' }}
 
-    const source = YAML.load(`
+    const overrideconfig = YAML.load(`
           branches:
             - name: master
               protection:
@@ -33,7 +38,7 @@ describe('Validator Tests', () => {
                 enforce_admins: false
         `)
 
-    const target = YAML.load(`
+    const baseconfig = YAML.load(`
           branches:
             - name: master
               protection:
@@ -51,8 +56,8 @@ describe('Validator Tests', () => {
     try {
       const ignorableFields = []
       const mergeDeep = new MergeDeep(log, ignorableFields, configValidators, overrideValidators)
-      const merged = mergeDeep.mergeDeep(target, source)
-//    expect(() => mergeDeep.mergeDeep(target, source)).toThrow('you are using the wrong JDK');
+      const merged = mergeDeep.mergeDeep(baseconfig, overrideconfig)
+//    expect(() => mergeDeep.mergeDeep(baseconfig, overrideconfig)).toThrow('you are using the wrong JDK');
     } catch (err) {
       expect(err).toBeDefined
       expect(err).toEqual(Error('Branch overrideValidators.error'))
@@ -74,7 +79,7 @@ describe('Validator Tests', () => {
     const overrideValidators = { repository: { canOverride: overrideMock, error: 'Repo overrideValidators.error' } }
     const configValidators = { repository: { isValid: configMock, error: 'Repo configValidators.error' }}
 
-    const source = YAML.load(`
+    const overrideconfig = YAML.load(`
   repository:      
     name: test   
     org: decyjphr-org
@@ -94,7 +99,7 @@ describe('Validator Tests', () => {
     default_branch: develop  
         `)
 
-    const target = YAML.load(`
+    const baseconfig = YAML.load(`
   repository:
     # A short description of the repository that will show up on GitHub
     description: description of the repos 
@@ -108,7 +113,7 @@ describe('Validator Tests', () => {
     try {
       const ignorableFields = []
       const mergeDeep = new MergeDeep(log, ignorableFields, configValidators, overrideValidators)
-      const merged = mergeDeep.mergeDeep(target, source)
+      const merged = mergeDeep.mergeDeep(baseconfig, overrideconfig)
     } catch (err) {
       expect(err).toBeDefined
       expect(err).toEqual(Error('Repo overrideValidators.error'))
@@ -129,7 +134,7 @@ describe('Validator Tests', () => {
     const overrideValidators = { repository: { canOverride: overrideMock, error: 'Repo overrideValidators.error' } }
     const configValidators = { repository: { isValid: configMock, error: 'Repo configValidators.error' }}
 
-    const source = YAML.load(`
+    const overrideconfig = YAML.load(`
   repository:      
     name: test   
     org: decyjphr-org
@@ -149,7 +154,7 @@ describe('Validator Tests', () => {
     default_branch: develop  
         `)
 
-    const target = YAML.load(`
+    const baseconfig = YAML.load(`
   repository:
     # A short description of the repository that will show up on GitHub
     description: description of the repos 
@@ -163,7 +168,7 @@ describe('Validator Tests', () => {
     try {
       const ignorableFields = []
       const mergeDeep = new MergeDeep(log, ignorableFields, configValidators, overrideValidators)
-      const merged = mergeDeep.mergeDeep(target, source)
+      const merged = mergeDeep.mergeDeep(baseconfig, overrideconfig)
     } catch (err) {
       expect(err).toBeDefined
       expect(err).toEqual(Error('Repo configValidators.error'))
