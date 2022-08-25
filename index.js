@@ -385,7 +385,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       check_run_id: payload.check_run.id,
       status: 'in_progress',
       started_at: new Date().toISOString(),
-      output: { title: 'Starting Dry-Run', summary: 'initiating...' }
+      output: { title: 'Starting NOP', summary: 'initiating...' }
     }
     robot.log.debug(`Updating check run ${JSON.stringify(params)}`)
     await context.octokit.checks.update(params)

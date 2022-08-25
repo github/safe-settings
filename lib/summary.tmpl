@@ -11,10 +11,12 @@
 ### Breakdown of changes
 
 <% Object.keys(it.changes).forEach(plugin => { %>
-Number of repos with changes to <%= plugin %>: `<%= Object.keys(it.changes[plugin]).length %>` 
-<%= Object.keys(it.changes[plugin]) %>
-
----
+  Repos with changes to <%= plugin %> settings: <%= Object.keys(it.changes[plugin]).length %>
+  <ul>
+  <% Object.keys(it.changes[plugin]).forEach( repo => { %>
+    <li><%= repo %></li>
+  <% }) %>
+  </ul>
 <% }) %>
 
 
