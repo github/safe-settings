@@ -5,19 +5,20 @@
 
 ### Breakdown of errors
 <% Object.keys(it.errors).forEach(repo => { %>
-<%= repo %>: <%= it.errors[repo] %>
+  <%= repo %>: <%= it.errors[repo] %>
 <% }) %>
 
 ### Breakdown of changes
 
 <% Object.keys(it.changes).forEach(plugin => { %>
+<details>
+  <summary>
   Repos with changes to <%= plugin %> settings: <%= Object.keys(it.changes[plugin]).length %>
-  <ul>
+  </summary>
   <% Object.keys(it.changes[plugin]).forEach( repo => { %>
-    <li><%= repo %></li>
+  <%= repo %><br>
   <% }) %>
-  </ul>
+</details>
 <% }) %>
-
 
  

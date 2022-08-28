@@ -60,6 +60,7 @@ describe('Validator Tests', () => {
 //    expect(() => mergeDeep.mergeDeep(baseconfig, overrideconfig)).toThrow('you are using the wrong JDK');
     } catch (err) {
       expect(err).toBeDefined
+      console.log(JSON.stringify(err))
       expect(err).toEqual(Error('Branch overrideValidators.error'))
     }
     expect(overrideMock.mock.calls.length).toBe(1);
