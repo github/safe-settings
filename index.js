@@ -29,7 +29,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
-        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
         throw e
@@ -54,7 +54,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
-        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
         throw e
@@ -79,7 +79,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
-        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
         throw e
@@ -442,7 +442,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     # * * * * * *
     */
     cron.schedule(process.env.CRON, () => {
-      console.log('running a task every minute')
+      robot.log.debug('running a task every minute')
       syncInstallation()
     })
   }
