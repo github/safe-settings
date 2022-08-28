@@ -1,12 +1,12 @@
 # This settings can be used to create suborg level settings
 
 # List of repos that belong to the suborg
-#suborgrepos:
-#  - test*
+suborgrepos:
+  - test*
 # You can use Glob patterns
 
-#suborgteams:
-#  - core
+suborgteams:
+  - core
 
 #repository: 
   # This is the settings that need to be applied to all repositories in the org 
