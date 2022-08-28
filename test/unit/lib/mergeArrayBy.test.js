@@ -1,4 +1,4 @@
-const branchArrayMerge = require('../../../lib/mergeArrayByName')
+const branchArrayMerge = require('../../../lib/mergeArrayBy')
 const YAML = require('js-yaml')
 
 describe('mergeArrayByName', () => {
@@ -18,7 +18,7 @@ describe('mergeArrayByName', () => {
       name: 'added'
     }]
 
-    const merged = branchArrayMerge(target, source)
+    const merged = branchArrayMerge("",null,null,["name"], target, source)
 
     expect(merged).toEqual([{
       name: 'master',
@@ -73,7 +73,7 @@ describe('mergeArrayByName', () => {
        }
     }]
 
-    const merged = branchArrayMerge(target.branches, source.branches)
+    const merged = branchArrayMerge("",null,null,["name"], target.branches, source.branches)
 
     expect(merged).toEqual(expected)
   })
