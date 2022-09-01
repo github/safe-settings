@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 
 const Branches = require('../../../../lib/plugins/branches')
 

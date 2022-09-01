@@ -7,8 +7,8 @@
 1. In `safe-settings` all the settings are stored centrally in an `admin` repo within the organization. This is important. Unlike [Settings Probot](https://github.com/probot/settings), the settings files cannot be in individual repositories.
 1. There are 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml` 
-   1. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg`settings reside in a yaml file for each `suborg` in the `.github/suborgs`folder.
-   1. `Repo` level settings. They reside in a repo specific yaml in `.github/repos`folder
+   1. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
+   1. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
 1. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to be define and manage policies for their specific projects or business units.With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
 
 **Note:** The settings file must have a `.yml`extension only. `.yaml` extension is ignored, for now.
@@ -28,12 +28,12 @@ The App listens to the following webhook events:
 
 - **pull_request.opened**, **pull_request.reopened**, **check_suite.requested**: If the settings are changed, but it is not in the `default` branch, and there is an existing PR, the code will validate the settings changes by running safe-settings in `nop` mode and update the PR with the `dry-run` status. 
 
-### Restricting `safe-settings` for specific repos
-`safe-settings` can be turned on only to a subset of repos by specifying them in the runtime config file, `deployment-settings.yml`.  
+### Restricting `safe-settings` to specific repos
+`safe-settings` can be turned on only to a subset of repos by specifying them in the runtime settings file, `deployment-settings.yml`.  
 If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.  
 A sample of `deployment-settings` file is found [here](docs/sample-settings/sample-deployment-settings.yml).
 
-To apply `safe-settings` only to a specific list of repos, add them to the `restrictedRepos` section as `include` array.
+To apply `safe-settings` __only__ to a specific list of repos, add them to the `restrictedRepos` section as `include` array.
 
 To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
 
@@ -83,6 +83,116 @@ overridevalidators:
 
 A sample of `deployment-settings` file is found [here](docs/sample-settings/sample-deployment-settings.yml).
 
+### Performance
+When there are 1000s of repos to be managed -- and there is a global settings change -- safe-settings will have to work efficiently and only make the neccessary API calls.
+
+The app also has to complete the work within an hour: the lifetime of the GitHub app token.
+
+To address these constraints the following design decisions have been implemented:
+1. `Probot` automatically handles `rate` and `abuse` limits.
+2. Instead of loading all the repo contents from `.github/repos/*`, it will selectively load the specific repo file based on which `repo` settings has changed, or a subset of the repo files associated with `suborg` settings that has changed. The only time all the repo files will be loaded is if there is a `global` settings file change.
+3. The PR check will only provide a summary of errors and changes. (Providing the details of changes for 1000s of repos will error out.)
+4. To ensure it handles updates to GitHub intelligently, it will compare the changes with the settings in GitHub, and  will call the API only if there are `real` changes.
+
+#### Comparing changes with GitHub
+To determine if there are `real` changes, the code will generate a detailed list of `additions`, `modifications`, and `deletions` compared to the settings in GitHub:
+
+For e.g:
+
+If the settings is:
+```json
+{
+  "branches": [
+    {
+      "name": "master",
+      "protection": {
+        "required_pull_request_reviews": {
+          "required_approving_review_count": 2,
+          "dismiss_stale_reviews": false,
+          "require_code_owner_reviews": true,
+          "dismissal_restrictions": {}
+        },
+        "required_status_checks": {
+          "strict": true,
+          "contexts": []
+        },
+        "enforce_admins": false
+      }
+    }
+  ]
+}
+```
+
+and the settings in GitHub is:
+```json
+{
+     "branches": [
+       {
+         "name": "master",
+         "protection": {
+            url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection",
+           "required_status_checks": {
+              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks",
+             "strict": true,
+             "contexts": [],
+              contexts_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks/contexts",
+             "checks": []
+           },
+           "restrictions": {
+              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions",
+              users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/users",
+              teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/teams",
+              apps_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/apps",
+             "users": [],
+             "teams": [],
+             "apps": []
+           },
+           "required_pull_request_reviews": {
+              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_pull_request_reviews",
+             "dismiss_stale_reviews": true,
+             "require_code_owner_reviews": true,
+             "required_approving_review_count": 2,
+             "dismissal_restrictions": {
+                url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions",
+                users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/users",
+                teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/teams",
+               "users": [],
+               "teams": []
+             }
+           },
+           "required_signatures": false,
+           "enforce_admins": false,
+           "required_linear_history": false,
+           "allow_force_pushes": {
+             "enabled": false
+           },
+           "allow_deletions": false,
+           "required_conversation_resolution": false
+         }
+       }
+     ]
+   }
+```
+
+the results of comparison would be:
+```json
+{
+      "additions": {},
+      "modifications": {
+        "branches": [
+          {
+            "protection": {
+              "required_pull_request_reviews": {
+                "dismiss_stale_reviews": false
+              }
+            },
+            "name": "master"
+          }
+        ]
+      },
+      "hasChanges": true
+    }
+```
 ### Schedule
 The App can be configured to apply the settings on a schedule. This could a way to address configuration drift since webhooks have not always guaranteed to be delivered.
 
@@ -241,7 +351,6 @@ collaborators:
 # You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator
   exclude:
   - actions-demo
-
 - username: thor
   permission: push
 # You can include a list of repos for this collaborator and only those repos would have this collaborator
@@ -249,8 +358,8 @@ collaborators:
   - actions-demo
   - another-repo
 
-# See https://docs.github.com/en/rest/reference/teams#create-a-team for available options
 teams:
+# Teams See https://docs.github.com/en/rest/reference/teams#create-a-team for available options
   - name: core
     # The permission to grant the team. Can be one of:
     # * `pull` - can pull, but not push to or administer this repository.

@@ -18,7 +18,7 @@ describe('mergeArrayByName', () => {
       name: 'added'
     }]
 
-    const merged = branchArrayMerge(["name"], target, source)
+    const merged = branchArrayMerge("",null,null,["name"], target, source)
 
     expect(merged).toEqual([{
       name: 'master',
@@ -32,7 +32,7 @@ describe('mergeArrayByName', () => {
   })
 
   it('works in a realistic scenario', () => {
-    const target = YAML.safeLoad(`
+    const target = YAML.load(`
   branches:
     - name: master
       protection:
@@ -48,7 +48,7 @@ describe('mergeArrayByName', () => {
         restrictions:
   `)
 
-    const source = YAML.safeLoad(`
+    const source = YAML.load(`
   branches:
     - name: master
       protection:
@@ -73,7 +73,7 @@ describe('mergeArrayByName', () => {
        }
     }]
 
-    const merged = branchArrayMerge(["name"], target.branches, source.branches)
+    const merged = branchArrayMerge("",null,null,["name"], target.branches, source.branches)
 
     expect(merged).toEqual(expected)
   })

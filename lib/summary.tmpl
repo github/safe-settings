@@ -1,0 +1,24 @@
+## :robot: Safe-Settings Settings Dry-Run Summary
+### Run on: <%= new Date() %>
+
+### Number of repos that were considered: `<%= Object.keys(it.reposProcessed).length  %>` 
+
+### Breakdown of errors
+<% Object.keys(it.errors).forEach(repo => { %>
+  <%= repo %>: <%= it.errors[repo] %>
+<% }) %>
+
+### Breakdown of changes
+
+<% Object.keys(it.changes).forEach(plugin => { %>
+<details>
+  <summary>
+  Repos with changes to <%= plugin %> settings: <%= Object.keys(it.changes[plugin]).length %>
+  </summary>
+  <% Object.keys(it.changes[plugin]).forEach( repo => { %>
+  <%= repo %><br>
+  <% }) %>
+</details>
+<% }) %>
+
+ 

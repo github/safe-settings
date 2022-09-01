@@ -1,21 +1,19 @@
-const path = require('path')
+/* eslint-disable camelcase */
 const yaml = require('js-yaml')
 const fs = require('fs')
-const cron = require('node-cron');
+const cron = require('node-cron')
 const Glob = require('./lib/glob')
 const ConfigManager = require('./lib/configManager')
 const NopCommand = require('./lib/nopcommand')
 
 let deploymentConfig
 module.exports = (robot, _, Settings = require('./lib/settings')) => {
-  
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
-
     try {
       deploymentConfig = await loadYamlFileSystem()
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-      const configManager = new ConfigManager(context,ref)
-      const runtimeConfig = await configManager.loadGlobalSettingsYaml();
+      const configManager = new ConfigManager(context, ref)
+      const runtimeConfig = await configManager.loadGlobalSettingsYaml()
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       if (ref) {
@@ -23,21 +21,20 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       } else {
         return Settings.syncAll(nop, context, repo, config)
       }
-    } catch(e) {
+    } catch (e) {
       if (nop) {
-        let filename="settings.yml"
+        let filename = 'settings.yml'
         if (!deploymentConfig) {
-          filename="deployment-settings.yml"
-          deploymentConfig={}
+          filename = 'deployment-settings.yml'
+          deploymentConfig = {}
         }
-        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
-        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
+        robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
         throw e
       }
     }
-
   }
 
   async function syncSubOrgSettings (nop, context, suborg, repo = context.repo(), ref) {
@@ -45,19 +42,19 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       deploymentConfig = await loadYamlFileSystem()
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
       const configManager = new ConfigManager(context, ref)
-      const runtimeConfig = await configManager.loadGlobalSettingsYaml();
+      const runtimeConfig = await configManager.loadGlobalSettingsYaml()
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
-      return Settings.syncAll(nop, context, repo, config, ref)
-    } catch(e) {
+      return Settings.syncSubOrgs(nop, context, suborg, repo, config, ref)
+    } catch (e) {
       if (nop) {
-        let filename="settings.yml"
+        let filename = 'settings.yml'
         if (!deploymentConfig) {
-          filename="deployment-settings.yml"
-          deploymentConfig={}
+          filename = 'deployment-settings.yml'
+          deploymentConfig = {}
         }
-        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
-        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
+        robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
         throw e
@@ -69,21 +66,20 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     try {
       deploymentConfig = await loadYamlFileSystem()
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-      //const runtimeConfig = await loadYaml(context)
-      const configManager = new ConfigManager(context,ref)
-      const runtimeConfig = await configManager.loadGlobalSettingsYaml();
+      const configManager = new ConfigManager(context, ref)
+      const runtimeConfig = await configManager.loadGlobalSettingsYaml()
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       return Settings.sync(nop, context, repo, config, ref)
-    } catch(e) {
+    } catch (e) {
       if (nop) {
-        let filename="settings.yml"
+        let filename = 'settings.yml'
         if (!deploymentConfig) {
-          filename="deployment-settings.yml"
-          deploymentConfig={}
+          filename = 'deployment-settings.yml'
+          deploymentConfig = {}
         }
-        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
-        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
+        robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
         throw e
@@ -103,151 +99,92 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       if (fs.existsSync(deploymentConfigPath)) {
         deploymentConfig = yaml.load(fs.readFileSync(deploymentConfigPath))
       } else {
-        //console.error(`Safe-settings load deployment config failed: file ${deploymentConfigPath} not found`)
-        //process.exit(1)
-        deploymentConfig = { restrictedRepos: [ 'admin', '.github', 'safe-settings' ] }
+        deploymentConfig = { restrictedRepos: ['admin', '.github', 'safe-settings'] }
       }
     }
     return deploymentConfig
   }
 
-  /**
-   * Loads a file from GitHub
-   *
-   * @param params Params to fetch the file with
-   * @return The parsed YAML file
-   */
-  async function loadYaml (context) {
-    try {
-      const repo = { owner: context.repo().owner, repo: 'admin' }
-      const CONFIG_PATH = '.github'
-      const params = Object.assign(repo, { path: path.posix.join(CONFIG_PATH, 'settings.yml') })
-      const response = await context.octokit.repos.getContent(params).catch(e => {
-        robot.log.error(e, 'Error getting settings')
-      })
-      // Ignore in case path is a folder
-      // - https://developer.github.com/v3/repos/contents/#response-if-content-is-a-directory
-      if (Array.isArray(response.data)) {
-        return null
-      }
-
-      // we don't handle symlinks or submodule
-      // - https://developer.github.com/v3/repos/contents/#response-if-content-is-a-symlink
-      // - https://developer.github.com/v3/repos/contents/#response-if-content-is-a-submodule
-      if (typeof response.data.content !== 'string') {
-        return
-      }
-
-      return yaml.load(Buffer.from(response.data.content, 'base64').toString()) || {}
-    } catch (e) {
-      if (e.status === 404) {
-        return null
-      }
-
-      throw e
-    }
-  }
-
-  function getModifiedRepoConfigName(payload) {
-    const repoSettingPattern = new Glob(".github/repos/*.yml")
-
-    let commit = payload.commits.find(c => {
-      return ( c.modified.find(s => {
+  function getAllChangedSubOrgConfigs (payload) {
+    const settingPattern = new Glob('.github/suborgs/*.yml')
+    // Changes will be an array of files that were added
+    const added = payload.commits.map(c => {
+      return (c.added.filter(s => {
         robot.log.debug(JSON.stringify(s))
-        return ( s.search(repoSettingPattern)>=0 )
-      }) !== undefined )
-    })
-
-    if (commit) {
-      robot.log.debug(`${JSON.stringify(commit)}`)
-      return repo = {repo: commit.modified[0].match(repoSettingPattern)[1], owner: payload.repository.owner.name}
-    } else {
-      robot.log.debug(`No modifications to repo configs`)
-    }
-    return undefined
-  }
-
-  function getAddedRepoConfigName(payload) {
-    const repoSettingPattern = new Glob(".github/repos/*.yml")
-
-    let commit = payload.commits.find(c => {
-      return ( c.added.find(s => {
+        return (s.search(settingPattern) >= 0)
+      }))
+    }).flat(2)
+    const modified = payload.commits.map(c => {
+      return (c.modified.filter(s => {
         robot.log.debug(JSON.stringify(s))
-        return ( s.search(repoSettingPattern)>=0 )
-      }) !== undefined )
+        return (s.search(settingPattern) >= 0)
+      }))
+    }).flat(2)
+    const changes = added.concat(modified)
+    const configs = changes.map(file => {
+      const matches = file.match(settingPattern)
+      robot.log.debug(`${JSON.stringify(file)} \n ${matches[1]}`)
+      return { name: matches[1] + '.yml', path: file }
     })
-
-    if (commit) {
-      robot.log.debug(`${JSON.stringify(commit)}`)
-      return repo = {repo: commit.added[0].match(repoSettingPattern)[1], owner: payload.repository.owner.name}
-    } else {
-      robot.log.debug(`No additions to repo configs`)
-    }
-    return undefined
+    return configs
   }
 
-  function getAddedSubOrgConfigName(payload) {
-    const repoSettingPattern = new Glob(".github/suborgs/*.yml")
-
-    let commit = payload.commits.find(c => {
-      return ( c.added.find(s => {
+  function getAllChangedRepoConfigs (payload, owner) {
+    const settingPattern = new Glob('.github/repos/*.yml')
+    // Changes will be an array of files that were added
+    const added = payload.commits.map(c => {
+      return (c.added.filter(s => {
         robot.log.debug(JSON.stringify(s))
-        return ( s.search(repoSettingPattern)>=0 )
-      }) !== undefined )
-    })
-
-    if (commit) {
-      robot.log.debug(`${JSON.stringify(commit)}`)
-      return {suborg: commit.added[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
-    } else {
-      robot.log.debug(`No additions to suborgs configs`)
-    }
-    return undefined
-  }
-
-  function getModifiedSubOrgConfigName(payload) {
-    const repoSettingPattern = new Glob(".github/suborgs/*.yml")
-
-    let commit = payload.commits.find(c => {
-      return ( c.modified.find(s => {
+        return (s.search(settingPattern) >= 0)
+      }))
+    }).flat(2)
+    const modified = payload.commits.map(c => {
+      return (c.modified.filter(s => {
         robot.log.debug(JSON.stringify(s))
-        return ( s.search(repoSettingPattern)>=0 )
-      }) !== undefined )
+        return (s.search(settingPattern) >= 0)
+      }))
+    }).flat(2)
+    const changes = added.concat(modified)
+    const configs = changes.map(file => {
+      robot.log.debug(`${JSON.stringify(file)}`)
+      return { repo: file.match(settingPattern)[1], owner }
     })
-
-    if (commit) {
-      robot.log.debug(`${JSON.stringify(commit)} \n ${commit.modified[0].match(repoSettingPattern)[1]}`)
-      return repo = {suborg: commit.modified[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
-    } else {
-      robot.log.debug(`No modifications to suborgs configs`)
-    }
-    return undefined
+    return configs
   }
 
-  function getChangedConfigName(glob, files, owner) {
-    let modifiedFile = files.find(s => {
-        return ( s.search(glob)>=0 )
+  function getChangedRepoConfigName (glob, files, owner) {
+    const modifiedFiles = files.filter(s => {
+      robot.log.debug(JSON.stringify(s))
+      return (s.search(glob) >= 0)
     })
 
-    if (modifiedFile) {
+    return modifiedFiles.map(modifiedFile => {
+      return { repo: modifiedFile.match(glob)[1], owner }
+    })
+  }
+
+  function getChangedSubOrgConfigName (glob, files) {
+    const modifiedFiles = files.filter(s => {
+      robot.log.debug(JSON.stringify(s))
+      return (s.search(glob) >= 0)
+    })
+
+    return modifiedFiles.map(modifiedFile => {
       robot.log.debug(`${JSON.stringify(modifiedFile)}`)
-      return repo = {repo: modifiedFile.match(glob)[1], owner: owner}
-    } else {
-      robot.log.debug(`No changes to repo configs`)
-    }
-    return undefined
+      return { name: modifiedFile.match(glob)[1] + '.yml', path: modifiedFile }
+    })
   }
 
-  async function createCheckRun(context, pull_request, head_sha, head_branch) {
+  async function createCheckRun (context, pull_request, head_sha, head_branch) {
     const { payload } = context
     robot.log.debug(`Check suite was requested! for ${context.repo()} ${pull_request.number} ${head_sha} ${head_branch}`)
     const res = await context.octokit.checks.create({
       owner: payload.repository.owner.login,
       repo: payload.repository.name,
       name: 'Safe-setting validator',
-      head_sha: head_sha
+      head_sha
     })
-    robot.log.debug(JSON.stringify(res,null))
+    robot.log.debug(JSON.stringify(res, null))
   }
 
   async function syncInstallation () {
@@ -258,20 +195,21 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       github.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
 
-    for (installation of installations) {
+    if (installations.length > 0) {
+      const installation = installations[0]
       robot.log.trace(`${JSON.stringify(installation)}`)
       const github = await robot.auth(installation.id)
       const context = {
         payload: {
-          installation: installation
+          installation
         },
         octokit: github,
         log: robot.log,
-        repo: () => { return {repo: "admin", owner: installation.account.login}}
+        repo: () => { return { repo: 'admin', owner: installation.account.login } }
       }
       return syncAllSettings(false, context)
     }
-    return
+    return null
   }
 
   robot.on('push', async context => {
@@ -288,41 +226,37 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug('Not working on the default branch, returning...')
       return
     }
+
     const settingsModified = payload.commits.find(commit => {
       return commit.added.includes(Settings.FILE_NAME) ||
         commit.modified.includes(Settings.FILE_NAME)
     })
-
-    let repo = getModifiedRepoConfigName(payload)
-    if (repo) {
-      return syncSettings(false, context, repo)
+    if (settingsModified) {
+      robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
+      return syncAllSettings(false, context)
     }
 
-    repo = getAddedRepoConfigName(payload)
-    if (repo) {
-      return syncSettings(false, context, repo)
-    } 
-
-    let suborg = getModifiedSubOrgConfigName(payload)
-    if (suborg) {
-      return syncSubOrgSettings(false, context, suborg)
+    const repoChanges = getAllChangedRepoConfigs(payload, context.repo().owner)
+    if (repoChanges.length > 0) {
+      return Promise.all(repoChanges.map(repo => {
+        return syncSettings(false, context, repo)
+      }))
     }
 
-    suborg = getAddedSubOrgConfigName(payload)
-    if (suborg) {
-      return syncSubOrgSettings(false, context, suborg)
+    const changes = getAllChangedSubOrgConfigs(payload)
+    if (changes.length) {
+      return Promise.all(changes.map(suborg => {
+        return syncSubOrgSettings(false, context, suborg)
+      }))
     }
-    
-    if (!settingsModified) {
-      robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
-      return
-    }
-    return syncAllSettings(false, context)
+
+    robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
   })
 
   robot.on('branch_protection_rule', async context => {
     const { payload } = context
-    const { changes, repository, sender } = payload
+    const { sender } = payload
+    robot.log.debug('Branch Protection edited by ', JSON.stringify(sender))
     if (sender.type === 'Bot') {
       robot.log.debug('Branch Protection edited by Bot')
       return
@@ -357,7 +291,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug('Not working on the Admin repo, returning...')
       return
     }
-    const defaultBranch = payload.check_suite.head_branch ===  repository.default_branch
+    const defaultBranch = payload.check_suite.head_branch === repository.default_branch
     if (defaultBranch) {
       robot.log.debug(' Working on the default branch, returning...')
       return
@@ -380,14 +314,13 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug('Not working on the Admin repo, returning...')
       return
     }
-    const defaultBranch = payload.pull_request.head_branch ===  repository.default_branch
+    const defaultBranch = payload.pull_request.head_branch === repository.default_branch
     if (defaultBranch) {
       robot.log.debug(' Working on the default branch, returning...')
       return
     }
     const pull_request = payload.pull_request
-    robot.log.debug(pull_request)
-    createCheckRun(context,pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
+    createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
   })
 
   robot.on('pull_request.reopened', async context => {
@@ -403,33 +336,32 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return
     }
 
-    const defaultBranch = payload.pull_request.head_branch ===  repository.default_branch
+    const defaultBranch = payload.pull_request.head_branch === repository.default_branch
     if (defaultBranch) {
       robot.log.debug(' Working on the default branch, returning...')
       return
     }
-    robot.log.debug(pull_request)
-    createCheckRun(context,pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
+    createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
   })
 
-  robot.on([ 'check_suite.rerequested'], async context => {
+  robot.on(['check_suite.rerequested'], async context => {
     robot.log.debug('Check suite was rerequested!')
     createCheckRun(context)
   })
 
-  robot.on([ 'check_suite.rerequested'], async context => {
+  robot.on(['check_suite.rerequested'], async context => {
     robot.log.debug('Check suite was rerequested!')
     createCheckRun(context)
   })
 
-  robot.on([ 'check_run.created'], async context => {
-    robot.log.debug(`Check run was created!`)
+  robot.on(['check_run.created'], async context => {
+    robot.log.debug('Check run was created!')
     const { payload } = context
     const { repository } = payload
     const { check_run } = payload
     const { check_suite } = check_run
     const pull_request = check_suite.pull_requests[0]
-    const source = payload.check_run.name ===  "Safe-setting validator"
+    const source = payload.check_run.name === 'Safe-setting validator'
     if (!source) {
       robot.log.debug(' Not triggered by Safe-settings...')
       return
@@ -453,33 +385,43 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       check_run_id: payload.check_run.id,
       status: 'in_progress',
       started_at: new Date().toISOString(),
-      output: { title: "Starting NOP", summary: "initiating..."}
+      output: { title: 'Starting NOP', summary: 'initiating...' }
     }
     robot.log.debug(`Updating check run ${JSON.stringify(params)}`)
-    let res = await context.octokit.checks.update(params)
+    await context.octokit.checks.update(params)
 
-    // guarding against null value from upstream libary that is 
+    // guarding against null value from upstream libary that is
     // causing a 404 and the check to stall
     // from issue: https://github.com/github/safe-settings/issues/185#issuecomment-1075240374
-    if (check_suite.before === "0000000000000000000000000000000000000000") 
-    {
-      check_suite.before = check_suite.pull_requests[0].base.sha;
+    if (check_suite.before === '0000000000000000000000000000000000000000') {
+      check_suite.before = check_suite.pull_requests[0].base.sha
     }
-    params = Object.assign(context.repo(), {  basehead: `${check_suite.before}...${check_suite.after}`  })
+    params = Object.assign(context.repo(), { basehead: `${check_suite.before}...${check_suite.after}` })
     const changes = await context.octokit.repos.compareCommitsWithBasehead(params)
     const files = changes.data.files.map(f => { return f.filename })
-    const repo = getChangedConfigName(new Glob(".github/repos/*.yml"), files, context.repo().owner)
-    robot.log.debug(repo)
-    if (repo) {
-      return syncSettings(true, context, repo, pull_request.head.ref)
+
+    const settingsModified = files.includes(Settings.FILE_NAME)
+
+    if (settingsModified) {
+      robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
+      return syncAllSettings(true, context, context.repo(), pull_request.head.ref)
     }
-    const suborg = getChangedConfigName(new Glob(".github/suborgs/*.yml"), files, context.repo().owner)
-    if (suborg) {
-      return syncAllSettings(true, context, suborg, pull_request.head.ref )
+
+    const repoChanges = getChangedRepoConfigName(new Glob('.github/repos/*.yml'), files, context.repo().owner)
+    if (repoChanges.length > 0) {
+      return Promise.all(repoChanges.map(repo => {
+        return syncSettings(true, context, repo, pull_request.head.ref)
+      }))
     }
-    return syncAllSettings(true, context, context.repo(), pull_request.head.ref )
+
+    const subOrgChanges = getChangedSubOrgConfigName(new Glob('.github/suborgs/*.yml'), files, context.repo().owner)
+    if (subOrgChanges.length) {
+      return Promise.all(subOrgChanges.map(suborg => {
+        return syncSubOrgSettings(true, context, suborg, context.repo(), pull_request.head.ref)
+      }))
+    }
   })
-  
+
   robot.on('repository.created', async context => {
     const { payload } = context
     const { sender } = payload
@@ -500,10 +442,8 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     # * * * * * *
     */
     cron.schedule(process.env.CRON, () => {
-      robot.log.debug('running a task every minute');
+      robot.log.debug('running a task every minute')
       syncInstallation()
-    });
+    })
   }
-
-  
 }
