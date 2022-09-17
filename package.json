@@ -5,7 +5,7 @@
   "repository": "https://github.com/github/safe-settings.git",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon --inspect",
     "start": "probot run ./index.js",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
     "lint:es": "eslint .",
