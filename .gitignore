@@ -7,3 +7,4 @@ private-key.pem
 *.pem
 
 .vscode
+yarn.lock
