@@ -78,6 +78,16 @@ describe('Teams', () => {
       expectTeamDeleted(removedTeamId)
     })
 
+    it('removes all teams', async () => {
+      const plugin = configure([])
+
+      await plugin.sync()
+
+      expectTeamDeleted(removedTeamId)
+      expectTeamDeleted(unchangedTeamId)
+      expectTeamDeleted(updatedTeamId)
+    })
+
     function expectTeamDeleted(teamId) {
       expect(github.request).toHaveBeenCalledWith(
         'DELETE /teams/:team_id/repos/:owner/:repo',

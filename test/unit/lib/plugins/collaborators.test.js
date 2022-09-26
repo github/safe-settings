@@ -65,5 +65,38 @@ describe('Collaborators', () => {
         expect(github.repos.removeCollaborator).toHaveBeenCalledTimes(1)
       })
     })
+
+    it('removes all collaborators', () => {
+      const plugin = configure([])
+
+      github.repos.listCollaborators.mockResolvedValueOnce({
+        data: [
+          { login: 'removed-user-1', permissions: { admin: true, push: true, pull: true } },
+          { login: 'removed-user-2', permissions: { admin: false, push: false, pull: true } },
+          { login: 'removed-user-3', permissions: { admin: false, push: true, pull: true } }
+        ]
+      })
+
+      return plugin.sync().then(() => {
+        expect(github.repos.removeCollaborator).toHaveBeenCalledWith({
+          owner: 'bkeepers',
+          repo: 'test',
+          username: 'removed-user-1'
+        })
+        expect(github.repos.removeCollaborator).toHaveBeenCalledWith({
+          owner: 'bkeepers',
+          repo: 'test',
+          username: 'removed-user-2'
+        })
+        expect(github.repos.removeCollaborator).toHaveBeenCalledWith({
+          owner: 'bkeepers',
+          repo: 'test',
+          username: 'removed-user-3'
+        })
+
+        expect(github.repos.removeCollaborator).toHaveBeenCalledTimes(3)
+        expect(github.repos.addCollaborator).not.toHaveBeenCalled()
+      })
+    })
   })
 })
