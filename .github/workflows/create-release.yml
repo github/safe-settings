@@ -1,8 +1,11 @@
 name: Create a release
-"on":
-  push:
-    branches:
-      - main-enterprise
+on:
+   workflow_dispatch:
+#  push:
+#    branches:
+#      - main-enterprise
+
+   
 
 env:
   DOCKER_IMAGE_NAME: yadhav/safe-settings
