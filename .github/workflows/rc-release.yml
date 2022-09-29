@@ -16,16 +16,14 @@ jobs:
   rcrelease:
     name: release
     runs-on: ubuntu-latest
-    if: ${{ github.event.issue.pull_request && github.event.issue_comment.body == '/release'}}
+    if: ${{ github.event.issue.pull_request && github.event.comment.body == '/release'}}
     outputs:
       release: ${{ steps.rcrelease.outputs.release }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-    - run: echo "${{ toJSON(github.event.issue.pull_request) }}"
     - id: getref
       run: echo "::set-output name=ref::$(gh api ${{ github.event.issue.pull_request.url }} | jq -r '.head.ref')"
-    
     - uses: actions/checkout@v3
     - name: Use Node.js
       uses: actions/setup-node@v3
