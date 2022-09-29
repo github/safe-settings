@@ -16,7 +16,7 @@ jobs:
   rcrelease:
     name: release
     runs-on: ubuntu-latest
-    if: ${{ github.event.issue.pull_request }}
+    if: ${{ github.event.issue.pull_request && github.event.issue_comment.body == '/release'}}
     outputs:
       release: ${{ steps.rcrelease.outputs.release }}
     env:
