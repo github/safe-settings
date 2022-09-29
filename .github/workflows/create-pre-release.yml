@@ -1,8 +1,10 @@
 name: Create pre-release
 "on":
-  pull_request:
-    types:
-      - opened
+  workflow_dispatch:
+    
+#   pull_request:
+#     types:
+#       - opened
 permissions: write-all
 
 jobs:
