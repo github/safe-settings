@@ -2,9 +2,6 @@
 name: RC Release 
 
 on:
-  # Runs on pushes targeting the default branch
-  #push:
-  #  branches: ["master"]
   issue_comment:
   
 # Allow one concurrent deployment
@@ -29,13 +26,10 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 16.x
+        cache: npm
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm test -- -u
-    - uses: actions/upload-artifact@v3
-      with:
-        name: webpack artifacts
-        path: public/    
+    - run: npm test -- -u   
     - name: Tag a rc release 
       id: rcrelease
       uses: actionsdesk/semver@0.6.0-rc.10
