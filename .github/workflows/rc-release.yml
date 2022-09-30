@@ -38,15 +38,15 @@ jobs:
         prelabel: rc
         commitish: ${{ steps.getref.outputs.ref }}
   
-  package:
-    needs: [rcrelease]
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-    - uses: actions/checkout@v3
-    - name: package to docker
-      uses: ./.github/actions/publish-docker
-      with:
-        docker_username: ${{ secrets.DOCKER_USERNAME }}
-        docker_password: ${{ secrets.DOCKER_PASSWORD }}
-        tag: yadhav/safe-settings:${{needs.rcrelease.outputs.release}}
+#   package:
+#     needs: [rcrelease]
+#     runs-on: ubuntu-latest
+#     environment: staging
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: package to docker
+#       uses: ./.github/actions/publish-docker
+#       with:
+#         docker_username: ${{ secrets.DOCKER_USERNAME }}
+#         docker_password: ${{ secrets.DOCKER_PASSWORD }}
+#         tag: yadhav/safe-settings:${{needs.rcrelease.outputs.release}}
