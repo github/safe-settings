@@ -2,7 +2,8 @@
 name: RC Release 
 
 on:
-  issue_comment:
+  pull_request:
+    types: [labeled]
   
 # Allow one concurrent deployment
 concurrency:
@@ -13,14 +14,13 @@ jobs:
   rcrelease:
     name: release
     runs-on: ubuntu-latest
-    if: ${{ github.event.issue.pull_request && github.event.comment.body == '/release'}}
+    # if: ${{ github.event.issue.pull_request && github.event.comment.body == '/release'}}
+    if: contains(github.event.pull_request.labels.*.name, 'stage')
     outputs:
       release: ${{ steps.rcrelease.outputs.release }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-    - id: getref
-      run: echo "::set-output name=ref::$(gh api ${{ github.event.issue.pull_request.url }} | jq -r '.head.ref')"
     - uses: actions/checkout@v3
     - name: Use Node.js
       uses: actions/setup-node@v3
@@ -36,7 +36,7 @@ jobs:
       with:
         prerelease: withBuildNumber
         prelabel: rc
-        commitish: ${{ steps.getref.outputs.ref }}
+        commitish: ${{ github.head_ref }}
   
 #   package:
 #     needs: [rcrelease]
