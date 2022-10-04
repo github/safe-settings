@@ -4,7 +4,9 @@ name: RC Release
 on:
   pull_request:
     types: [labeled]
-  
+
+permissions: write-all
+
 # Allow one concurrent deployment
 concurrency:
   group: "rcrelease"
@@ -31,6 +33,7 @@ jobs:
     - run: npm run build --if-present
 #    - run: npm test -- -u   
     - name: Tag a rc release 
+      if: ${{ !github.event.pull_request.head.repo.fork }}
       id: rcrelease
       uses: actionsdesk/semver@0.6.0-rc.10
       with:
