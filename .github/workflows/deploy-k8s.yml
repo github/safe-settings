@@ -26,9 +26,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - uses: azure/aks-set-context@v3.1
+      - uses: azure/login@v1
         with:
-          creds: "${{ secrets.AZ_SERVICE_PRINCIPAL }}" # Azure credentials
+          creds: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
+      - uses: azure/aks-set-context@v3
+        with:
           resource-group: ${{env.AZURE_RESOURCE_GROUP}}
           cluster-name: ${{env.AZURE_AKS_CLUSTER}}
         id: login
