@@ -72,12 +72,12 @@ jobs:
           curl http://localhost:3000
       - name: Tag a final release 
         id: prerelease
-        uses: actionsdesk/semver@0.6.0-rc.9
+        uses: actionsdesk/semver@0.6.0-rc.10
         with:
           bump: ${{ inputs.bump }}
           prerelease: ${{ inputs.prerelease }}
           prelabel: ${{ inputs.prelabel }}
-          commitish: ${{ github.head_ref }}
+          commitish: ${{ github.ref }}
       - name: Push Docker Image
         if: ${{ success() }}
         uses: docker/build-push-action@v2
