@@ -28,7 +28,9 @@ jobs:
         uses: actions/checkout@v2
       - uses: azure/login@v1
         with:
-          creds: "${{ secrets.AZ_SERVICE_PRINCIPAL }}"
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} 
       - uses: azure/aks-set-context@v3
         with:
           resource-group: ${{env.AZURE_RESOURCE_GROUP}}
