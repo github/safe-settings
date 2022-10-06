@@ -420,6 +420,19 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
         return syncSubOrgSettings(true, context, suborg, context.repo(), pull_request.head.ref)
       }))
     }
+
+    // if no safe-settings changes detected, send a success to the check run
+    params = {
+      owner: payload.repository.owner.login,
+      repo: payload.repository.name,
+      check_run_id: payload.check_run.id,
+      status: 'completed',
+      completed_at: new Date().toISOString(),
+      conclusion: 'success',
+      output: { title: 'No Safe-settings changes detected', summary: 'No changes detected' }
+    }
+    robot.log.debug(`Completing check run ${JSON.stringify(params)}`)
+    await context.octokit.checks.update(params)
   })
 
   robot.on('repository.created', async context => {
