@@ -13,8 +13,8 @@ env:
   DOCKER_IMAGE_NAME: yadhav/safe-settings
   #IMAGE_REGISTRY_URL: docker.pkg.github.com
   IMAGE_REGISTRY_URL: docker.io
-  AZURE_RESOURCE_GROUP: aks-actions
-  AZURE_AKS_CLUSTER: actionsAKSCluster
+  AZURE_RESOURCE_GROUP: decyjphr-aks
+  AZURE_AKS_CLUSTER: decyjphr-aks
   AZURE_LOCATION: '"East US"'
   AZURE_AKS_NAMESPACE: default
 
@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - uses: azure/aks-set-context@v1
+      - uses: azure/aks-set-context@v3.1
         with:
           creds: "${{ secrets.AZ_SERVICE_PRINCIPAL }}" # Azure credentials
           resource-group: ${{env.AZURE_RESOURCE_GROUP}}
