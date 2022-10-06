@@ -55,7 +55,7 @@ jobs:
           curl http://localhost:3000
       - name: Tag a final release 
         id: finalrelease
-        uses: actionsdesk/semver@0.6.0-rc.8
+        uses: actionsdesk/semver@0.6.0-rc.10
         with:
           bump: final
       - name: Push Docker Image
