@@ -18,6 +18,9 @@ env:
   AZURE_LOCATION: '"East US"'
   AZURE_AKS_NAMESPACE: default
 
+permissions:
+  id-token: write
+  
 jobs:
   deploy-to-k8s:
     if: ${{ github.event.inputs.status == 'passed' }}
