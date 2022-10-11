@@ -27,13 +27,14 @@
     "eta": "^1.12.3",
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.2",
-    "probot": "^12.2.8"
+    "probot": "^12.2.8",
+    "smee-client": "^1.2.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^1.3.1",
     "@travi/any": "^2.1.5",
     "check-engine": "^1.10.1",
     "eslint": "^8.23.0",
-    "@eslint/eslintrc": "^1.3.1",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
@@ -45,7 +46,6 @@
     "nock": "^13.2.9",
     "nodemon": "^2.0.19",
     "npm-run-all": "^4.1.5",
-    "smee-client": "^1.2.2",
     "standard": "^17.0.0"
   },
   "standard": {
