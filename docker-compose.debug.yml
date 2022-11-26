@@ -6,6 +6,13 @@ services:
     build: .
     environment:
       NODE_ENV: development
+      APP_ID: ${APP_ID}
+      GH_ORG: ${GH_ORG}
+      WEBHOOK_PROXY_URL: ${WEBHOOK_PROXY_URL}
+      PRIVATE_KEY: ${PRIVATE_KEY}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
     ports:
       - 3000:3000
       - 9229:9229

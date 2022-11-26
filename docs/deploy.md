@@ -58,7 +58,7 @@ Once you have configured the **GitHub App** and updated the source code, you sho
 - Change directory to inside the code base
   - `cd safe-settings/`
 - Build the container
-  - `sudo docker build -t safe-settings .`
+  - `docker build -t safe-settings .`
 - This process should complete successfully and you will then have a **Docker** container ready for deployment
 
 #### Run the Docker container
@@ -66,24 +66,24 @@ Once the container has been successfully built, you can deploy it and start util
 
 #### Start the container with docker-compose
 If you have docker-compose installed, you can simply start and stop the **Docker** container with:
-- `cd safe-settings/; docker-compose up -d`
+- `cd safe-settings/; docker-compose --env-file .env up -d`
 This will start the container in the background and detached.
 
 #### Start Docker container Detached in background
 - Start the container detached with port assigned (*Assuming port 3000 for the webhook*)
-  - `sudo docker run -d -p 3000:3000 safe-settings`
+  - `docker run -d -p 3000:3000 safe-settings`
 - You should now have the container running in the background and can validate it running with the command:
-  - `sudo docker ps`
+  - `docker ps`
 - This should show the `safe-settings` alive and running
 
 #### Start Docker container attached in forground (Debug)
 - If you need to run the container in interactive mode to validate connectivity and functionality:
-  - `sudo docker run -it -p 3000:3000 safe-settings`
+  - `docker run -it -p 3000:3000 safe-settings`
 - You will now have the log of the container showing to your terminal, and can validate connectivity and functionality.
 
 #### Connect to running Docker container (Debug)
 - If you need to connect to the container thats already running, you can run the following command:
-  - `sudo docker exec -it safe-settings /bin/sh`
+  - `docker exec -it safe-settings /bin/sh`
 - You will now be inside the running **Docker** container and can perform any troubleshooting needed
 
 ### Deploy the app to AWS Lambda
