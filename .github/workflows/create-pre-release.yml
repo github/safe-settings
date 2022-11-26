@@ -70,6 +70,7 @@ jobs:
           docker run --env APP_ID=${{ secrets.APP_ID }} --env PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --env WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }} -d -p 3000:3000 yadhav/safe-settings:main-enterprise
           sleep 5
           curl http://localhost:3000
+      - run: echo "${{ github.head_ref }}"
       - name: Tag a final release 
         id: prerelease
         uses: actionsdesk/semver@0.6.0-rc.10
