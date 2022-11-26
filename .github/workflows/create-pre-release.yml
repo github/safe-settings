@@ -72,7 +72,7 @@ jobs:
           curl http://localhost:3000
       - name: Tag a final release 
         id: prerelease
-        uses: actionsdesk/semver@0.6.0-rc.9
+        uses: actionsdesk/semver@0.6.0-rc.10
         with:
           bump: ${{ inputs.bump }}
           prerelease: ${{ inputs.prerelease }}
