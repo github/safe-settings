@@ -24,7 +24,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       }
     } catch (e) {
       if (nop) {
-        let filename = env.SAFE_SETTINGS_SETTINGS_FILE_PATH
+        let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
           filename = 'deployment-settings.yml'
           deploymentConfig = {}
@@ -49,7 +49,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return Settings.syncSubOrgs(nop, context, suborg, repo, config, ref)
     } catch (e) {
       if (nop) {
-        let filename = env.SAFE_SETTINGS_SETTINGS_FILE_PATH
+        let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
           filename = 'deployment-settings.yml'
           deploymentConfig = {}
@@ -74,7 +74,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return Settings.sync(nop, context, repo, config, ref)
     } catch (e) {
       if (nop) {
-        let filename = env.SAFE_SETTINGS_SETTINGS_FILE_PATH
+        let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
           filename = 'deployment-settings.yml'
           deploymentConfig = {}
@@ -206,7 +206,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
         },
         octokit: github,
         log: robot.log,
-        repo: () => { return { repo: env.SAFE_SETTINGS_ADMIN_REPO, owner: installation.account.login } }
+        repo: () => { return { repo: env.ADMIN_REPO, owner: installation.account.login } }
       }
       return syncAllSettings(false, context)
     }
@@ -217,7 +217,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const { payload } = context
     const { repository } = payload
 
-    const adminRepo = repository.name === env.SAFE_SETTINGS_ADMIN_REPO
+    const adminRepo = repository.name === env.ADMIN_REPO
     if (!adminRepo) {
       return
     }
@@ -286,7 +286,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   robot.on('check_suite.requested', async context => {
     const { payload } = context
     const { repository } = payload
-    const adminRepo = repository.name === env.SAFE_SETTINGS_ADMIN_REPO
+    const adminRepo = repository.name === env.ADMIN_REPO
     robot.log.debug(`Is Admin repo event ${adminRepo}`)
     if (!adminRepo) {
       robot.log.debug('Not working on the Admin repo, returning...')
@@ -309,7 +309,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     robot.log.debug('Pull_request opened !')
     const { payload } = context
     const { repository } = payload
-    const adminRepo = repository.name === env.SAFE_SETTINGS_ADMIN_REPO
+    const adminRepo = repository.name === env.ADMIN_REPO
     robot.log.debug(`Is Admin repo event ${adminRepo}`)
     if (!adminRepo) {
       robot.log.debug('Not working on the Admin repo, returning...')
@@ -329,7 +329,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const { payload } = context
     const { repository } = payload
     const pull_request = payload.pull_request
-    const adminRepo = repository.name === env.SAFE_SETTINGS_ADMIN_REPO
+    const adminRepo = repository.name === env.ADMIN_REPO
 
     robot.log.debug(`Is Admin repo event ${adminRepo}`)
     if (!adminRepo) {
@@ -368,7 +368,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return
     }
 
-    const adminRepo = repository.name === env.SAFE_SETTINGS_ADMIN_REPO
+    const adminRepo = repository.name === env.ADMIN_REPO
     robot.log.debug(`Is Admin repo event ${adminRepo}`)
     if (!adminRepo) {
       robot.log.debug('Not working on the Admin repo, returning...')
