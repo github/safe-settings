@@ -30,8 +30,8 @@ describe('env', () => {
 
     beforeAll(() => {
       jest.resetModules()
-      process.env.ADMIN_ORG = '.github'
-      process.env.ADMIN_REPO = '.github'
+      process.env.SAFE_SETTINGS_ADMIN_ORG = '.github'
+      process.env.SAFE_SETTINGS_ADMIN_REPO = '.github'
     })
 
     it('loads override values if passed', () => {
