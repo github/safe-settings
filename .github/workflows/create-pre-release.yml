@@ -8,13 +8,13 @@ on:
           - patch
           - minor
           - major
-        required: true
+        required: false
       prerelease:
         type: choice
         options:
           - withBuildNumber
           - withoutBuildNumber
-        required: true
+        required: false
       prelabel:
         type: choice
         options:
@@ -22,7 +22,7 @@ on:
           - beta
           - rc
           - snapshot
-        required: true
+        required: false
      
 env:
   DOCKER_IMAGE_NAME: yadhav/safe-settings
