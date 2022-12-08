@@ -4,15 +4,19 @@ describe('Collaborators', () => {
   let github
 
   function configure (config) {
-    return new Collaborators(github, { owner: 'bkeepers', repo: 'test' }, config)
+    const log = { debug: jest.fn(), error: console.error }
+    return new Collaborators(undefined, github, { owner: 'bkeepers', repo: 'test' }, config, log)
   }
 
   beforeEach(() => {
     github = {
       repos: {
-        listCollaborators: jest.fn().mockImplementation(() => Promise.resolve([])),
-        removeCollaborator: jest.fn().mockImplementation(() => Promise.resolve()),
-        addCollaborator: jest.fn().mockImplementation(() => Promise.resolve())
+        listInvitations: jest.fn().mockResolvedValue([]),
+        deleteInvitation: jest.fn().mockResolvedValue(),
+        updateInvitation: jest.fn().mockResolvedValue(),
+        listCollaborators: jest.fn().mockResolvedValue([]),
+        removeCollaborator: jest.fn().mockResolvedValue(),
+        addCollaborator: jest.fn().mockResolvedValue()
       }
     }
   })
@@ -26,14 +30,14 @@ describe('Collaborators', () => {
         { username: 'DIFFERENTcase', permission: 'push' }
       ])
 
-      github.repos.listCollaborators.mockReturnValueOnce(Promise.resolve({
+      github.repos.listCollaborators.mockResolvedValueOnce({
         data: [
           { login: 'bkeepers', permissions: { admin: true, push: true, pull: true } },
           { login: 'updated-permission', permissions: { admin: false, push: false, pull: true } },
           { login: 'removed-user', permissions: { admin: false, push: true, pull: true } },
           { login: 'differentCase', permissions: { admin: false, push: true, pull: true } }
         ]
-      }))
+      })
 
       return plugin.sync().then(() => {
         expect(github.repos.addCollaborator).toHaveBeenCalledWith({
@@ -59,6 +63,39 @@ describe('Collaborators', () => {
         })
 
         expect(github.repos.removeCollaborator).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('removes all collaborators', () => {
+      const plugin = configure([])
+
+      github.repos.listCollaborators.mockResolvedValueOnce({
+        data: [
+          { login: 'removed-user-1', permissions: { admin: true, push: true, pull: true } },
+          { login: 'removed-user-2', permissions: { admin: false, push: false, pull: true } },
+          { login: 'removed-user-3', permissions: { admin: false, push: true, pull: true } }
+        ]
+      })
+
+      return plugin.sync().then(() => {
+        expect(github.repos.removeCollaborator).toHaveBeenCalledWith({
+          owner: 'bkeepers',
+          repo: 'test',
+          username: 'removed-user-1'
+        })
+        expect(github.repos.removeCollaborator).toHaveBeenCalledWith({
+          owner: 'bkeepers',
+          repo: 'test',
+          username: 'removed-user-2'
+        })
+        expect(github.repos.removeCollaborator).toHaveBeenCalledWith({
+          owner: 'bkeepers',
+          repo: 'test',
+          username: 'removed-user-3'
+        })
+
+        expect(github.repos.removeCollaborator).toHaveBeenCalledTimes(3)
+        expect(github.repos.addCollaborator).not.toHaveBeenCalled()
       })
     })
   })
