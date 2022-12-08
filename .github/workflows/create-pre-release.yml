@@ -9,14 +9,14 @@ on:
           - minor
           - major
           - ''
-        required: false
+        required: true
       prerelease:
         type: choice
         options:
           - withBuildNumber
           - withoutBuildNumber
           - ''
-        required: false
+        required: true
       prelabel:
         type: choice
         options:
@@ -25,7 +25,7 @@ on:
           - rc
           - snapshot
           - ''
-        required: false
+        required: true
      
 env:
   DOCKER_IMAGE_NAME: yadhav/safe-settings
