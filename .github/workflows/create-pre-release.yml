@@ -8,12 +8,14 @@ on:
           - patch
           - minor
           - major
+          -
         required: false
       prerelease:
         type: choice
         options:
           - withBuildNumber
           - withoutBuildNumber
+          -
         required: false
       prelabel:
         type: choice
@@ -22,6 +24,7 @@ on:
           - beta
           - rc
           - snapshot
+          -
         required: false
      
 env:
