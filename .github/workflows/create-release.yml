@@ -68,14 +68,14 @@ jobs:
           tags:  |
             yadhav/safe-settings:${{ steps.finalrelease.outputs.release }}    
                   
-  trigger-deployment:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: decyjphr-actions/workflow-trigger@v0.1-alpha
-      with:
-        workflow: deploy-k8s.yml
-        token: ${{ secrets.pat }}
-        ref: ${{ github.event.pull_request.head.ref || github.ref }}
-        inputs: '{"release": "${{needs.build.outputs.release}}", "status": "passed" }'
+  #trigger-deployment:
+  #  needs: build
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - uses: actions/checkout@v2
+  #  - uses: decyjphr-actions/workflow-trigger@v0.1-alpha
+  #    with:
+  #      workflow: deploy-k8s.yml
+  #      token: ${{ secrets.pat }}
+  #      ref: ${{ github.event.pull_request.head.ref || github.ref }}
+  #      inputs: '{"release": "${{needs.build.outputs.release}}", "status": "passed" }'
