@@ -32,6 +32,8 @@ describe('env', () => {
       jest.resetModules()
       process.env.SAFE_SETTINGS_ADMIN_ORG = '.github'
       process.env.SAFE_SETTINGS_ADMIN_REPO = '.github'
+      process.env.SAFE_SETTINGS_CONFIG_PATH = 'whatever'
+      process.env.SAFE_SETTINGS_SETTINGS_FILE_PATH = 'safe-settings.yml'
     })
 
     it('loads override values if passed', () => {
@@ -40,6 +42,10 @@ describe('env', () => {
       expect(ADMIN_ORG).toEqual('.github')
       const ADMIN_REPO = envTest.ADMIN_REPO
       expect(ADMIN_REPO).toEqual('.github')
+      const CONFIG_PATH = envTest.CONFIG_PATH
+      expect(CONFIG_PATH).toEqual('whatever')
+      const SETTINGS_FILE_PATH = envTest.SETTINGS_FILE_PATH
+      expect(SETTINGS_FILE_PATH).toEqual('safe-settings.yml')
     })
   })
 
