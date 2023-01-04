@@ -936,3 +936,24 @@ entries:
   })
 */
 })
+
+it('CompareDeep does not mutate source object', () => {
+  const ignorableFields = []
+  const mergeDeep = new MergeDeep(log, ignorableFields)
+  const target = {
+    teams: [
+      { name: 'developers' },
+      { name: 'marketing' }
+    ]
+  }
+  const source = {
+    teams: ['developers']
+  }
+  const result = mergeDeep.compareDeep(target, source)
+
+  console.log(`source ${JSON.stringify(source, null, 2)}`)
+  console.log(`target ${JSON.stringify(target, null, 2)}`)
+  console.log(`result ${JSON.stringify(result, null, 2)}`)
+
+  expect(source.teams).toEqual(['developers'])
+})
