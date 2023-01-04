@@ -115,38 +115,38 @@ branches:
     const expected = {
       additions: {
         repository: {
-          name: "test",
-          org: "decyjphr-org",
-          homepage: "https://newhome.github.io/",
+          name: 'test',
+          org: 'decyjphr-org',
+          homepage: 'https://newhome.github.io/',
           topics: [
-            "red"
+            'red'
           ],
           auto_init: true,
           has_issues: true,
           has_projects: true,
           has_downloads: true,
           allow_squash_merge: true,
-          default_branch: "develop"
+          default_branch: 'develop'
         },
         labels: [
-            {
-              name: "green",
-              color: "#B60205",
-              description: "An issue sswithss the system"
-            }
+          {
+            name: 'green',
+            color: '#B60205',
+            description: 'An issue sswithss the system'
+          }
         ],
         validator: {
-          pattern: "[a-zA-Z0-9_-]+"
+          pattern: '[a-zA-Z0-9_-]+'
         },
         collaborators: [
-            {
-              username: "regpaco",
-              permission: "pull"
-            }
+          {
+            username: 'regpaco',
+            permission: 'pull'
+          }
         ],
         branches: [
           {
-            name: "feature1",
+            name: 'feature1',
             protection: {
               required_pull_request_reviews: {
                 required_approving_review_count: 5,
@@ -173,8 +173,8 @@ branches:
       },
       modifications: {
         repository: {
-          description: "description of test repository",
-          name: "test"
+          description: 'description of test repository',
+          name: 'test'
         }
       },
       hasChanges: true
@@ -394,7 +394,6 @@ branches:
     expect(same.modifications).toEqual({})
   })
 
-
   it('CompareDeep Undefined target Works', () => {
     const source = YAML.load(`
               protection:
@@ -473,7 +472,6 @@ branches:
         hasChanges: true
       }
 
-
       const ignorableFields = []
       const mergeDeep = new MergeDeep(log, ignorableFields)
       const merged = mergeDeep.compareDeep({}, source)
@@ -551,7 +549,7 @@ branches:
       branches: [
         {
           name: 'master',
-          protection: protection
+          protection
         }
       ]
     }
@@ -581,7 +579,7 @@ branches:
                 dismiss_stale_reviews: false
               }
             },
-            name: "master"
+            name: 'master'
           }
         ]
       },
@@ -608,7 +606,6 @@ branches:
     const source = { entries: [{"id":3954990840,"node_id":"LA_kwDOHC6_Gc7rvF74","url":"https://api.github.com/repos/decyjphr-org/test2/labels/bug","name":"bug","color":"CC0000","default":true,"description":"An issue with the system"},{"id":4015763857,"node_id":"LA_kwDOHC6_Gc7vW7GR","url":"https://api.github.com/repos/decyjphr-org/test2/labels/feature","name":"feature","color":"336699","default":false,"description":"New functionality."},{"id":4015763934,"node_id":"LA_kwDOHC6_Gc7vW7He","url":"https://api.github.com/repos/decyjphr-org/test2/labels/first-timers-only","name":"first-timers-only","color":"326699","default":false,"description":null},{"id":4015763984,"node_id":"LA_kwDOHC6_Gc7vW7IQ","url":"https://api.github.com/repos/decyjphr-org/test2/labels/new-label","name":"new-label","color":"326699","default":false,"description":null}]}
     const target = { entries: [{"name":"bug","color":"CC0000","description":"An issue with the system"},{"name":"feature","color":"336699","description":"New functionality."},{"name":"first-timers-only","oldname":"Help Wanted","color":"326699"},{"name":"new-label","oldname":"Help Wanted","color":"326699"}]}
 
-
     const expected = {
       additions: {},
       modifications: {}
@@ -621,7 +618,6 @@ branches:
     expect(merged.additions).toEqual(expected.additions)
     expect(merged.modifications.length).toEqual(expected.modifications.length)
 
-
     const overrideConfig = mergeDeep.mergeDeep({}, target, source)
     // console.log(`overrideConfig = ${JSON.stringify(overrideConfig, null, 2)}`)
     const same = mergeDeep.compareDeep(overrideConfig, target)
@@ -629,7 +625,6 @@ branches:
     expect(same.additions).toEqual({})
     expect(same.modifications).toEqual({})
   })
-
 
   it('Merge labels ', () => {
     const source = YAML.load(`
@@ -669,7 +664,6 @@ branches:
     expect(merged.additions).toEqual(expected.additions)
     expect(merged.modifications.length).toEqual(expected.modifications.length)
 
-
     const overrideConfig = mergeDeep.mergeDeep({}, target, source)
     // console.log(`overrideConfig = ${JSON.stringify(overrideConfig, null, 2)}`)
     const same = mergeDeep.compareDeep(overrideConfig, source)
@@ -677,7 +671,6 @@ branches:
     expect(same.additions).toEqual({})
     expect(same.modifications).toEqual({})
   })
-
 
   it('Merge arrays deep', () => {
     const source = [{name: "blue", color: "green"},{name: "newone",color: "red"},{ name: "uber",color: "yellow"}]
@@ -696,7 +689,6 @@ branches:
     expect(merged.additions).toEqual(expected.additions)
     expect(merged.modifications.length).toEqual(expected.modifications.length)
 
-
     const overrideConfig = mergeDeep.mergeDeep({}, target, source)
     // console.log(`overrideConfig = ${JSON.stringify(overrideConfig, null, 2)}`)
     const same = mergeDeep.compareDeep(overrideConfig, source)
@@ -708,7 +700,6 @@ branches:
   it('Merge array of topics', () => {
     const source = { entries: ["blue","green","newone","red","uber","yellow"]}
     const target = { entries: ["red","blu"]}
-
 
     const expected = {
       additions: {
@@ -791,7 +782,6 @@ branches:
     expect(merged.additions).toEqual(expected.additions)
     expect(merged.modifications.length).toEqual(expected.modifications.length)
 
-
     const overrideConfig = mergeDeep.mergeDeep({}, target, source)
     // console.log(`overrideConfig = ${JSON.stringify(overrideConfig, null, 2)}`)
     const same = mergeDeep.compareDeep(overrideConfig, target)
@@ -826,7 +816,6 @@ branches:
     // console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
     expect(merged.additions).toEqual(expected.additions)
     expect(merged.modifications.length).toEqual(expected.modifications.length)
-
 
     const overrideConfig = mergeDeep.mergeDeep({}, target, source)
     // console.log(`overrideConfig = ${JSON.stringify(overrideConfig, null, 2)}`)
