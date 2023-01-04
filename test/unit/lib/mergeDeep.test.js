@@ -957,3 +957,24 @@ it('CompareDeep does not mutate source object', () => {
 
   expect(source.teams).toEqual(['developers'])
 })
+
+it('CompareDeep produces correct result for arrays of named objects', () => {
+  const ignorableFields = []
+  const mergeDeep = new MergeDeep(log, ignorableFields)
+  const target = {
+    teams: [
+      { name: 'developers' },
+      { name: 'marketing' }
+    ]
+  }
+  const source = {
+    teams: ['developers']
+  }
+  const result = mergeDeep.compareDeep(target, source)
+
+  console.log(`source ${JSON.stringify(source, null, 2)}`)
+  console.log(`target ${JSON.stringify(target, null, 2)}`)
+  console.log(`result ${JSON.stringify(result, null, 2)}`)
+
+  expect(result.modifications.teams).toEqual(['developers'])
+})
