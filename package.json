@@ -7,8 +7,11 @@
   "scripts": {
     "dev": "nodemon --inspect",
     "start": "probot run ./index.js",
-    "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
-    "lint:es": "eslint .",
+    "test": "npm-run-all --print-label --parallel test:*",
+    "citest": "npm-run-all --print-label --parallel \"test:* -- --reporters=github-actions\"",
+    "testall": "npm-run-all --print-label --parallel lint:* --parallel test:*",
+    "lint": "npm-run-all --print-label --parallel lint:*",
+    "lint:es": "eslint --format github --format junit .",
     "lint:js": "standard",
     "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --validate-https --allowed-hosts npm",
     "lint:engines": "check-engine",
@@ -24,16 +27,18 @@
   "dependencies": {
     "@probot/adapter-aws-lambda-serverless": "^3.0.1",
     "deepmerge": "^4.2.2",
+    "eslint-formatter-github": "^1.0.11",
     "eta": "^1.12.3",
+    "jest-junit": "^15.0.0",
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.2",
     "probot": "^12.2.8"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^1.3.1",
     "@travi/any": "^2.1.5",
     "check-engine": "^1.10.1",
     "eslint": "^8.23.0",
-    "@eslint/eslintrc": "^1.3.1",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
@@ -56,14 +61,28 @@
   "engines": {
     "node": ">= 12.14.1"
   },
-  "jest": {
-    "testEnvironment": "node"
-  },
   "nodemonConfig": {
     "exec": "npm start",
     "watch": [
       ".env",
       "."
     ]
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "reporters": [
+      "default",
+      "jest-junit"
+    ]
+  },
+  "jest-junit": {
+    "suiteName": "jest tests",
+    "outputDirectory": "reports",
+    "outputName": "jest-junit.xml",
+    "uniqueOutputName": "false",
+    "classNameTemplate": "{classname}-{title}",
+    "titleTemplate": "{classname}-{title}",
+    "ancestorSeparator": " › ",
+    "usePathForSuiteName": "true"
   }
 }
