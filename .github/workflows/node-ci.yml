@@ -18,7 +18,6 @@ jobs:
     if: ${{ github.actor != 'dependabot'}}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
       matrix:
         test: ['lint', 'citest']
         node_version: ['12.x', '16.x']
