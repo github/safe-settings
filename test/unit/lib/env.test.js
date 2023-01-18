@@ -15,11 +15,6 @@ describe('env', () => {
       expect(SETTINGS_FILE_PATH).toEqual('settings.yml')
     })
 
-    it('loads default ADMIN_ORG if not passed', () => {
-      const ADMIN_ORG = envTest.ADMIN_ORG
-      expect(ADMIN_ORG).toEqual('admin')
-    })
-
     it('loads default ADMIN_REPO if not passed', () => {
       const ADMIN_REPO = envTest.ADMIN_REPO
       expect(ADMIN_REPO).toEqual('admin')
@@ -38,8 +33,6 @@ describe('env', () => {
 
     it('loads override values if passed', () => {
       const envTest = require('../../../lib/env')
-      const ADMIN_ORG = envTest.ADMIN_ORG
-      expect(ADMIN_ORG).toEqual('.github')
       const ADMIN_REPO = envTest.ADMIN_REPO
       expect(ADMIN_REPO).toEqual('.github')
       const CONFIG_PATH = envTest.CONFIG_PATH
