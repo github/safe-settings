@@ -37,7 +37,10 @@ To apply `safe-settings` __only__ to a specific list of repos, add them to the `
 
 To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
 
-### Custom rules 
+**Note**: The `include` and `exclude` attributes support as well regular expressions.
+
+### Custom rules
+
 Admins setting up `safe-settings` can include custom rules that would be used to validate before applying a setting or overridding a broader scoped setting.
 
 The code has to return `true` if validation is successful, or `false` if it isn't.  
