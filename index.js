@@ -66,7 +66,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     try {
       deploymentConfig = await loadYamlFileSystem()
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-      const configManager = new ConfigManager(context, ref, robot.log)
+      const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
@@ -262,6 +262,24 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return
     }
     robot.log.debug('Branch Protection edited by a Human')
+    return syncSettings(false, context)
+  })
+
+  const member_change_events = [
+    'member',
+    'team.added_to_repository',
+    'team.removed_from_repository',
+    'team.edited'
+  ]
+  robot.on(member_change_events, async context => {
+    const { payload } = context
+    const { sender } = payload
+    robot.log.debug('Repository member edited by ', JSON.stringify(sender))
+    if (sender.type === 'Bot') {
+      robot.log.debug('Repository member edited by Bot')
+      return
+    }
+    robot.log.debug('Repository member edited by a Human')
     return syncSettings(false, context)
   })
 
