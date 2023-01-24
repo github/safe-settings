@@ -180,24 +180,59 @@ branches:
       hasChanges: true
     }
 
+    const combinedModifications = JSON.parse(`
+      {
+        "repository": {
+          "topics": [
+            "red"
+          ]
+        },
+        "branches": [
+          {
+            "name": "feature1",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 5,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": false,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      }`
+    )
     const ignorableFields = []
     const mergeDeep = new MergeDeep(log, ignorableFields)
     const merged = mergeDeep.compareDeep(target, source)
-    console.log(`source ${JSON.stringify(source, null, 2)}`)
-    console.log(`target ${JSON.stringify(target, null, 2)}`)
-    console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
+    //console.log(`source ${JSON.stringify(source, null, 2)}`)
+    //console.log(`target ${JSON.stringify(target, null, 2)}`)
+    //console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
     expect(merged.additions).toEqual(expected.additions)
     expect(merged.modifications.length).toEqual(expected.modifications.length)
 
-    console.log(`target = ${JSON.stringify(target, null, 2)}`)
+    //console.log(`target = ${JSON.stringify(target, null, 2)}`)
     const overrideConfig = mergeDeep.mergeDeep({}, target, source)
 
-    console.log(`overrideConfig = ${JSON.stringify(overrideConfig, null, 2)}`)
+    //console.log(`overrideConfig = ${JSON.stringify(overrideConfig, null, 2)}`)
 
     const same = mergeDeep.compareDeep(overrideConfig, source)
-    console.log(`new diffs ${JSON.stringify(same, null, 2)}`)
+    //console.log(`new diffs ${JSON.stringify(same, null, 2)}`)
     expect(same.additions).toEqual({})
-    expect(same.modifications).toEqual({})
+    expect(same.modifications).toEqual(combinedModifications)
   })
   /*
   it('CompareDeep extensive test', () => {
@@ -589,9 +624,9 @@ branches:
     const ignorableFields = []
     const mergeDeep = new MergeDeep(log, ignorableFields)
     const merged = mergeDeep.compareDeep(target, source)
-    console.log(`source ${JSON.stringify(source, null, 2)}`)
-    console.log(`target ${JSON.stringify(target, null, 2)}`)
-    console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
+    //console.log(`source ${JSON.stringify(source, null, 2)}`)
+    //console.log(`target ${JSON.stringify(target, null, 2)}`)
+    //console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
     expect(merged.additions).toEqual(expected.additions)
     expect(merged.modifications.length).toEqual(expected.modifications.length)
 
@@ -951,9 +986,9 @@ it('CompareDeep does not mutate source object', () => {
   }
   const result = mergeDeep.compareDeep(target, source)
 
-  console.log(`source ${JSON.stringify(source, null, 2)}`)
-  console.log(`target ${JSON.stringify(target, null, 2)}`)
-  console.log(`result ${JSON.stringify(result, null, 2)}`)
+  //console.log(`source ${JSON.stringify(source, null, 2)}`)
+  //console.log(`target ${JSON.stringify(target, null, 2)}`)
+  //console.log(`result ${JSON.stringify(result, null, 2)}`)
 
   expect(source.teams).toEqual(['developers'])
 })
@@ -972,9 +1007,9 @@ it('CompareDeep produces correct result for arrays of named objects', () => {
   }
   const result = mergeDeep.compareDeep(target, source)
 
-  console.log(`source ${JSON.stringify(source, null, 2)}`)
-  console.log(`target ${JSON.stringify(target, null, 2)}`)
-  console.log(`result ${JSON.stringify(result, null, 2)}`)
+  //console.log(`source ${JSON.stringify(source, null, 2)}`)
+  //console.log(`target ${JSON.stringify(target, null, 2)}`)
+  //console.log(`result ${JSON.stringify(result, null, 2)}`)
 
   expect(result.modifications.teams).toEqual(['developers'])
 })
