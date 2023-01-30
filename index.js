@@ -301,7 +301,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return
     }
     const pull_request = payload.check_suite.pull_requests[0]
-    createCheckRun(context, pull_request, payload.check_suite.head_sha, payload.check_suite.head_branch)
+    return createCheckRun(context, pull_request, payload.check_suite.head_sha, payload.check_suite.head_branch)
   })
 
   robot.on('pull_request.opened', async context => {
@@ -320,7 +320,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return
     }
     const pull_request = payload.pull_request
-    createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
+    return createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
   })
 
   robot.on('pull_request.reopened', async context => {
@@ -341,17 +341,17 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug(' Working on the default branch, returning...')
       return
     }
-    createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
+    return createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
   })
 
   robot.on(['check_suite.rerequested'], async context => {
     robot.log.debug('Check suite was rerequested!')
-    createCheckRun(context)
+    return createCheckRun(context)
   })
 
   robot.on(['check_suite.rerequested'], async context => {
     robot.log.debug('Check suite was rerequested!')
-    createCheckRun(context)
+    return createCheckRun(context)
   })
 
   robot.on(['check_run.created'], async context => {
