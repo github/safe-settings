@@ -21,3 +21,15 @@ functions:
       - httpApi:
           path: /api/github/webhooks
           method: post
+  cronHandler:
+    handler: handler.scheduler
+    memorySize: 256
+    timeout: 900 # 15 mins (max)
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: debug
+    events:
+      - schedule:
+          rate: rate(30 minutes)
+          enabled: false # set to true to auto-enable
+          input: {}
