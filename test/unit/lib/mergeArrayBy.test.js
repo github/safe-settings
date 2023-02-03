@@ -18,7 +18,7 @@ describe('mergeArrayByName', () => {
       name: 'added'
     }]
 
-    const merged = branchArrayMerge("",null,null,["name"], target, source)
+    const merged = branchArrayMerge('', null, null, ['name'], target, source)
 
     expect(merged).toEqual([{
       name: 'master',
@@ -73,7 +73,7 @@ describe('mergeArrayByName', () => {
        }
     }]
 
-    const merged = branchArrayMerge("",null,null,["name"], target.branches, source.branches)
+    const merged = branchArrayMerge('', null, null, ['name'], target.branches, source.branches)
 
     expect(merged).toEqual(expected)
   })

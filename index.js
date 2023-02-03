@@ -460,4 +460,8 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       syncInstallation()
     })
   }
+
+  return {
+    syncInstallation
+  }
 }
