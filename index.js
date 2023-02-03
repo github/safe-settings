@@ -26,7 +26,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
-          filename = 'deployment-settings.yml'
+          filename = env.DEPLOYMENT_CONFIG_FILE
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
@@ -51,7 +51,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
-          filename = 'deployment-settings.yml'
+          filename = env.DEPLOYMENT_CONFIG_FILE
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
@@ -76,7 +76,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
-          filename = 'deployment-settings.yml'
+          filename = env.DEPLOYMENT_CONFIG_FILE
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
@@ -96,7 +96,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
    */
   async function loadYamlFileSystem () {
     if (deploymentConfig === undefined) {
-      const deploymentConfigPath = process.env.DEPLOYMENT_CONFIG_FILE ? process.env.DEPLOYMENT_CONFIG_FILE : 'deployment-settings.yml'
+      const deploymentConfigPath = env.DEPLOYMENT_CONFIG_FILE
       if (fs.existsSync(deploymentConfigPath)) {
         deploymentConfig = yaml.load(fs.readFileSync(deploymentConfigPath))
       } else {
