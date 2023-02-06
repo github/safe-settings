@@ -26,8 +26,8 @@ describe('env', () => {
 
     beforeAll(() => {
       jest.resetModules()
-      process.env.SAFE_SETTINGS_ADMIN_REPO = '.github'
-      process.env.SAFE_SETTINGS_SETTINGS_FILE_PATH = 'safe-settings.yml'
+      process.env.ADMIN_REPO = '.github'
+      process.env.SETTINGS_FILE_PATH = 'safe-settings.yml'
       process.env.DEPLOYMENT_CONFIG_FILE = 'safe-settings-deployment.yml'
     })
 
