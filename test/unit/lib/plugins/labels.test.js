@@ -2,14 +2,19 @@ const Labels = require('../../../../lib/plugins/labels')
 
 describe('Labels', () => {
   let github
+  let log
 
-  function configure (config) {
-    return new Labels(github, { owner: 'bkeepers', repo: 'test' }, config)
+  function configure(config) {
+    const nop = false;
+    return new Labels(nop, github, { owner: 'bkeepers', repo: 'test' }, config, log)
   }
 
   beforeEach(() => {
     github = {
       paginate: jest.fn().mockImplementation(() => Promise.resolve()),
+      repos: {
+        get: jest.fn().mockImplementation(() => Promise.resolve({}))
+      },
       issues: {
         listLabelsForRepo: {
           endpoint: {
@@ -21,6 +26,7 @@ describe('Labels', () => {
         updateLabel: jest.fn().mockImplementation(() => Promise.resolve())
       }
     }
+    log = { debug: jest.fn(), error: console.error }
   })
 
   describe('sync', () => {
@@ -38,7 +44,7 @@ describe('Labels', () => {
         { name: 'new-name', oldname: 'update-me', color: 'FFFFFF', description: '' },
         { name: 'new-color', color: '999999', description: '' },
         { name: 'new-description', color: '#000000', description: 'Hello world' },
-        { name: 'added' }
+        { name: 'added', description: '' }
       ])
 
       return plugin.sync().then(() => {
@@ -53,6 +59,7 @@ describe('Labels', () => {
           owner: 'bkeepers',
           repo: 'test',
           name: 'added',
+          description: '',
           headers: { accept: 'application/vnd.github.symmetra-preview+json' }
         })
 
