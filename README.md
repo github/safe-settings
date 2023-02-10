@@ -322,24 +322,28 @@ repository:
 # The app will apply the following settings to it
 labels:
   # Labels: define labels for Issues and Pull Requests
-  - name: bug
-    color: CC0000
-    description: An issue with the system
+  include:
+    - name: bug
+      color: CC0000
+      description: An issue with the system
 
-  - name: feature
-    # If including a `#`, make sure to wrap it with quotes!
-    color: '#336699'
-    description: New functionality.
+    - name: feature
+      # If including a `#`, make sure to wrap it with quotes!
+      color: '#336699'
+      description: New functionality.
 
-  - name: first-timers-only
-    # include the old name to rename an existing label
-    oldname: Help Wanted
-    color: '#326699'
+    - name: first-timers-only
+      # include the old name to rename an existing label
+      oldname: Help Wanted
+      color: '#326699'
 
-  - name: new-label
-    # include the old name to rename an existing label
-    oldname: Help Wanted
-    color: '#326699'
+    - name: new-label
+      # include the old name to rename an existing label
+      oldname: Help Wanted
+      color: '#326699'
+  exclude:
+    # don't delete any labels created on GitHub that starts with "release"
+    - name: ^release
 
 milestones:
 # Milestones: define milestones for Issues and Pull Requests

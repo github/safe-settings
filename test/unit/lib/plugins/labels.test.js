@@ -98,5 +98,51 @@ describe('Labels', () => {
         expect(github.issues.createLabel).toHaveBeenCalledTimes(1)
       })
     })
+
+    it('does not delete excluded labels', () => {
+      github.paginate.mockReturnValueOnce(Promise.resolve([
+        { name: 'no-change', color: 'FF0000', description: '' },
+        { name: 'keep-me', color: '000000', description: '' },
+        { name: 'things-to-keep', color: '000000', description: '' },
+        { name: 'released on @7.x.x', color: '000000', description: '' },
+        { name: 'update-me', color: '0000FF', description: '' },
+        { name: 'delete-me', color: '000000', description: '' }
+      ]))
+
+      const plugin = configure({
+        exclude: [
+          { name: 'keep' },
+          { name: '^released' },
+        ],
+        include: [
+          { name: 'no-change', color: 'FF0000', description: '' },
+          { name: 'new-name', oldname: 'update-me', color: 'FFFFFF', description: '' },
+          { name: 'added', description: '' }
+        ]
+      })
+
+      return plugin.sync().then(() => {
+        expect(github.issues.deleteLabel).toHaveBeenCalledWith({
+          owner: 'bkeepers',
+          repo: 'test',
+          name: 'delete-me',
+          headers: { accept: 'application/vnd.github.symmetra-preview+json' }
+        })
+
+        expect(github.issues.updateLabel).toHaveBeenCalledWith({
+          owner: 'bkeepers',
+          repo: 'test',
+          current_name: 'update-me',
+          name: 'new-name',
+          color: 'FFFFFF',
+          description: '',
+          headers: { accept: 'application/vnd.github.symmetra-preview+json' }
+        })
+
+        expect(github.issues.deleteLabel).toHaveBeenCalledTimes(1)
+        expect(github.issues.updateLabel).toHaveBeenCalledTimes(1)
+        expect(github.issues.createLabel).toHaveBeenCalledTimes(1)
+      })
+    })
   })
 })
