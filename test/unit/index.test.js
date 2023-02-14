@@ -1,18 +1,37 @@
-const { Application } = require('probot')
+const { Probot, ProbotOctokit } = require('probot')
 const plugin = require('../../index')
 
 describe('plugin', () => {
   let app, event, sync, github
 
   beforeEach(() => {
-    app = new Application()
+    class Octokit {
+      static defaults () {
+        return Octokit
+      }
+
+      constructor () {
+        this.config = {
+          get: jest.fn().mockReturnValue({})
+        }
+        this.repos = {
+          getContent: jest.fn(() => Promise.resolve({ data: { content: '' } }))
+        }
+      }
+
+      auth () {
+        return this
+      }
+    }
+
+    app = new Probot({ secret: "abcdef", Octokit })
     github = {
       repos: {
         getContents: jest.fn(() => Promise.resolve({ data: { content: '' } }))
       }
     }
     app.auth = () => Promise.resolve(github)
-
+    app.log = { debug: jest.fn(), error: console.error }
     event = {
       name: 'push',
       payload: JSON.parse(JSON.stringify(require('../fixtures/events/push.settings.json')))
@@ -65,13 +84,72 @@ describe('plugin', () => {
     })
   })
 
-  describe('repository created', async () => {
+  describe('member event', () => {
+    beforeEach(() => {
+      event = {
+        name: 'member',
+        payload: require('../fixtures/events/member.json')
+      }
+    })
+
+    it('does sync settings', async () => {
+      await app.receive(event)
+      expect(sync).toHaveBeenCalled()
+    })
+  })
+
+  describe('team added to repository', () => {
+    beforeEach(() => {
+      event = {
+        name: 'team.added_to_repository',
+        payload: require('../fixtures/events/team.added_to_repository.json')
+      }
+    })
+
+    it('does sync settings', async () => {
+      await app.receive(event)
+      expect(sync).toHaveBeenCalled()
+    })
+  })
+
+  describe('team removed from repository', () => {
+    beforeEach(() => {
+      event = {
+        name: 'team.removed_from_repository',
+        payload: require('../fixtures/events/team.removed_from_repository.json')
+      }
+    })
+
+    it('does sync settings', async () => {
+      await app.receive(event)
+      expect(sync).toHaveBeenCalled()
+    })
+  })
+
+  describe('team access changed', () => {
+    beforeEach(() => {
+      event = {
+        name: 'team.edited',
+        payload: require('../fixtures/events/team.edited.json')
+      }
+    })
+
+    it('does sync settings', async () => {
+      await app.receive(event)
+      expect(sync).toHaveBeenCalled()
+    })
+  })
+
+  describe('repository created', () => {
     event = {
       name: 'repository.created',
       payload: {}
     }
 
-    await app.receive(event)
-    expect(sync).toHaveBeenCalled()
+    it('does sync settings', async () => {
+      await app.receive(event)
+      expect(sync).toHaveBeenCalled()
+    })
   })
+
 })

@@ -1013,3 +1013,15 @@ it('CompareDeep produces correct result for arrays of named objects', () => {
 
   expect(result.modifications.teams).toEqual(['developers'])
 })
+
+it('CompareDeep result has changes when source is empty and target is not', () => {
+  const ignorableFields = []
+  const mergeDeep = new MergeDeep(log, ignorableFields)
+  const target = [
+      { username: 'unwanted-collaborator' }
+    ]
+  const source = []
+  const result = mergeDeep.compareDeep(target, source)
+
+  expect(result.hasChanges).toBeTruthy()
+})

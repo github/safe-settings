@@ -266,6 +266,24 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     return syncSettings(false, context)
   })
 
+  const member_change_events = [
+    'member',
+    'team.added_to_repository',
+    'team.removed_from_repository',
+    'team.edited'
+  ]
+  robot.on(member_change_events, async context => {
+    const { payload } = context
+    const { sender } = payload
+    robot.log.debug('Repository member edited by ', JSON.stringify(sender))
+    if (sender.type === 'Bot') {
+      robot.log.debug('Repository member edited by Bot')
+      return
+    }
+    robot.log.debug('Repository member edited by a Human')
+    return syncSettings(false, context)
+  })
+
   robot.on('repository.edited', async context => {
     const { payload } = context
     const { changes, repository, sender } = payload
