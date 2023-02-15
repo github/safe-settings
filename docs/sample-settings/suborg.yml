@@ -132,15 +132,16 @@ suborgteams:
 # You can include a list of repos for this collaborator and only those repos would have this collaborator
 
 # See https://developer.github.com/v3/teams/#add-or-update-team-repository for available options
-#teams:
-#  - name: core
+teams:
+  - name: gennin
+    permission: admin 
     # The permission to grant the team. Can be one of:
     # * `pull` - can pull, but not push to or administer this repository.
     # * `push` - can pull and push, but not administer this repository.
     # * `admin` - can pull, push and administer this repository.
-#    permission: admin
-#  - name: docs
-#    permission: push
+  
+  - name: readers
+    permission: pull
 #    exclude:
 #    - actions-demo
 # You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator
