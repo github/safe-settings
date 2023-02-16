@@ -1,4 +1,4 @@
-FROM node:14.17.6-alpine
+FROM node:16-alpine
 ENV NODE_ENV production
 ## Set the Labels
 LABEL version="1.0" \
@@ -25,10 +25,6 @@ COPY  lib /opt/safe-settings/lib
 ## run the container, then copy the key. This helps avoid that for folks
 ## using this in their enterprise environments
 #COPY --chown=node:node .ssh/safe-settings.pem /opt/safe-settings/.ssh/
-
-# We need Python for Probot
-USER root
-RUN apk add --no-cache make python
 
 ## Best practice, don't run as `root`
 USER node
