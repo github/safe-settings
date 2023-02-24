@@ -1026,3 +1026,19 @@ it('CompareDeep result has changes when source is empty and target is not', () =
 
   expect(result.hasChanges).toBeTruthy()
 })
+
+it('CompareDeep finds modifications on top-level arrays with different ordering', () => {
+  const ignorableFields = []
+  const mergeDeep = new MergeDeep(log, ignorableFields)
+  const target = [
+      { username: 'collaborator-1' },
+      { username: 'collaborator-2' },
+    ]
+  const source = [
+      { username: 'collaborator-2' },
+      { username: 'collaborator-1' },
+    ]
+  const result = mergeDeep.compareDeep(target, source)
+
+  expect(result.hasChanges).toBeFalsy()
+})
