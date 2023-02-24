@@ -1042,3 +1042,13 @@ it('CompareDeep finds modifications on top-level arrays with different ordering'
 
   expect(result.hasChanges).toBeFalsy()
 })
+
+it('CompareDeep does not report changes for matching empty targets', () => {
+  const ignorableFields = []
+  const mergeDeep = new MergeDeep(log, ignorableFields)
+  const target = []
+  const source = []
+  const result = mergeDeep.compareDeep(target, source)
+
+  expect(result.hasChanges).toBeFalsy()
+})
