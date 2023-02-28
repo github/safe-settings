@@ -101,10 +101,10 @@ This will start the container in the background and detached.
 - Create app secrets from the `.env` file
     `kubectl create secret generic app-env --from-env-file=.env`
 - Deploy the app
-    `kubectl apply -f safe-settings.yml`
+    `kubectl apply -f safe-settings.yaml`
 > **_NOTE:_**  If your secrets' names are different; modify them in the deployment yaml.
 - Expose the app using a service
-    `kubectl apply -f svc-safe-settings.yml`
+    `kubectl apply -f svc-safe-settings.yaml`
 
 ### __Deploying using [helm](https://docs.helm.sh/using_helm/#Install-Helm)__
 
