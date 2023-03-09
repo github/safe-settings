@@ -409,6 +409,10 @@ branches:
         dismissal_restrictions:
           users: []
           teams: []
+        bypass_pull_request_allowances:
+          users: []
+          teams: []
+          apps: []
       # Required. Require status checks to pass before merging. Set to null to disable
       required_status_checks:
         # Required. Require branches to be up to date before merging.
