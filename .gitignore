@@ -132,3 +132,7 @@ private-key.pem
 *.pem
 .vscode
 yarn.lock
+
+# aws sam stuff
+.aws-sam
+samconfig.toml

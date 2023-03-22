@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Safe Settings Serverless GitHub app
+
+Globals:
+  Function:
+    Tags:
+      owner: !Ref owner
+
+Parameters:
+  githubAppId:
+    Description: The App ID of your GitHub app
+    Type: String
+  githubWebhookSecret:
+    Description: The webhook secret of your GitHub app
+    Type: String
+  githubPrivateKey:
+    Description: The private key of your GitHub app in base64 format
+    Type: String
+  environment:
+    Description: Environment deployment of your GitHub App
+    Type: String
+  logLevel:
+    Description: Log level for your GitHub App
+    Type: String
+  owner:
+    Description: Owner of the GitHub App
+    Type: String
+
+Resources:
+  webhooks:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-webhooks
+      Description: Safe Settings GitHub App
+      CodeUri: .
+      Handler: handler.webhooks
+      Runtime: nodejs16.x
+      MemorySize: 256
+      Timeout: 900
+      Events:
+        ApiEvent:
+          Type: HttpApi
+      Environment:
+        Variables:
+          APP_ID: !Ref githubAppId
+          WEBHOOK_SECRET: !Ref githubWebhookSecret
+          PRIVATE_KEY: !Ref githubPrivateKey
+          NODE_ENV: !Ref environment
+          LOG_LEVEL: !Ref logLevel
+
+Outputs:
+  WebhooksUrl:
+    Description: "Endpoint URL"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
