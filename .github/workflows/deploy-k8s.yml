@@ -42,14 +42,14 @@ jobs:
       - run: |
           kubectl get deployment
       - name: app-env
-        uses: azure/k8s-create-secret@v1
+        uses: azure/k8s-create-secret@v4
         with:
           namespace: 'default'
           secret-type: 'generic'
           arguments:  --from-literal=APP_ID=${{ secrets.APP_ID }} --from-literal=PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --from-literal=WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }}
           secret-name: app-env
       - name: Set imagePullSecret
-        uses: azure/k8s-create-secret@v1
+        uses: azure/k8s-create-secret@v4
         with:
           namespace: ${{env.AZURE_AKS_NAMESPACE}}
           container-registry-url: ${{env.IMAGE_REGISTRY_URL}}
