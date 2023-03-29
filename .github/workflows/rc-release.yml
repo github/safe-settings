@@ -32,8 +32,7 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
 #    - run: npm test -- -u   
-    - name: Tag a rc release 
-      if: ${{ !github.event.pull_request.head.repo.fork }}
+    - name: Tag a rc release
       id: rcrelease
       uses: actionsdesk/semver@0.6.0-rc.10
       with:
