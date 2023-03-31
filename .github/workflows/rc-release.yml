@@ -41,6 +41,46 @@ jobs:
         prelabel: rc
         commitish: ${{ github.head_ref }}
   
+  image:
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+    needs: rcrelease
+    permissions:
+      contents: read
+      packages: write
+    
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - run: echo ${{ github.actor }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.rcrelease.outputs.release }}
+          labels: ${{ steps.meta.outputs.labels }}
+  
 #   package:
 #     needs: [rcrelease]
 #     runs-on: ubuntu-latest
