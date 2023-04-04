@@ -1,13 +1,10 @@
 FROM node:14.17.6-alpine
+WORKDIR /opt/safe-settings
 ENV NODE_ENV production
 ## Set the Labels
 LABEL version="1.0" \
       description="Probot app which is a modified version of Settings Probot GitHub App" \
       maintainer="GitHub Professional Services <services@github.com>"
-
-USER node
-## Set our working directory
-WORKDIR /opt/safe-settings
 
 ## These files are copied separately to allow updates
 ## to the image to be as small as possible
@@ -26,13 +23,6 @@ COPY  lib /opt/safe-settings/lib
 ## using this in their enterprise environments
 #COPY --chown=node:node .ssh/safe-settings.pem /opt/safe-settings/.ssh/
 
-# We need Python for Probot
-USER root
-RUN apk add --no-cache make python
-
-## Best practice, don't run as `root`
-USER node
-
 #
 ## Not strictly necessary, but set permissions to 400
 #RUN chmod 400 /opt/safe-settings/.ssh/safe-settings.pem /opt/safe-settings/.env
@@ -42,6 +32,9 @@ RUN npm install
 
 ## This app will listen on port 3000
 EXPOSE 3000
+
+## Best practice, don't run as `root`
+USER node
 
 ## This does not start properly when using the ['npm','start'] format
 ## so stick with just calling it outright
