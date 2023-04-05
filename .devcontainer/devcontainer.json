@@ -1,0 +1,37 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.195.0/containers/javascript-node
+{
+	"name": "Node.js",
+	"build": {
+		"dockerfile": "Dockerfile",
+		// Update 'VARIANT' to pick a Node version: 16, 14, 12.
+		// Append -bullseye or -buster to pin to an OS version.
+		// Use -bullseye variants on local arm64/Apple Silicon.
+		"args": { "VARIANT": "16-bullseye" }
+	},
+
+	"settings": {},
+
+	"extensions": [
+		"dbaeumer.vscode-eslint",
+		"mikestead.dotenv",
+		"mcright.auto-save",
+		"donjayamanne.git-extension-pack",
+		"redhat.vscode-yaml",
+		"github.copilot",
+		"ms-azuretools.vscode-docker"
+	],
+
+	"portsAttributes": {
+		"3000": {
+			"label": "probot",
+			"onAutoForward": "notify",
+            "requireLocalPort": true
+		}
+	},
+
+	"postCreateCommand": "npm install && npm install -g mocha nyc",
+
+	"remoteUser": "node",
+
+}
