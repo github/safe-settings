@@ -207,7 +207,7 @@ the results of comparison would be:
 ### Schedule
 The App can be configured to apply the settings on a schedule. This could a way to address configuration drift since webhooks have not always guaranteed to be delivered.
 
- To set periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#Env variables).
+ To set periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#env-variables).
 
 ### Pull Request Workflow
 `Safe-settings` explicitly looks in the `admin` repo in the organization for the settings files. The `admin` repo could be a restricted repository with `branch protections` and `codeowners`  
