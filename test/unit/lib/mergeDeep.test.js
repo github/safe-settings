@@ -221,6 +221,7 @@ branches:
     // console.log(`source ${JSON.stringify(source, null, 2)}`)
     // console.log(`target ${JSON.stringify(target, null, 2)}`)
     // console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
+    expect(merged.hasChanges).toBeTruthy()
     expect(merged.additions).toEqual(expected.additions)
     expect(merged.modifications.length).toEqual(expected.modifications.length)
 
@@ -1018,13 +1019,55 @@ it('CompareDeep produces correct result for arrays of named objects', () => {
 it('CompareDeep result has changes when source is empty and target is not', () => {
   const ignorableFields = []
   const mergeDeep = new MergeDeep(log, ignorableFields)
-  const target = [
-      { username: 'unwanted-collaborator' }
-    ]
-  const source = []
+  const target = {
+    required_pull_request_reviews: {
+      dismissal_restrictions: {
+        apps: [],
+        teams: [],
+        users: [{ login: 'test' }, { login: 'test2' }]
+      }
+    }
+  }
+
+  const source = {
+    required_pull_request_reviews: {
+      dismissal_restrictions: {
+        apps: [],
+        teams: [],
+        users: []
+      }
+    }
+  }
   const result = mergeDeep.compareDeep(target, source)
 
   expect(result.hasChanges).toBeTruthy()
+})
+
+it('CompareDeep result has no change when source and target match', () => {
+  const ignorableFields = []
+  const mergeDeep = new MergeDeep(log, ignorableFields)
+  const target = {
+    required_pull_request_reviews: {
+      dismissal_restrictions: {
+        apps: [],
+        teams: [],
+        users: [{ login: 'test' }, { login: 'test2' }]
+      }
+    }
+  }
+
+  const source = {
+    required_pull_request_reviews: {
+      dismissal_restrictions: {
+        apps: [],
+        teams: [],
+        users: [{ login: 'test' }, { login: 'test2' }]
+      }
+    }
+  }
+  const result = mergeDeep.compareDeep(target, source)
+
+  expect(result.hasChanges).toBeFalsy()
 })
 
 it('CompareDeep finds modifications on top-level arrays with different ordering', () => {
@@ -1038,6 +1081,16 @@ it('CompareDeep finds modifications on top-level arrays with different ordering'
       { username: 'collaborator-2' },
       { username: 'collaborator-1' },
     ]
+  const result = mergeDeep.compareDeep(target, source)
+
+  expect(result.hasChanges).toBeFalsy()
+})
+
+it('CompareDeep does not report changes for matching empty targets', () => {
+  const ignorableFields = []
+  const mergeDeep = new MergeDeep(log, ignorableFields)
+  const target = []
+  const source = []
   const result = mergeDeep.compareDeep(target, source)
 
   expect(result.hasChanges).toBeFalsy()
