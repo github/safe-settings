@@ -1,4 +1,4 @@
-FROM node:14.17.6-alpine
+FROM node:16-alpine
 WORKDIR /opt/safe-settings
 ENV NODE_ENV production
 ## Set the Labels

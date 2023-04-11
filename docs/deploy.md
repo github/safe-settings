@@ -5,7 +5,7 @@
 ### Prepare the source code
 You will first need to clone the source code to your local environment that will run the **Docker** container.
 
-Note: If running locally without Docker, ensure that Node 14.x or later is installed.
+Note: If running locally without Docker, ensure that Node 16.x or later is installed.
 
 - Clone the codebase
   - `git clone https://github.com/github/safe-settings.git` or `git clone <this repo>`
