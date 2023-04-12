@@ -15,24 +15,24 @@ This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.
 
    1. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
    1. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
-1. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to be define and manage policies for their specific projects or business units.With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
+1. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
 
 :wave:`NOTE:` `Suborg` and `Repo` level settings directory structure cannot be customized.
 
-:wave:`NOTE:` The settings file must have a `.yml`extension only. `.yaml` extension is ignored, for now.
+:wave:`NOTE:` The settings file must have a `.yml` extension only. `.yaml` extension is ignored, for now.
 
 ## How it works
 
 ### Events
 The App listens to the following webhook events:
 
-- **push**: If the settings are created or modified, that is, if  push happens in the `default` branch of the `admin` repo and the file added or changed is `.github/settings.yml` or `.github/repos/*.yml`or `.github/suborgs/*.yml`, then the settings would be applied either globally to all the repos, or specific repos. For each repo, the settings that is actually applied depend on the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo.
+- **push**: If the settings are created or modified, that is, if  push happens in the `default` branch of the `admin` repo and the file added or changed is `.github/settings.yml` or `.github/repos/*.yml`or `.github/suborgs/*.yml`, then the settings would be applied either globally to all the repos, or specific repos. For each repo, the settings that are actually applied depend on the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo.
   
 - **repository.created**: If a repository is created in the org, the settings for the repo - the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo - is applied. 
 
 - **branch_protection_rule**: If a branch protection rule is modified or deleted, `safe-settings` will `sync` the settings to prevent any unauthorized changes.
 
-- **repository.edited**: If the `default` branch is changed if the the settings that would be applied for the repo
+- **repository.edited**: If the default branch is renamed, `safe-settings` will `sync` the settings, returning the default branch to the configured value for the repo.
 
 - **pull_request.opened**, **pull_request.reopened**, **check_suite.requested**: If the settings are changed, but it is not in the `default` branch, and there is an existing PR, the code will validate the settings changes by running safe-settings in `nop` mode and update the PR with the `dry-run` status. 
 
@@ -49,7 +49,7 @@ To ignore `safe-settings` for a specific list of repos, add them to the `restric
 
 ### Custom rules
 
-Admins setting up `safe-settings` can include custom rules that would be used to validate before applying a setting or overridding a broader scoped setting.
+Admins setting up `safe-settings` can include custom rules that would be validated before applying a setting or overridding a broader scoped setting.
 
 The code has to return `true` if validation is successful, or `false` if it isn't.  
 
@@ -57,7 +57,7 @@ If the validation fails, the `error` attribute specified would be used to create
 
 The first use case is where a custom rule has to be applied for a setting on its own. For e.g. No collaborator should be given `admin` permissions. 
 
-For this type of validations, admins can provide custom code as `configvalidators` which validates the setting by itself. 
+For this type of validation, admins can provide custom code as `configvalidators` which validates the setting by itself. 
 
 For e.g. for the case above, it would look like:
 ```yaml
@@ -74,7 +74,7 @@ For convenience this script has access to a variable, `baseconfig`, that contain
 
 The second use case is where custom rule has to be applied when a setting in the org or suborg level is being overridden. Such as, when default branch protection is being overridden.
 
-For this type of validations, admins can provide custom code as `overridevalidators`. The script can access two variables, `baseconfig` and `overrideconfig` which represent the base setting and the setting that is overridding it.  
+For this type of validation, admins can provide custom code as `overridevalidators`. The script can access two variables, `baseconfig` and `overrideconfig` which represent the base setting and the setting that is overridding it.  
 
 A sample would look like:
 
@@ -205,16 +205,16 @@ the results of comparison would be:
     }
 ```
 ### Schedule
-The App can be configured to apply the settings on a schedule. This could a way to address configuration drift since webhooks have not always guaranteed to be delivered.
+The App can be configured to apply the settings on a schedule. This could be a way to address configuration drift since webhooks are not always guaranteed to be delivered.
 
- To set periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#env-variables).
+To periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#env-variables).
 
 ### Pull Request Workflow
 `Safe-settings` explicitly looks in the `admin` repo in the organization for the settings files. The `admin` repo could be a restricted repository with `branch protections` and `codeowners`  
 
-In that set up, when a changes happen to the settings files and there is a PR for merging the changes back to the `default` branch in the `admin` repo, `safe-settings` will run `checks`  – which will run in **nop** mode and produce a report of the changes that would happen, including the API calls and the payload. 
+In that set up, when changes happen to the settings files and there is a PR for merging the changes back to the `default` branch in the `admin` repo, `safe-settings` will run `checks`  – which will run in **nop** mode and produce a report of the changes that would happen, including the API calls and the payload. 
 
-The checks will fail if `org-level`branch protections are overridden at the repo or suborg level with a lesser number of required approvers.
+The checks will fail if `org-level` branch protections are overridden at the repo or suborg level with a lesser number of required approvers.
 
 ### The Settings file
 
@@ -223,12 +223,12 @@ The settings file can be used to set the policies at the `Org`, `suborg` or `rep
 Using the settings, the following things could be configured:
 
 - `Repository settings` - home page, url, visibility, has_issues, has_projects, wikis, etc.
-- `default branch`naming and renaming 
+- `default branch` - naming and renaming 
 - `Repository Topics`
 - `Teams and permissions`
 - `Collaborators and permissions`
 - `Issue labels`
-- `Branch protections`. If the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
+- `Branch protections` - if the name of the branch is `default` in the settings, it is applied to the `default` branch of the repo.
 - `Autolinks`
 - `repository name validation` using regex pattern
 
@@ -450,11 +450,11 @@ validator:
 
 ### Additional values
 
-In addition to these values above, the settings file can have some addtional values
+In addition to these values above, the settings file can have some addtional values:
 
-1.  `force_create`: This is set in the repo-level settings to force create the repo if the repo does not exist. 
-2. `template`: This is set in the repo-level settings, and is used with the `force_create`flag to use a specific repo template when creating the repo
-3. `suborgrepos`: This is set in the suborg-level settings to define an array of repos. This field can also take a `glob` pattern to allow wild-card expression to specify repos in a suborg. For e.g. `test*`would include `test`, `test1`, `testing`, etc.
+1. `force_create`: This is set in the repo-level settings to force create the repo if the repo does not exist. 
+2. `template`: This is set in the repo-level settings, and is used with the `force_create` flag to use a specific repo template when creating the repo
+3. `suborgrepos`: This is set in the suborg-level settings to define an array of repos. This field can also take a `glob` pattern to allow wild-card expression to specify repos in a suborg. For e.g. `test*` would include `test`, `test1`, `testing`, etc.
 4. The `suborgteams` section contains a list of teams, and all the repos belonging to the teams would be part of the `suborg` 
 
 
@@ -476,7 +476,7 @@ You can pass environment variables; easiest way to do it is in a `.env`file.
 # * * * * * *
 CRON=* * * * * # Run every minute
 ```
-1. Logging level could be set using **LOG_LEVEL**. For e.g.
+2. Logging level could be set using **LOG_LEVEL**. For e.g.
 ```
 LOG_LEVEL=trace
 ```
