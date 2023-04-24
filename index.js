@@ -252,6 +252,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const repoChanges = getAllChangedRepoConfigs(payload, context.repo().owner)
     if (repoChanges.length > 0) {
       return Promise.all(repoChanges.map(repo => {
+        log.debug(`Changes in '${repo}' detected, doing a repo sync...`)
         return syncSettings(false, context, repo)
       }))
     }
@@ -259,6 +260,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     const changes = getAllChangedSubOrgConfigs(payload)
     if (changes.length) {
       return Promise.all(changes.map(suborg => {
+        log.debug(`Changes in '${suborg}' detected, doing a suborg sync...`)
         return syncSubOrgSettings(false, context, suborg)
       }))
     }
