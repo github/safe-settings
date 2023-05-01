@@ -23,7 +23,7 @@
   "license": "ISC",
   "dependencies": {
     "@probot/adapter-aws-lambda-serverless": "^3.0.1",
-    "deepmerge": "^4.2.2",
+    "deepmerge": "^4.3.1",
     "eta": "^2.0.1",
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.2",
