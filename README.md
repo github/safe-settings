@@ -476,6 +476,10 @@ CRON=* * * * * # Run every minute
 ```
 LOG_LEVEL=trace
 ```
+3. Enable Pull Request comment using **ENABLE_PR_COMMENT**. For e.g.
+```
+ENABLE_PR_COMMENT=true
+```
 
 ### Runtime Settings 
 
