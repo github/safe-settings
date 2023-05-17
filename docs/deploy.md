@@ -285,9 +285,11 @@ Every deployment will need an [App](https://developer.github.com/apps/).
 - Branch protection rule
 - Check run
 - Check suite
+- Member
 - Push
 - Pull request
 - Repository
+- Team
 
 1. Download the private key from the app.
 
