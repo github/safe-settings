@@ -317,6 +317,9 @@ repository:
   # Default: `false`
   delete_branch_on_merge: true  
       
+  # Whether to archive this repository. false will unarchive a previously archived repository.
+  archived: false
+
 # The following attributes are applied to any repo within the org
 # So if a repo is not listed above is created or edited
 # The app will apply the following settings to it
