@@ -57,7 +57,7 @@ jobs:
           container-registry-password: ${{ secrets.DOCKER_PASSWORD }}
           secret-name: 'image-pull-secret'
         id: create-secret
-      - uses: Azure/k8s-deploy@v4.9
+      - uses: Azure/k8s-deploy@v4.10
         with:
           namespace: ${{env.AZURE_AKS_NAMESPACE}}
           manifests: |
