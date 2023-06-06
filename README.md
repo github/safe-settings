@@ -261,6 +261,12 @@ repository:
   - new-topic
   - another-topic
   - topic-12
+
+  # Settings for Code security and analysis
+  # Dependabot Alerts
+  security:
+    enableVulnerabilityAlerts: true
+    enableAutomatedSecurityFixes: true
   
   # Either `true` to make the repository private, or `false` to make it public. 
   # If this value is changed and if Org members cannot change the visibility of repos
@@ -317,6 +323,9 @@ repository:
   # Default: `false`
   delete_branch_on_merge: true  
       
+  # Whether to archive this repository. false will unarchive a previously archived repository.
+  archived: false
+
 # The following attributes are applied to any repo within the org
 # So if a repo is not listed above is created or edited
 # The app will apply the following settings to it
