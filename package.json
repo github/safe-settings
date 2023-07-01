@@ -33,7 +33,7 @@
     "@travi/any": "^2.1.5",
     "check-engine": "^1.10.1",
     "eslint": "^8.42.0",
-    "@eslint/eslintrc": "^2.0.2",
+    "@eslint/eslintrc": "^2.1.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-node": "^11.1.0",
