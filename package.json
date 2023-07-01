@@ -30,7 +30,7 @@
     "probot": "^12.3.0"
   },
   "devDependencies": {
-    "@travi/any": "^2.1.5",
+    "@travi/any": "^2.1.8",
     "check-engine": "^1.10.1",
     "eslint": "^8.42.0",
     "@eslint/eslintrc": "^2.0.2",
