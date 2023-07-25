@@ -11,29 +11,7 @@ jobs:
   deploy: 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4.6.0
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4.1.1
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+       
 
 
       - name: 'Login via Azure CLI'
@@ -46,7 +24,7 @@ jobs:
         with:
           resource-group: ${{ vars.AZURE_RG }}
           dns-name-label: krakendevssafesettings
-          image: ${{ steps.meta.outputs.tags }}
+          image: ghcr.io/kraken-devs/safe-settings:main-enterprise
           name: draken-devs-safesettings
           location: 'east us'
           registry-login-server: ${{ env.REGISTRY }}
