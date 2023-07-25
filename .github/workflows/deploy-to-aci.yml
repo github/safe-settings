@@ -22,8 +22,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: docker pull
-        run: docker pull ghcr.io/kraken-devs/safe-settings:2.0.0
+        run: docker pull ghcr.io/kraken-devs/safe-settings
 
       - name: 'Deploy to Azure Container Instances'
         uses: 'azure/aci-deploy@v1.1.3'
