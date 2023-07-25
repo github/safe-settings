@@ -21,7 +21,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.REGISTRY_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Deploy to Azure Container Instances'
         uses: 'azure/aci-deploy@v1.1.3'
@@ -33,6 +33,6 @@ jobs:
           location: 'east us'
           registry-login-server: ghcr.io
           registry-username: ${{ github.actor }}
-          registry-password: ${{ secrets.REGISTRY_TOKEN }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
   
             
