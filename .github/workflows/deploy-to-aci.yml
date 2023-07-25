@@ -2,31 +2,47 @@ name: deploy to azure container instances
 
 on:
   workflow_dispatch:
+
+
 env:
-  REGISTRY: "ghcr.io"
-  IMAGE_NAME: "kraken-devs/safe-settings"
-  TAG: "2.0.0"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 jobs:
-  deploy:
+  deploy: 
     runs-on: ubuntu-latest
     steps:
-      
-      - name: 'Login via Azure CLI'
-        uses: azure/login@v1
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS2 }}
-      
-      
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4.6.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
       - name: 'Deploy to Azure Container Instances'
         uses: 'azure/aci-deploy@v1.1.3'
         with:
           resource-group: ${{ vars.AZURE_RG }}
           dns-name-label: urlforcontainer
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:9e4492eae83b45aaa7980c9bc52917f9e609e69690505ac8ca0717bfa0410621
-          name: contoso-container
+          image: ${{ steps.meta.outputs.tags }}
+          name: krakendevs.safesettings
           location: 'east us'
-          registry-login-server: ghcr.io
-          registry-username: sebastianramospina
+          registry-login-server: ${{ env.REGISTRY }}
+          registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.REGISTRY_TOKEN }}
-  
-            
