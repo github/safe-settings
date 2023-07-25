@@ -32,7 +32,7 @@ jobs:
           name: contoso-container
           location: 'east us'
           registry-login-server: ghcr.io
-          registry-username: ${{ github.actor }}
+          registry-username: sebastianramospina
           registry-password: ${{ secrets.GITHUB_TOKEN }}
   
             
