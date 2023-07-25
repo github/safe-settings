@@ -24,7 +24,7 @@ jobs:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
           name: contoso-container
           location: 'east us'
-          registry-login-server: ${{ env.REGISTRY }}
+          registry-login-server: ghcr.io
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.REGISTRY_TOKEN }}
   
