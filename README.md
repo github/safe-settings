@@ -5,12 +5,12 @@
 `Safe-settings`– an app to manage policy-as-code and apply repository settings to repositories across an organization.
 
 1. In `safe-settings` all the settings are stored centrally in an `admin` repo within the organization. This is important. Unlike [Settings Probot](https://github.com/probot/settings), the settings files cannot be in individual repositories.  
-    > **Note** It is possible to overrride this behavior and specify a custom repo instead of the `admin` repo.<br>
+    > **Note** It is possible to override this behavior and specify a custom repo instead of the `admin` repo.<br>
     > This could be done by setting an `env` variable called `ADMIN_REPO`.
 
 1. There are 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml`  
-       > **Note** It is possible to overrride this behavior and specify a different filename for the `settings` yml repo.<br>
+       > **Note** It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
        > This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.
 
    1. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
@@ -49,7 +49,7 @@ To ignore `safe-settings` for a specific list of repos, add them to the `restric
 
 ### Custom rules
 
-Admins setting up `safe-settings` can include custom rules that would be validated before applying a setting or overridding a broader scoped setting.
+Admins setting up `safe-settings` can include custom rules that would be validated before applying a setting or overidding a broader scoped setting.
 
 The code has to return `true` if validation is successful, or `false` if it isn't.  
 
@@ -74,7 +74,7 @@ For convenience this script has access to a variable, `baseconfig`, that contain
 
 The second use case is where custom rule has to be applied when a setting in the org or suborg level is being overridden. Such as, when default branch protection is being overridden.
 
-For this type of validation, admins can provide custom code as `overridevalidators`. The script can access two variables, `baseconfig` and `overrideconfig` which represent the base setting and the setting that is overridding it.  
+For this type of validation, admins can provide custom code as `overridevalidators`. The script can access two variables, `baseconfig` and `overrideconfig` which represent the base setting and the setting that is overriding it.  
 
 A sample would look like:
 
@@ -95,7 +95,7 @@ overridevalidators:
 A sample of `deployment-settings` file is found [here](docs/sample-settings/sample-deployment-settings.yml).
 
 ### Performance
-When there are 1000s of repos to be managed -- and there is a global settings change -- safe-settings will have to work efficiently and only make the neccessary API calls.
+When there are 1000s of repos to be managed -- and there is a global settings change -- safe-settings will have to work efficiently and only make the necessary API calls.
 
 The app also has to complete the work within an hour: the lifetime of the GitHub app token.
 
@@ -455,7 +455,7 @@ validator:
 
 ### Additional values
 
-In addition to these values above, the settings file can have some addtional values:
+In addition to these values above, the settings file can have some additional values:
 
 1. `force_create`: This is set in the repo-level settings to force create the repo if the repo does not exist. 
 2. `template`: This is set in the repo-level settings, and is used with the `force_create` flag to use a specific repo template when creating the repo

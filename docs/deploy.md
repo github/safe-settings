@@ -170,7 +170,7 @@ Chart documentation is available in [decyjphr charts repo](https://github.com/de
 
 For production use cases one should consider to build a custom safe-settings app image which conforms to your org standards. 
 
-The [repository](https://github.com/decyjphr-org/safe-settings) contains [documentation](https://github.com/decyjphr-org/safe-settings/blob/main/docs/deploy.md#build-the-docker-container) how to do it.
+Follow the instructions [here](#build-the-docker-container) on how to do it.
 
 
 `NOTE:` If you want a reproducible build then you should specify a non floating tag for the image `yadhav/safe-settings:2.0.3` .
