@@ -31,7 +31,7 @@ jobs:
         with:
           resource-group: ${{ vars.AZURE_RG }}
           dns-name-label: urlforcontainer
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:9e4492eae83b45aaa7980c9bc52917f9e609e69690505ac8ca0717bfa0410621
           name: contoso-container
           location: 'east us'
           registry-login-server: ghcr.io
