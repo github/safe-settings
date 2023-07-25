@@ -26,6 +26,6 @@ jobs:
           location: 'east us'
           registry-login-server: ${{ env.REGISTRY }}
           registry-username: ${{ github.actor }}
-          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          registry-password: ${{ secrets.REGISTRY_TOKEN }}
   
             
