@@ -21,7 +21,7 @@ jobs:
         with:
           resource-group: ${{ vars.AZURE_RG }}
           dns-name-label: urlforcontainer
-          image: nginx
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
           name: contoso-container
           location: 'east us'
             
