@@ -10,10 +10,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - id: timeseries
-        uses: pozetroninc/github-action-get-latest-release@master
-        with:
-          repository: ${{ github.repository }}
       
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
@@ -28,4 +24,8 @@ jobs:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
           name: ${{ vars.AZURE_CI_NAME }} 
           location: ${{ vars.AZURE_LOCATION }}
+          secure-environment-variables: APP_ID=${{ sectrets.APP_ID }} PRIVATE_KEY=${{ sectrets.PRIVATE_KEY }} WEBHOOK_SECRET=${{ sectrets.WEBHOOK_SECRET }}
+
+            
+  
             
