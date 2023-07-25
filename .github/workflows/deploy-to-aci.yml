@@ -16,16 +16,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS2 }}
       
-      - name: ghcr login
-        uses: docker/login-action@v2.2.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: docker pull
-        run: docker pull ghcr.io/kraken-devs/safe-settings@sha256:9e4492eae83b45aaa7980c9bc52917f9e609e69690505ac8ca0717bfa0410621
-
+      
       - name: 'Deploy to Azure Container Instances'
         uses: 'azure/aci-deploy@v1.1.3'
         with:
