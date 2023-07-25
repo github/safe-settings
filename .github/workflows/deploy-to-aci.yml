@@ -20,7 +20,7 @@ jobs:
         uses: 'azure/aci-deploy@v1.1.3'
         with:
           resource-group: ${{ vars.AZURE_RG }}
-          dns-name-label: url-for-container
+          dns-name-label: urlforcontainer
           image: nginx
           name: contoso-container
           location: 'east us'
