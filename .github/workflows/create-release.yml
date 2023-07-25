@@ -25,6 +25,12 @@ jobs:
           node-version: 16.x
           cache: 'npm'
       - run: npm install
+      - name: Convert IMAGE_NAME to lowercase
+        run: |
+          IMAGE_NAME="${{ env.IMAGE_NAME }}"
+          IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_NAME=$IMAGE_NAME_LOWER" >> $GITHUB_ENV
+          
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Log in to the Container registry
