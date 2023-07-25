@@ -27,7 +27,8 @@ jobs:
           image: ghcr.io/kraken-devs/safe-settings:main-enterprise
           name: draken-devs-safesettings
           location: 'east us'
+          ports: 3000
           registry-login-server: ${{ env.REGISTRY }}
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.REGISTRY_TOKEN }}
-          secure-environment-variables: APP_ID=${{ secrets.APP_ID }} PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }}
+          secure-environment-variables: GH_ORG=${{ secrets.DEPLOY_GH_ORG }} APP_ID=${{ secrets.APP_ID }} PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }}
