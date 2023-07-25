@@ -25,7 +25,7 @@ jobs:
           cpu: 1
           memory: 1
           restart-policy: OnFailure
-          name: ${{ vars.AZURE_CI_NAME }} 
+          name: ${{ vars.AZURE_CI_NAME }}2
           location: ${{ vars.AZURE_LOCATION }}
           secure-environment-variables: APP_ID=${{ secrets.APP_ID }} PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }}
 
