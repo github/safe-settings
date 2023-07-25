@@ -23,7 +23,8 @@ jobs:
           image: nginx
           dns-name-label: testdns
           cpu: 1
-          memory: 1 
+          memory: 1
+          restart-policy: OnFailure
           name: ${{ vars.AZURE_CI_NAME }} 
           location: ${{ vars.AZURE_LOCATION }}
           secure-environment-variables: APP_ID=${{ secrets.APP_ID }} PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }}
