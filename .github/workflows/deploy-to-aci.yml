@@ -47,7 +47,7 @@ jobs:
           resource-group: ${{ vars.AZURE_RG }}
           dns-name-label: krakendevssafesettings
           image: ${{ steps.meta.outputs.tags }}
-          name: Kraken-Devs-safesettings
+          name: draken-devs-safesettings
           location: 'east us'
           registry-login-server: ${{ env.REGISTRY }}
           registry-username: ${{ github.actor }}
