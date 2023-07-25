@@ -28,6 +28,8 @@ jobs:
           name: draken-devs-safesettings
           location: 'east us'
           ports: 3000
+          cpu: 0.5   #Optional
+          memory: 0.1   #Optional
           registry-login-server: ${{ env.REGISTRY }}
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.REGISTRY_TOKEN }}
