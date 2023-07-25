@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: "kraken-devs/safe-settings"
+  IMAGE_NAME: kraken-devs/safe-settings
 
 jobs:
   build:
