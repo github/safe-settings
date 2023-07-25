@@ -3,8 +3,9 @@ name: deploy to azure container instances
 on:
   workflow_dispatch:
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: kraken-devs/safe-settings
+  REGISTRY: "ghcr.io"
+  IMAGE_NAME: "kraken-devs/safe-settings"
+  TAG: "2.0.0"
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -24,7 +25,7 @@ jobs:
         with:
           resource-group: ${{ vars.AZURE_RG }}
           dns-name-label: url-for-container
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.timeseries.outputs.release }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
           name: ${{ vars.AZURE_CI_NAME }} 
           location: ${{ vars.AZURE_LOCATION }}
             
