@@ -24,7 +24,7 @@ jobs:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
           name: ${{ vars.AZURE_CI_NAME }} 
           location: ${{ vars.AZURE_LOCATION }}
-          secure-environment-variables: APP_ID=${{ sectrets.APP_ID }} PRIVATE_KEY=${{ sectrets.PRIVATE_KEY }} WEBHOOK_SECRET=${{ sectrets.WEBHOOK_SECRET }}
+          secure-environment-variables: APP_ID=${{ secrets.APP_ID }} PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }}
 
             
   
