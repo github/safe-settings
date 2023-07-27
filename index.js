@@ -38,51 +38,109 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     }
   }
 
-  async function syncSubOrgSettings (nop, context, suborg, repo = context.repo(), ref) {
+  /**
+   * @description: Syncs the settings for a sub-organization based on the 
+   *               deployment and global settings yaml files
+   * @param {*} nop 
+   * @param {*} context 
+   * @param {*} suborg 
+   * @param {*} repo 
+   * @param {*} ref 
+   * @returns 
+   */
+  async function syncSubOrgSettings(nop, context, suborg, repo = context.repo(), ref) {
     try {
+      // Load the deployment configuration from a YAML file
       deploymentConfig = await loadYamlFileSystem()
+  
+      // Log the deployment configuration
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+  
+      // Create a new ConfigManager instance
       const configManager = new ConfigManager(context, ref)
+  
+      // Load the global settings YAML file
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
+  
+      // Merge the deployment configuration with the global settings
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
+  
+      // Log the merged configuration
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
+  
+      // Sync the sub-organization settings with the merged configuration
       return Settings.syncSubOrgs(nop, context, suborg, repo, config, ref)
     } catch (e) {
       if (nop) {
+        // If a "no operation" command is requested, create a new NopCommand instance
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
           filename = env.DEPLOYMENT_CONFIG_FILE
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
+  
+        // Log the "no operation" command
         robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+  
+        // Handle the error with the "no operation" command
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
+        // If a "no operation" command is not requested, re-throw the error
         throw e
       }
     }
   }
 
-  async function syncSettings (nop, context, repo = context.repo(), ref) {
+  /**
+   * @description: Syncs the settings for a repository based on the deployment 
+   *               configuration and the global settings yaml file
+   * 
+   * @param {*} nop 
+   * @param {*} context 
+   * @param {*} repo 
+   * @param {*} ref 
+   * @returns 
+   */
+  async function syncSettings(nop, context, repo = context.repo(), ref) {
     try {
+      // Load the deployment configuration from a YAML file
       deploymentConfig = await loadYamlFileSystem()
+  
+      // Log the deployment configuration
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+  
+      // Create a new ConfigManager instance
       const configManager = new ConfigManager(context, ref)
+  
+      // Load the global settings YAML file
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
+  
+      // Merge the deployment configuration with the global settings
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
+  
+      // Log the merged configuration
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
+  
+      // Sync the repository settings with the merged configuration
       return Settings.sync(nop, context, repo, config, ref)
     } catch (e) {
       if (nop) {
+        // If a "no operation" command is requested, create a new NopCommand instance
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
           filename = env.DEPLOYMENT_CONFIG_FILE
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
+  
+        // Log the "no operation" command
         robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+  
+        // Handle the error with the "no operation" command
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
       } else {
+        // If a "no operation" command is not requested, re-throw the error
         throw e
       }
     }
@@ -106,6 +164,12 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     return deploymentConfig
   }
 
+  /**
+   * @description: Gets all the changed sub-org configs from the payload
+   * 
+   * @param {*} payload 
+   * @returns 
+   */
   function getAllChangedSubOrgConfigs (payload) {
     const settingPattern = new Glob('.github/suborgs/*.yml')
     // Changes will be an array of files that were added
@@ -130,6 +194,13 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     return configs
   }
 
+  /**
+   * @description: Gets all the changed repo configs from the payload
+   * 
+   * @param {*} payload 
+   * @param {*} owner 
+   * @returns 
+   */
   function getAllChangedRepoConfigs (payload, owner) {
     const settingPattern = new Glob('.github/repos/*.yml')
     // Changes will be an array of files that were added
