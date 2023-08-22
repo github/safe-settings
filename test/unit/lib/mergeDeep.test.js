@@ -748,6 +748,47 @@ entries:
     expect(merged).toEqual(expected)
   })
 
+  it('Autolinks different prefixes test', () => {
+    const source = YAML.load(`
+entries:
+- key_prefix: ASDF-
+  url_template: https://jira.company.com/browse/ASDF-<num>
+- key_prefix: BOLIGRAFO-
+  url_template: https://jira.company.com/browse/BOLIGRAFO-<num>
+  `)
+    const target = YAML.load(`
+    entries:
+    - key_prefix: ASDF-
+      url_template: https://jiranew.company.com/browse/ASDF-<num>
+    - key_prefix: BOLSIGRAFO-
+      url_template: https://jira.company.com/browse/BOLIGRAFO-<num>
+      `)
+    const expected = {
+      additions: {
+       entries: [
+          {
+            key_prefix: "BOLIGRAFO-",
+            url_template: "https://jira.company.com/browse/BOLIGRAFO-<num>"
+          }
+        ]
+      },
+      modifications: {
+      },
+      deletions: {
+        entries: [ {
+          key_prefix: "BOLSIGRAFO-",
+          url_template: "https://jira.company.com/browse/BOLIGRAFO-<num>"
+        },]
+      },
+      hasChanges: true
+    }
+    const ignorableFields = []
+    const mergeDeep = new MergeDeep(log, ignorableFields)
+    const merged = mergeDeep.compareDeep(target, source)
+    console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
+    expect(merged).toEqual(expected)
+  })
+
   it('CompareDeep does not mutate source object', () => {
     const ignorableFields = []
     const mergeDeep = new MergeDeep(log, ignorableFields)
@@ -894,13 +935,11 @@ entries:
     ]
   
     const expected = {
-      deletions: {
-        __array:[{
+      deletions: [{
           "username": "iksathrr",
           "pendinginvite": false,
           "permission": "admin"
-        }]
-      },
+    }],
       modifications:{}
     }
 
