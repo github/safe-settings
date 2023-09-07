@@ -24,6 +24,6 @@
 `None`
 <% } else { %>
   <% Object.keys(it.errors).forEach(repo => { %>
-    <%= repo %>: <%= it.errors[repo] %>
+    <%= repo %>: <%= JSON.stringify(it.errors[repo]) %>
   <% }) %>
 <% } %>

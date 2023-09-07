@@ -24,6 +24,9 @@
 `None`
 <% } else { %>
   <% Object.keys(it.errors).forEach(repo => { %>
-    <%= repo %>: <%= it.errors[repo] %>
+    <%= repo %>: 
+    <% it.errors[repo].forEach(plugin => { -%>
+      * <%= plugin.msg %>
+    <%_ }) -%>
   <% }) %>
 <% } %>
