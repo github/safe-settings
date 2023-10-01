@@ -23,7 +23,7 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - run: echo ${{ github.actor }}
 
@@ -92,7 +92,7 @@ jobs:
 #     runs-on: ubuntu-latest
 #     environment: staging
 #     steps:
-#     - uses: actions/checkout@v3
+#     - uses: actions/checkout@v4
 #     - name: package to docker
 #       uses: ./.github/actions/publish-docker
 #       with:
