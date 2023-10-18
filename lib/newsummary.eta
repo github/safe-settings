@@ -1,8 +1,0 @@
-# Summary
-_Run on: <%= new Date() %>_
-
-Repos Processed `<%= Object.keys(it.reposProcessed).size %>` Repos </br>
-
-### Changes:
-
-<%~ include("./shortDetail", it.changes)%>
