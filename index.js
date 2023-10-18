@@ -263,7 +263,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       return
     }
     robot.log.debug('Branch Creation by a Human')
-    if(payload.repository.default_branch !== payload.ref) {
+    if (payload.repository.default_branch !== payload.ref) {
       robot.log.debug('Not default Branch')
       return
     }
@@ -291,9 +291,14 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       robot.log.debug('Repository Ruleset edited by Bot')
       return
     }
+
     robot.log.debug('Repository Repository edited by a Human')
-    if (payload.repository_ruleset.source_type === 'organization') {
-      return syncAllSettings(false, context)
+    if (payload.repository_ruleset.source_type === 'Organization') {
+      // For org-level events, we need to update the context since context.repo() won't work
+      const updatedContext = Object.assign({}, context, {
+        repo: () => { return { repo: env.ADMIN_REPO, owner: payload.organization.login } }
+      })
+      return syncAllSettings(false, updatedContext)
     } else {
       return syncSettings(false, context)
     }
@@ -305,6 +310,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     'team.removed_from_repository',
     'team.edited'
   ]
+
   robot.on(member_change_events, async context => {
     const { payload } = context
     const { sender } = payload
