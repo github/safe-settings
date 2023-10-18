@@ -5,7 +5,8 @@
 `Safe-settings`– an app to manage policy-as-code and apply repository settings to repositories across an organization.
 
 1. In `safe-settings` all the settings are stored centrally in an `admin` repo within the organization. This is important. Unlike [Settings Probot](https://github.com/probot/settings), the settings files cannot be in individual repositories.  
-    > **Note** It is possible to override this behavior and specify a custom repo instead of the `admin` repo.<br>
+    > **Note**
+    > It is possible to override this behavior and specify a custom repo instead of the `admin` repo.<br>
     > This could be done by setting an `env` variable called `ADMIN_REPO`.
 
 1. In `safe-settings` the settings can have 2 types of targets:
@@ -14,16 +15,19 @@
    
 2. For The `repo`-targeted settings there can be at 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml`  
-       > **Note** It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
+       > **Note**
+       > It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
        > This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.
 
    2. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
    3. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
 3. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
 
-> **Note** `Suborg` and `Repo` level settings directory structure cannot be customized.
+> **Note**
+> `Suborg` and `Repo` level settings directory structure cannot be customized.
 
-> **Note** The settings file must have a `.yml` extension only. `.yaml` extension is ignored, for now.
+> **Note**
+> The settings file must have a `.yml` extension only. `.yaml` extension is ignored, for now.
 
 ## How it works
 
@@ -53,7 +57,8 @@ To apply `safe-settings` __only__ to a specific list of repos, add them to the `
 
 To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
 
-> **Note** The `include` and `exclude` attributes support as well regular expressions.
+> **Note**
+> The `include` and `exclude` attributes support as well regular expressions.
 
 ### Custom rules
 
