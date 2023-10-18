@@ -232,6 +232,7 @@ For e.g. If we have `override` validators that will fail if `org-level` branch p
 <img width="467" alt="image" src="https://github.com/github/safe-settings/assets/57544838/cc5d59fb-3d7c-477b-99e9-94bcafd07c0b">
 
 Here is a screenshot of what the users will see in the `checkrun` page:
+
 <img width="462" alt="image" src="https://github.com/github/safe-settings/assets/57544838/c875224f-894b-45da-a9cc-4bfc75c47670">
 
 ### Error handling
