@@ -223,27 +223,36 @@ The App can be configured to apply the settings on a schedule. This could be a w
 To periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#env-variables).
 
 ### Pull Request Workflow
+It is
 `Safe-settings` explicitly looks in the `admin` repo in the organization for the settings files. The `admin` repo could be a restricted repository with `branch protections` and `codeowners`  
 
 In that set up, when changes happen to the settings files and there is a PR for merging the changes back to the `default` branch in the `admin` repo, `safe-settings` will run `checks`  – which will run in **nop** mode and produce a report of the changes that would happen, including the API calls and the payload. 
 
 For e.g. If we have `override` validators that will fail if `org-level` branch protections are overridden at the repo or suborg level with a lesser number of required approvers, here is an screenshot of what users will see in the PR.
-
+<p>
 <img width="467" alt="image" src="https://github.com/github/safe-settings/assets/57544838/cc5d59fb-3d7c-477b-99e9-94bcafd07c0b">
+</p>
+
+> **NOTE**
+> If you don't want the PR message to have these details, it can be turned off by `env` setting `CREATE_PR_COMMENT`=`false`
 
 Here is a screenshot of what the users will see in the `checkrun` page:
-
+<p>
 <img width="462" alt="image" src="https://github.com/github/safe-settings/assets/57544838/c875224f-894b-45da-a9cc-4bfc75c47670">
+</p>
 
 ### Error handling
 The app creates a `Check` at the end of its processing to indicate if there were any errors. The `Check` is called `safe-settings` and corrosponds to the latest commit on the `default` branch of the `admin` repo.
 
-- **push**: If the settings are created or modified, that is, if  push happens in the `default` branch of the `admin` repo and the file added or changed is `.github/settings.yml` or `.github/repos/*.yml`or `.github/suborgs/*.yml`, then the settings would be applied either globally to all the repos, or specific repos. For each repo, the settings that are actually applied depend on the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo.
-
 Here is an example of a `checkrun` result:
+<p>
 <img width="944" alt="image" src="https://github.com/github/safe-settings/assets/57544838/7ccedcea-628e-4055-a5a5-b8e45123777e">
+</p>
 
+And the `checkrun` page will look like this:
+<p>
 <img width="860" alt="image" src="https://github.com/github/safe-settings/assets/57544838/893ff4e6-904c-4a07-924a-7c23dc068983">
+</p>
 
 ### The Settings file
 
