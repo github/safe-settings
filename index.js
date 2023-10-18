@@ -254,6 +254,23 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
   })
 
+  robot.on('create', async context => {
+    const { payload } = context
+    const { sender } = payload
+    robot.log.debug('Branch Creation by ', JSON.stringify(sender))
+    if (sender.type === 'Bot') {
+      robot.log.debug('Branch Creation by Bot')
+      return
+    }
+    robot.log.debug('Branch Creation by a Human')
+    if(payload.repository.default_branch !== payload.ref) {
+      robot.log.debug('Not default Branch')
+      return
+    }
+
+    return syncSettings(false, context)
+  })
+
   robot.on('branch_protection_rule', async context => {
     const { payload } = context
     const { sender } = payload
