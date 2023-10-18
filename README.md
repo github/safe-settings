@@ -8,14 +8,18 @@
     > **Note** It is possible to override this behavior and specify a custom repo instead of the `admin` repo.<br>
     > This could be done by setting an `env` variable called `ADMIN_REPO`.
 
-1. There are 3 levels at which the settings could be managed:
+1. In `safe-settings` the settings can have 2 types of targets:
+   1. `org` - These settings are applied to the `org`. `Org`-targeted settings are defined in `.github/settings.yml` . Currently, only `rulesets` are supported as `org`-targeted settings.
+   2. `repo` - These settings are applied to `repos`
+   
+2. For The `repo`-targeted settings there can be at 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml`  
        > **Note** It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
        > This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.
 
-   1. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
-   1. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
-1. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
+   2. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
+   3. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
+3. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
 
 > **Note** `Suborg` and `Repo` level settings directory structure cannot be customized.
 
@@ -36,6 +40,10 @@ The App listens to the following webhook events:
 
 - **pull_request.opened**, **pull_request.reopened**, **check_suite.requested**: If the settings are changed, but it is not in the `default` branch, and there is an existing PR, the code will validate the settings changes by running safe-settings in `nop` mode and update the PR with the `dry-run` status. 
 
+- **repository_ruleset**: If the `ruleset` settings are modified in the UI manually, `safe-settings` will `sync` the settings to prevent any unauthorized changes.
+
+- **member_change_events**: If a member is added or removed from a repository, `safe-settings` will `sync` the settings to prevent any unauthorized changes.
+  
 ### Restricting `safe-settings` to specific repos
 `safe-settings` can be turned on only to a subset of repos by specifying them in the runtime settings file, `deployment-settings.yml`.  
 If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.  
@@ -215,6 +223,11 @@ To periodically converge the settings to the configuration, set the `CRON` envir
 In that set up, when changes happen to the settings files and there is a PR for merging the changes back to the `default` branch in the `admin` repo, `safe-settings` will run `checks`  – which will run in **nop** mode and produce a report of the changes that would happen, including the API calls and the payload. 
 
 The checks will fail if `org-level` branch protections are overridden at the repo or suborg level with a lesser number of required approvers.
+
+### Error handling
+The app creates a `Check` at the end of its processing to indicate if there were any errors. The `Check` is called `safe-settings` and corrosponds to the latest commit on the `default` branch of the `admin` repo.
+
+- **push**: If the settings are created or modified, that is, if  push happens in the `default` branch of the `admin` repo and the file added or changed is `.github/settings.yml` or `.github/repos/*.yml`or `.github/suborgs/*.yml`, then the settings would be applied either globally to all the repos, or specific repos. For each repo, the settings that are actually applied depend on the default settings for the org, overlayed with settings for the suborg that the repo belongs to, overlayed with the settings for that specific repo.
 
 ### The Settings file
 
