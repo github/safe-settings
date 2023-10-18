@@ -24,10 +24,11 @@
   "dependencies": {
     "@probot/adapter-aws-lambda-serverless": "^3.0.2",
     "deepmerge": "^4.3.1",
-    "eta": "^2.0.1",
+    "eta": "^3.0.3",
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.2",
-    "probot": "^12.3.0"
+    "probot": "^12.3.1",
+    "octokit": "^3.1.0"
   },
   "devDependencies": {
     "@travi/any": "^2.1.8",

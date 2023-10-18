@@ -1,0 +1,9 @@
+
+<% Object.keys(it).sort().forEach(plugin => { %>
+
+### <%= plugin %>
+
+<% Object.keys(it[plugin]).sort().forEach(repo => { %>
+-  <%= repo %> 
+<% }) %>
+<% }) %>
