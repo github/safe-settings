@@ -227,10 +227,12 @@ To periodically converge the settings to the configuration, set the `CRON` envir
 
 In that set up, when changes happen to the settings files and there is a PR for merging the changes back to the `default` branch in the `admin` repo, `safe-settings` will run `checks`  – which will run in **nop** mode and produce a report of the changes that would happen, including the API calls and the payload. 
 
-The checks will fail if `org-level` branch protections are overridden at the repo or suborg level with a lesser number of required approvers. Here is an screenshot of what users will see in the PR.
+For e.g. If we have `override` validators that will fail if `org-level` branch protections are overridden at the repo or suborg level with a lesser number of required approvers, here is an screenshot of what users will see in the PR.
 
 <img width="467" alt="image" src="https://github.com/github/safe-settings/assets/57544838/cc5d59fb-3d7c-477b-99e9-94bcafd07c0b">
 
+Here is a screenshot of what the users will see in the `checkrun` page:
+<img width="462" alt="image" src="https://github.com/github/safe-settings/assets/57544838/c875224f-894b-45da-a9cc-4bfc75c47670">
 
 ### Error handling
 The app creates a `Check` at the end of its processing to indicate if there were any errors. The `Check` is called `safe-settings` and corrosponds to the latest commit on the `default` branch of the `admin` repo.
