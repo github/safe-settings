@@ -9,11 +9,12 @@
     > It is possible to override this behavior and specify a custom repo instead of the `admin` repo.<br>
     > This could be done by setting an `env` variable called `ADMIN_REPO`.
 
-1. In `safe-settings` the settings can have 2 types of targets:
+1. The **settings** in the **default** branch is applied. If the settings are changed in a non-default branch and a PR is created to merge the changes, it would be run in a `dry-run` mode to evaluate and validate the settings, and checks would pass or fail based on that.
+2. In `safe-settings` the settings can have 2 types of targets:
    1. `org` - These settings are applied to the `org`. `Org`-targeted settings are defined in `.github/settings.yml` . Currently, only `rulesets` are supported as `org`-targeted settings.
    2. `repo` - These settings are applied to `repos`
    
-2. For The `repo`-targeted settings there can be at 3 levels at which the settings could be managed:
+3. For The `repo`-targeted settings there can be at 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml`  
        > **Note**
        > It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
@@ -21,7 +22,7 @@
 
    2. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
    3. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
-3. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
+4. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
 
 > **Note**
 > `Suborg` and `Repo` level settings directory structure cannot be customized.
@@ -150,52 +151,52 @@ If the settings is:
 and the settings in GitHub is:
 ```json
 {
-     "branches": [
-       {
-         "name": "master",
-         "protection": {
-            url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection",
-           "required_status_checks": {
-              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks",
-             "strict": true,
-             "contexts": [],
-              contexts_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks/contexts",
-             "checks": []
-           },
-           "restrictions": {
-              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions",
-              users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/users",
-              teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/teams",
-              apps_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/apps",
-             "users": [],
-             "teams": [],
-             "apps": []
-           },
-           "required_pull_request_reviews": {
-              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_pull_request_reviews",
-             "dismiss_stale_reviews": true,
-             "require_code_owner_reviews": true,
-             "required_approving_review_count": 2,
-             "dismissal_restrictions": {
-                url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions",
-                users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/users",
-                teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/teams",
-               "users": [],
-               "teams": []
-             }
-           },
-           "required_signatures": false,
-           "enforce_admins": false,
-           "required_linear_history": false,
-           "allow_force_pushes": {
-             "enabled": false
-           },
-           "allow_deletions": false,
-           "required_conversation_resolution": false
-         }
-       }
-     ]
-   }
+  "branches": [
+    {
+      "name": "master",
+      "protection": {
+        "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection",
+        "required_status_checks": {
+          "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks",
+          "strict": true,
+          "contexts": [],
+          "contexts_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks/contexts",
+          "checks": []
+        },
+        "restrictions": {
+          "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions",
+          "users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/users",
+          "teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/teams",
+          "apps_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/apps",
+          "users": [],
+          "teams": [],
+          "apps": []
+        },
+        "required_pull_request_reviews": {
+          "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_pull_request_reviews",
+          "dismiss_stale_reviews": true,
+          "require_code_owner_reviews": true,
+          "required_approving_review_count": 2,
+          "dismissal_restrictions": {
+            "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions",
+            "users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/users",
+            "teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/teams",
+            "users": [],
+            "teams": []
+          }
+        },
+        "required_signatures": false,
+        "enforce_admins": false,
+        "required_linear_history": false,
+        "allow_force_pushes": {
+          "enabled": false
+        },
+        "allow_deletions": false,
+        "required_conversation_resolution": false
+      }
+    }
+  ]
+}
 ```
 
 the results of comparison would be:
@@ -214,6 +215,7 @@ the results of comparison would be:
           }
         ]
       },
+      "deletions": {},
       "hasChanges": true
     }
 ```
