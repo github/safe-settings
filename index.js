@@ -428,6 +428,11 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       return
     }
 
+    if (check_run.status === 'completed') {
+      robot.log.debug(' Checkrun created as completed, returning')
+      return
+    }
+
     const adminRepo = repository.name === env.ADMIN_REPO
     robot.log.debug(`Is Admin repo event ${adminRepo}`)
     if (!adminRepo) {
