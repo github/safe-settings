@@ -361,7 +361,12 @@ repository:
   # Either `true` to allow automatically deleting head branches 
   # when pull requests are merged, or `false` to prevent automatic deletion.
   # Default: `false`
-  delete_branch_on_merge: true  
+  delete_branch_on_merge: true
+
+  # Either `true` to  allow update branch on pull requests, 
+  # or `false` to disallow update branch.
+  # Default: `false`
+  allow_update_branch: true  
       
   # Whether to archive this repository. false will unarchive a previously archived repository.
   archived: false
