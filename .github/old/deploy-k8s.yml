@@ -1,0 +1,70 @@
+name: Deploy to Kubernetes
+on: 
+  workflow_dispatch:
+    inputs:
+      status:
+        description: 'Status of the previous workflow'     
+        required: true
+        default: 'passed'
+      release:
+        description: 'Release tag from the previous workflow'     
+        required: true
+env:
+  DOCKER_IMAGE_NAME: yadhav/safe-settings
+  #IMAGE_REGISTRY_URL: docker.pkg.github.com
+  IMAGE_REGISTRY_URL: docker.io
+  AZURE_RESOURCE_GROUP: decyjphr-aks
+  AZURE_AKS_CLUSTER: decyjphr-aks
+  AZURE_LOCATION: '"East US"'
+  AZURE_AKS_NAMESPACE: default
+
+permissions:
+  id-token: write
+  
+jobs:
+  deploy-to-k8s:
+    if: ${{ github.event.inputs.status == 'passed' }}
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} 
+      - uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{env.AZURE_RESOURCE_GROUP}}
+          cluster-name: ${{env.AZURE_AKS_CLUSTER}}
+        id: login
+      - run: |
+          kubectl get deployment
+      - name: app-env
+        uses: azure/k8s-create-secret@v4
+        with:
+          namespace: 'default'
+          secret-type: 'generic'
+          arguments:  --from-literal=APP_ID=${{ secrets.APP_ID }} --from-literal=PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --from-literal=WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }}
+          secret-name: app-env
+      - name: Set imagePullSecret
+        uses: azure/k8s-create-secret@v4
+        with:
+          namespace: ${{env.AZURE_AKS_NAMESPACE}}
+          container-registry-url: ${{env.IMAGE_REGISTRY_URL}}
+          container-registry-username: ${{ secrets.DOCKER_USERNAME }}
+          container-registry-password: ${{ secrets.DOCKER_PASSWORD }}
+          secret-name: 'image-pull-secret'
+        id: create-secret
+      - uses: Azure/k8s-deploy@v4.10
+        with:
+          namespace: ${{env.AZURE_AKS_NAMESPACE}}
+          manifests: |
+            safe-settings.yaml
+            svc-safe-settings.yaml
+          #images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{ github.sha }}
+          images: ${{env.IMAGE_REGISTRY_URL}}/yadhav/safe-settings:${{ github.event.inputs.release }}
+          imagepullsecrets: |
+            image-pull-secret
+          kubectl-version: 'latest'        
