@@ -7,6 +7,7 @@ describe('MergeDeep Test', () => {
   it('CompareDeep extensive test', () => {
     const target = YAML.load(`
 repository:
+  name: test
   # A short description of the repository that will show up on GitHub
   description: description of the repos 
       
