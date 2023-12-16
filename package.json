@@ -28,7 +28,7 @@
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.2",
     "probot": "^12.3.1",
-    "octokit": "^3.1.0"
+    "octokit": "^3.1.2"
   },
   "devDependencies": {
     "@travi/any": "^2.1.8",
