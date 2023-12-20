@@ -12,10 +12,26 @@ let deploymentConfig
 module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) => {
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
     try {
-      deploymentConfig = await loadYamlFileSystem()
-      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+      let deploymentConfig;
+      try {
+        deploymentConfig = await loadYamlFileSystem();
+      } catch (error) {
+        // Assumption here is if some one is using just repo config they don't need include exclude list of repos
+        console.warn('Deployment configuration file does not exist. Continuing with default settings.');
+        deploymentConfig = {}; // or some default configuration
+      }
+      if (Object.keys(deploymentConfig).length !== 0) {
+        // deploymentConfig is not empty
+        robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+      }
       const configManager = new ConfigManager(context, ref)
-      const runtimeConfig = await configManager.loadGlobalSettingsYaml()
+      let runtimeConfig;
+      try {
+        runtimeConfig = await configManager.loadGlobalSettingsYaml();
+      } catch (error) {
+        console.warn('GlobalSettingsYaml file does not exist. Continuing without default settings. probably just repo settings');
+        runtimeConfig = {};
+      }      
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       if (ref) {
