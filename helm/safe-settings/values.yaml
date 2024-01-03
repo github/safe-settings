@@ -49,6 +49,7 @@ env: []
 service:
   type: ClusterIP
   port: 3000
+  annotations: {}
 
 ingress:
   enabled: false
