@@ -1,0 +1,33 @@
+name: Create a release
+on:
+  workflow_dispatch:
+  release:
+#  push:
+#    branches:
+#      - main-enterprise
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  helm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Prepare
+        run: |
+          # OCI standard enforces lower-case paths
+          GHCR_REPO=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          HELM_REPO=$(echo "oci://ghcr.io/${{ github.repository_owner }}/helm-charts" | tr '[:upper:]' '[:lower:]')
+          echo "GHCR_REPO=$GHCR_REPO" >> $GITHUB_ENV
+          echo "HELM_REPO=$HELM_REPO" >> $GITHUB_ENV
+
+      - name: Publish Helm charts
+        run: |
+          cd helm
+          helm registry login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
+          helm package --app-version ${{ github.ref_name }} --version ${{ github.ref_name }} safe-settings
+          helm push safe-settings-${{ github.ref_name }}.tgz ${{ env.HELM_REPO }}
