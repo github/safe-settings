@@ -1,0 +1,8 @@
+{{- $fullName := include "safe-settings.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-deployment-config
+data:
+  deployment-settings.yml: |
+    {{ .Values.deploymentConfig | toYaml | nindent 4 }}
