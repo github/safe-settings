@@ -27,7 +27,7 @@
     "eta": "^3.0.3",
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.2",
-    "probot": "^12.3.1",
+    "probot": "^12.3.3",
     "octokit": "^3.1.2"
   },
   "devDependencies": {
