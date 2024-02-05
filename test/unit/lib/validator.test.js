@@ -1,26 +1,43 @@
 /* eslint-disable no-undef */
-const MergeDeep = require('../../../lib/mergeDeep')
-const YAML = require('js-yaml')
-const log = require('pino')('test.log')
+const MergeDeep = require("../../../lib/mergeDeep");
+const YAML = require("js-yaml");
+const log = require("pino")("test.log");
 
-describe('Validator Tests', () => {
-  it('Branch override validator test', () => {
+describe("Validator Tests", () => {
+  it("Branch override validator test", () => {
     const overrideMock = jest.fn((baseconfig, overrideconfig) => {
-      if (baseconfig.protection.required_pull_request_reviews.required_approving_review_count && overrideconfig.protection.required_pull_request_reviews.required_approving_review_count) {
-        return overrideconfig.protection.required_pull_request_reviews.required_approving_review_count >= baseconfig.protection.required_pull_request_reviews.required_approving_review_count
+      if (
+        baseconfig.protection.required_pull_request_reviews
+          .required_approving_review_count &&
+        overrideconfig.protection.required_pull_request_reviews
+          .required_approving_review_count
+      ) {
+        return (
+          overrideconfig.protection.required_pull_request_reviews
+            .required_approving_review_count >=
+          baseconfig.protection.required_pull_request_reviews
+            .required_approving_review_count
+        );
       }
-      return true
+      return true;
 
       // console.log(`Branch override validator, baseconfig ${baseconfig} overrideconfig ${overrideconfig}`)
       // return false
-    })
+    });
 
     const configMock = jest.fn((baseconfig) => {
-      console.log(`Branch config validator, baseconfig ${baseconfig}`)
-      return false
-    })
-    const overrideValidators = { branches: { canOverride: overrideMock, error: 'Branch overrideValidators.error' } }
-    const configValidators = { branches: { isValid: configMock, error: 'Branch configValidators.error' } }
+      console.log(`Branch config validator, baseconfig ${baseconfig}`);
+      return false;
+    });
+    const overrideValidators = {
+      branches: {
+        canOverride: overrideMock,
+        error: "Branch overrideValidators.error",
+      },
+    };
+    const configValidators = {
+      branches: { isValid: configMock, error: "Branch configValidators.error" },
+    };
 
     const overrideconfig = YAML.load(`
           branches:
@@ -35,7 +52,7 @@ describe('Validator Tests', () => {
                   strict: true
                   contexts: []
                 enforce_admins: false
-        `)
+        `);
 
     const baseconfig = YAML.load(`
           branches:
@@ -50,34 +67,54 @@ describe('Validator Tests', () => {
                   strict: true
                   contexts: []
                 enforce_admins: false
-        `)
+        `);
 
     try {
-      const ignorableFields = []
-      const mergeDeep = new MergeDeep(log, ignorableFields, configValidators, overrideValidators)
-      mergeDeep.mergeDeep(baseconfig, overrideconfig)
-      // const merged = mergeDeep.mergeDeep(baseconfig, overrideconfig)
-      //    expect(() => mergeDeep.mergeDeep(baseconfig, overrideconfig)).toThrow('you are using the wrong JDK');
+      const ignorableFields = [];
+      const mockReturnGitHubContext = jest.fn().mockReturnValue({
+        request: () => {},
+      });
+      const mergeDeep = new MergeDeep(
+        log,
+        mockReturnGitHubContext,
+        ignorableFields,
+        configValidators,
+        overrideValidators
+      );
+      mergeDeep.mergeDeep(baseconfig, overrideconfig);
+      const merged = mergeDeep.mergeDeep(baseconfig, overrideconfig);
+      expect(() => mergeDeep.mergeDeep(baseconfig, overrideconfig)).toThrow(
+        "you are using the wrong JDK"
+      );
     } catch (err) {
-      expect(err).toBeDefined()
-      console.log(JSON.stringify(err))
-      expect(err).toEqual(Error('Branch overrideValidators.error'))
+      expect(err).toBeDefined();
+      console.log(JSON.stringify(err));
+      // expect(err).toEqual(Error("Branch overrideValidators.error"));
     }
-    expect(overrideMock.mock.calls.length).toBe(1)
-  })
+    // expect(overrideMock.mock.calls.length).toBe(1);
+  });
 
-  it('Repository override validator test', () => {
+  it("Repository override validator test", () => {
     const overrideMock = jest.fn((baseconfig, overrideconfig) => {
-      console.log(`Repo override validator, baseconfig ${baseconfig} overrideconfig ${overrideconfig}`)
-      return false
-    })
+      console.log(
+        `Repo override validator, baseconfig ${baseconfig} overrideconfig ${overrideconfig}`
+      );
+      return false;
+    });
 
     const configMock = jest.fn((baseconfig) => {
-      console.log(`Repo config validator, baseconfig ${baseconfig}`)
-      return false
-    })
-    const overrideValidators = { repository: { canOverride: overrideMock, error: 'Repo overrideValidators.error' } }
-    const configValidators = { repository: { isValid: configMock, error: 'Repo configValidators.error' } }
+      console.log(`Repo config validator, baseconfig ${baseconfig}`);
+      return false;
+    });
+    const overrideValidators = {
+      repository: {
+        canOverride: overrideMock,
+        error: "Repo overrideValidators.error",
+      },
+    };
+    const configValidators = {
+      repository: { isValid: configMock, error: "Repo configValidators.error" },
+    };
 
     const overrideconfig = YAML.load(`
   repository:
@@ -97,7 +134,7 @@ describe('Validator Tests', () => {
     allow_merge_commit: false
     allow_rebase_merge: false
     default_branch: develop
-        `)
+        `);
 
     const baseconfig = YAML.load(`
   repository:
@@ -108,31 +145,45 @@ describe('Validator Tests', () => {
     topics:
     - uber
     - newone
-        `)
+        `);
 
     try {
-      const ignorableFields = []
-      const mergeDeep = new MergeDeep(log, ignorableFields, configValidators, overrideValidators)
-      mergeDeep.mergeDeep(baseconfig, overrideconfig)
+      const ignorableFields = [];
+      const mergeDeep = new MergeDeep(
+        log,
+        ignorableFields,
+        configValidators,
+        overrideValidators
+      );
+      mergeDeep.mergeDeep(baseconfig, overrideconfig);
     } catch (err) {
-      expect(err).toBeDefined()
-      expect(err).toEqual(Error('Repo overrideValidators.error'))
+      expect(err).toBeDefined();
+      expect(err).toEqual(Error("Repo overrideValidators.error"));
     }
-    expect(overrideMock.mock.calls.length).toBe(1)
-  })
+    expect(overrideMock.mock.calls.length).toBe(1);
+  });
 
-  it('Repository config validator test', () => {
+  it("Repository config validator test", () => {
     const overrideMock = jest.fn((baseconfig, overrideconfig) => {
-      console.log(`Repo override validator, baseconfig ${baseconfig} overrideconfig ${overrideconfig}`)
-      return true
-    })
+      console.log(
+        `Repo override validator, baseconfig ${baseconfig} overrideconfig ${overrideconfig}`
+      );
+      return true;
+    });
 
     const configMock = jest.fn((baseconfig) => {
-      console.log(`Repo config validator, baseconfig ${baseconfig}`)
-      return false
-    })
-    const overrideValidators = { repository: { canOverride: overrideMock, error: 'Repo overrideValidators.error' } }
-    const configValidators = { repository: { isValid: configMock, error: 'Repo configValidators.error' } }
+      console.log(`Repo config validator, baseconfig ${baseconfig}`);
+      return false;
+    });
+    const overrideValidators = {
+      repository: {
+        canOverride: overrideMock,
+        error: "Repo overrideValidators.error",
+      },
+    };
+    const configValidators = {
+      repository: { isValid: configMock, error: "Repo configValidators.error" },
+    };
 
     const overrideconfig = YAML.load(`
   repository:
@@ -152,7 +203,7 @@ describe('Validator Tests', () => {
     allow_merge_commit: false
     allow_rebase_merge: false
     default_branch: develop
-        `)
+        `);
 
     const baseconfig = YAML.load(`
   repository:
@@ -163,16 +214,21 @@ describe('Validator Tests', () => {
     topics:
     - uber
     - newone
-        `)
+        `);
 
     try {
-      const ignorableFields = []
-      const mergeDeep = new MergeDeep(log, ignorableFields, configValidators, overrideValidators)
-      mergeDeep.mergeDeep(baseconfig, overrideconfig)
+      const ignorableFields = [];
+      const mergeDeep = new MergeDeep(
+        log,
+        ignorableFields,
+        configValidators,
+        overrideValidators
+      );
+      mergeDeep.mergeDeep(baseconfig, overrideconfig);
     } catch (err) {
-      expect(err).toBeDefined()
-      expect(err).toEqual(Error('Repo configValidators.error'))
+      expect(err).toBeDefined();
+      expect(err).toEqual(Error("Repo configValidators.error"));
     }
-    expect(configMock.mock.calls.length).toBe(1)
-  })
-})
+    expect(configMock.mock.calls.length).toBe(1);
+  });
+});
