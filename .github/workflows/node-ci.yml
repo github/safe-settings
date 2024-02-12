@@ -1,11 +1,13 @@
 name: Node.js CI
-"on":
+on:
   pull_request:
-    types:
-      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  test:
     if: ${{ github.actor != 'dependabot'}}
     runs-on: ubuntu-latest
     steps:
@@ -14,7 +16,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: 'npm'
+          cache: npm
       - run: npm install
-  
- 
+      - run: npm run test:unit:ci
