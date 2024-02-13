@@ -205,7 +205,7 @@ describe('Branches', () => {
   })
 
   describe.skip('return values', () => {
-    it.only('returns updateBranchProtection Promise', () => {
+    it('returns updateBranchProtection Promise', () => {
       const plugin = configure(
         [{
           name: 'master',
@@ -214,7 +214,6 @@ describe('Branches', () => {
       )
 
       return plugin.sync().then(result => {
-        console.log(result)
         expect(result.length).toBe(1)
         expect(result[0]).toBe('updateBranchProtection')
       })
