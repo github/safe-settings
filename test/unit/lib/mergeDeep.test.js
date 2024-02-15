@@ -981,17 +981,17 @@ entries:
         dismissal_restrictions: {
           apps: [],
           teams: [],
-          users: [{ login: 'test' }, { login: 'test2' }]
+          users: [{ login: 'test', type: 'User' }, { login: 'test2', type: 'User' }]
         }
       }
     }
-  
+
     const source = {
       required_pull_request_reviews: {
         dismissal_restrictions: {
           apps: [],
           teams: [],
-          users: [{ login: 'test' }, { login: 'test2' }]
+          users: ['test', 'test2']
         }
       }
     }
