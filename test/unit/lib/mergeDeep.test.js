@@ -1315,5 +1315,68 @@ entries:
     //console.log(`target ${JSON.stringify(target, null, 2)}`)
     //console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
   })
-  
+
+  it('Has changes with additions to arrays', () => {
+    const target = {
+      branches: [
+        {
+          name: 'master',
+          protection: {
+            required_status_checks: {
+              strict: true,
+              contexts: [
+                "test1",
+              ],
+            }
+          }
+        }
+      ]
+    }
+
+    const source = {
+      branches: [
+        {
+          name: 'master',
+          protection: {
+            required_status_checks: {
+              strict: true,
+              contexts: [
+                'test1',
+                'test2'
+              ],
+            }
+          }
+        }
+      ]
+    }
+
+    const expected = {
+      additions: {},
+      deletions: {},
+      modifications: {
+        branches: [
+          {
+            name: "master",
+            protection: {
+              required_status_checks: {
+                contexts: [
+                  'test2'
+                ]
+              },
+            },
+          }
+        ]
+      },
+      hasChanges: true
+    }
+
+    const ignorableFields = []
+    const mergeDeep = new MergeDeep(
+      log,
+      jest.fn(),
+      ignorableFields
+    );
+    const changes = mergeDeep.compareDeep(target, source)
+    expect(changes).toEqual(expected)
+  })
 })
