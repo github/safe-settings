@@ -60,6 +60,7 @@ To ignore `safe-settings` for a specific list of repos, add them to the `restric
 
 > **Note**
 > The `include` and `exclude` attributes support as well regular expressions.
+> By default they look for regex, Example include: ['SQL'] will look apply to repos with SQL and SQL_ and SQL- etc if you want only SQL repo then use include:['^SQL$']
 
 ### Custom rules
 
