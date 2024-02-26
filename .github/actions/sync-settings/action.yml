@@ -1,0 +1,5 @@
+name: "Safe Settings Sync"
+description: "Runs safe-settings sync."
+runs:
+  using: "node12"
+  main: "gha-runner.js"
