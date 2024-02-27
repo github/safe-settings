@@ -1,5 +1,9 @@
 name: Safe Settings Sync
 description: Runs safe-settings sync.
+inputs:
+  github-token:
+    description: 'GitHub access token'
+    required: true
 runs:
   using: composite
   steps:
@@ -9,4 +13,4 @@ runs:
         node-version: '20.x'
     - run: node ./gha-runner.js
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
