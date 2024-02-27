@@ -7,11 +7,16 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
         node-version: '20.x'
-    - run: node ./gha-runner.js
+    - run: echo '${{ github.action_path }}'
+      shell: bash
+    - run: ls -l ${{ github.action_path }}
+      shell: bash
+    - run: |
+        cd ${{ github.action_path }}
+        npm run sync:gha
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
