@@ -1,5 +1,17 @@
 name: "Safe Settings Sync"
 description: "Runs safe-settings sync."
 runs:
-  using: "node12"
-  main: "gha-runner.js"
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+    - uses: "node20"
+      main: "gha-runner.js"
+
+    # - uses: actions/setup-node@v2
+    #   with:
+    #     cache: npm
+    #     node-version: 16
+    # - run: npm run build
+    # - uses: ./
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
