@@ -12,5 +12,6 @@ runs:
       with:
         node-version: '20.x'
     - run: node ./gha-runner.js
+      shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
