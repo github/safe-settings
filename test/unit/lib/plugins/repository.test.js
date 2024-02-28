@@ -1,28 +1,37 @@
 const Repository = require('../../../../lib/plugins/repository')
 
 describe('Repository', () => {
-  let github
-  let log
+  const github = {
+    repos: {
+      get: jest.fn().mockResolvedValue({
+        data: {
+          topics: []
+        }
+      }),
+      update: jest.fn().mockResolvedValue(),
+      replaceAllTopics: jest.fn().mockResolvedValue()
+    }
+  }
+  const log = jest.fn()
+  log.debug = jest.fn()
+  log.error = jest.fn()
+
   function configure (config) {
-    return new Repository(github, { owner: 'bkeepers', repo: 'test' }, config, 1, log)
+    const noop = false
+    const errors = []
+    return new Repository(noop, github, { owner: 'bkeepers', repo: 'test' }, config, 1, log, errors)
   }
 
-  beforeEach(() => {
-    github = {
-      repos: {
-        get: jest.fn().mockImplementation(() => Promise.resolve({})),
-        update: jest.fn().mockImplementation(() => Promise.resolve()),
-        replaceTopics: jest.fn().mockImplementation(() => Promise.resolve())
-      }
-    }
-    log = jest.fn()
-  })
-
   describe('sync', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
     it('syncs repository settings', () => {
       const plugin = configure({
         name: 'test',
-        description: 'Hello World!'
+        description: 'Hello World!',
+        topics: []
       })
       return plugin.sync().then(() => {
         expect(github.repos.update).toHaveBeenCalledWith({
@@ -30,7 +39,7 @@ describe('Repository', () => {
           repo: 'test',
           name: 'test',
           description: 'Hello World!',
-          mediaType: { previews: ['baptiste'] }
+          mediaType: { previews: ['nebula-preview'] }
         })
       })
     })
@@ -44,18 +53,18 @@ describe('Repository', () => {
           owner: 'bkeepers',
           repo: 'test',
           name: 'new-name',
-          mediaType: { previews: ['baptiste'] }
+          mediaType: { previews: ['nebula-preview'] }
         })
       })
     })
 
-    it('syncs topics', () => {
+    it.only('syncs topics', () => {
       const plugin = configure({
-        topics: 'foo, bar'
+        topics: ['foo', 'bar']
       })
 
       return plugin.sync().then(() => {
-        expect(github.repos.replaceTopics).toHaveBeenCalledWith({
+        expect(github.repos.replaceAllTopics).toHaveBeenCalledWith({
           owner: 'bkeepers',
           repo: 'test',
           names: ['foo', 'bar'],

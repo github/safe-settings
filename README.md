@@ -5,21 +5,30 @@
 `Safe-settings`– an app to manage policy-as-code and apply repository settings to repositories across an organization.
 
 1. In `safe-settings` all the settings are stored centrally in an `admin` repo within the organization. This is important. Unlike [Settings Probot](https://github.com/probot/settings), the settings files cannot be in individual repositories.  
-    > **Note** It is possible to override this behavior and specify a custom repo instead of the `admin` repo.<br>
+    > **Note**
+    > It is possible to override this behavior and specify a custom repo instead of the `admin` repo.<br>
     > This could be done by setting an `env` variable called `ADMIN_REPO`.
 
-1. There are 3 levels at which the settings could be managed:
+1. The **settings** in the **default** branch is applied. If the settings are changed in a non-default branch and a PR is created to merge the changes, it would be run in a `dry-run` mode to evaluate and validate the settings, and checks would pass or fail based on that.
+2. In `safe-settings` the settings can have 2 types of targets:
+   1. `org` - These settings are applied to the `org`. `Org`-targeted settings are defined in `.github/settings.yml` . Currently, only `rulesets` are supported as `org`-targeted settings.
+   2. `repo` - These settings are applied to `repos`
+   
+3. For The `repo`-targeted settings there can be at 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml`  
-       > **Note** It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
+       > **Note**
+       > It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
        > This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.
 
-   1. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
-   1. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
-1. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
+   2. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
+   3. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
+4. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
 
-> **Note** `Suborg` and `Repo` level settings directory structure cannot be customized.
+> **Note**
+> `Suborg` and `Repo` level settings directory structure cannot be customized.
 
-> **Note** The settings file must have a `.yml` extension only. `.yaml` extension is ignored, for now.
+> **Note**
+> The settings file must have a `.yml` extension only. `.yaml` extension is ignored, for now.
 
 ## How it works
 
@@ -36,6 +45,10 @@ The App listens to the following webhook events:
 
 - **pull_request.opened**, **pull_request.reopened**, **check_suite.requested**: If the settings are changed, but it is not in the `default` branch, and there is an existing PR, the code will validate the settings changes by running safe-settings in `nop` mode and update the PR with the `dry-run` status. 
 
+- **repository_ruleset**: If the `ruleset` settings are modified in the UI manually, `safe-settings` will `sync` the settings to prevent any unauthorized changes.
+
+- **member_change_events**: If a member is added or removed from a repository, `safe-settings` will `sync` the settings to prevent any unauthorized changes.
+  
 ### Restricting `safe-settings` to specific repos
 `safe-settings` can be turned on only to a subset of repos by specifying them in the runtime settings file, `deployment-settings.yml`.  
 If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.  
@@ -45,7 +58,9 @@ To apply `safe-settings` __only__ to a specific list of repos, add them to the `
 
 To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
 
-> **Note** The `include` and `exclude` attributes support as well regular expressions.
+> **Note**
+> The `include` and `exclude` attributes support as well regular expressions.
+> By default they look for regex, Example include: ['SQL'] will look apply to repos with SQL and SQL_ and SQL- etc if you want only SQL repo then use include:['^SQL$']
 
 ### Custom rules
 
@@ -137,52 +152,52 @@ If the settings is:
 and the settings in GitHub is:
 ```json
 {
-     "branches": [
-       {
-         "name": "master",
-         "protection": {
-            url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection",
-           "required_status_checks": {
-              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks",
-             "strict": true,
-             "contexts": [],
-              contexts_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks/contexts",
-             "checks": []
-           },
-           "restrictions": {
-              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions",
-              users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/users",
-              teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/teams",
-              apps_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/apps",
-             "users": [],
-             "teams": [],
-             "apps": []
-           },
-           "required_pull_request_reviews": {
-              url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_pull_request_reviews",
-             "dismiss_stale_reviews": true,
-             "require_code_owner_reviews": true,
-             "required_approving_review_count": 2,
-             "dismissal_restrictions": {
-                url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions",
-                users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/users",
-                teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/teams",
-               "users": [],
-               "teams": []
-             }
-           },
-           "required_signatures": false,
-           "enforce_admins": false,
-           "required_linear_history": false,
-           "allow_force_pushes": {
-             "enabled": false
-           },
-           "allow_deletions": false,
-           "required_conversation_resolution": false
-         }
-       }
-     ]
-   }
+  "branches": [
+    {
+      "name": "master",
+      "protection": {
+        "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection",
+        "required_status_checks": {
+          "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks",
+          "strict": true,
+          "contexts": [],
+          "contexts_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks/contexts",
+          "checks": []
+        },
+        "restrictions": {
+          "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions",
+          "users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/users",
+          "teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/teams",
+          "apps_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/apps",
+          "users": [],
+          "teams": [],
+          "apps": []
+        },
+        "required_pull_request_reviews": {
+          "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_pull_request_reviews",
+          "dismiss_stale_reviews": true,
+          "require_code_owner_reviews": true,
+          "required_approving_review_count": 2,
+          "dismissal_restrictions": {
+            "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions",
+            "users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/users",
+            "teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/teams",
+            "users": [],
+            "teams": []
+          }
+        },
+        "required_signatures": false,
+        "enforce_admins": false,
+        "required_linear_history": false,
+        "allow_force_pushes": {
+          "enabled": false
+        },
+        "allow_deletions": false,
+        "required_conversation_resolution": false
+      }
+    }
+  ]
+}
 ```
 
 the results of comparison would be:
@@ -201,6 +216,7 @@ the results of comparison would be:
           }
         ]
       },
+      "deletions": {},
       "hasChanges": true
     }
 ```
@@ -210,11 +226,36 @@ The App can be configured to apply the settings on a schedule. This could be a w
 To periodically converge the settings to the configuration, set the `CRON` environment variable. This is based on [node-cron](https://www.npmjs.com/package/node-cron) and details on the possible values can be found [here](#env-variables).
 
 ### Pull Request Workflow
+It is
 `Safe-settings` explicitly looks in the `admin` repo in the organization for the settings files. The `admin` repo could be a restricted repository with `branch protections` and `codeowners`  
 
 In that set up, when changes happen to the settings files and there is a PR for merging the changes back to the `default` branch in the `admin` repo, `safe-settings` will run `checks`  – which will run in **nop** mode and produce a report of the changes that would happen, including the API calls and the payload. 
 
-The checks will fail if `org-level` branch protections are overridden at the repo or suborg level with a lesser number of required approvers.
+For e.g. If we have `override` validators that will fail if `org-level` branch protections are overridden at the repo or suborg level with a lesser number of required approvers, here is an screenshot of what users will see in the PR.
+<p>
+<img width="467" alt="image" src="https://github.com/github/safe-settings/assets/57544838/cc5d59fb-3d7c-477b-99e9-94bcafd07c0b">
+</p>
+
+> **NOTE**
+> If you don't want the PR message to have these details, it can be turned off by `env` setting `CREATE_PR_COMMENT`=`false`
+
+Here is a screenshot of what the users will see in the `checkrun` page:
+<p>
+<img width="462" alt="image" src="https://github.com/github/safe-settings/assets/57544838/c875224f-894b-45da-a9cc-4bfc75c47670">
+</p>
+
+### Error handling
+The app creates a `Check` at the end of its processing to indicate if there were any errors. The `Check` is called `safe-settings` and corrosponds to the latest commit on the `default` branch of the `admin` repo.
+
+Here is an example of a `checkrun` result:
+<p>
+<img width="944" alt="image" src="https://github.com/github/safe-settings/assets/57544838/7ccedcea-628e-4055-a5a5-b8e45123777e">
+</p>
+
+And the `checkrun` page will look like this:
+<p>
+<img width="860" alt="image" src="https://github.com/github/safe-settings/assets/57544838/893ff4e6-904c-4a07-924a-7c23dc068983">
+</p>
 
 ### The Settings file
 
@@ -321,7 +362,12 @@ repository:
   # Either `true` to allow automatically deleting head branches 
   # when pull requests are merged, or `false` to prevent automatic deletion.
   # Default: `false`
-  delete_branch_on_merge: true  
+  delete_branch_on_merge: true
+
+  # Either `true` to  allow update branch on pull requests, 
+  # or `false` to disallow update branch.
+  # Default: `false`
+  allow_update_branch: true  
       
   # Whether to archive this repository. false will unarchive a previously archived repository.
   archived: false

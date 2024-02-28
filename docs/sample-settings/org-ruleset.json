@@ -1,0 +1,115 @@
+{
+    "name": "demo repo ruleset",
+    "target": "branch",
+    "enforcement": "disabled",
+    "bypass_actors": [
+        {
+            "actor_id": 3974045,
+            "actor_type": "Team",
+            "bypass_mode": "pull_request"
+        },
+        {
+            "actor_id": 7898,
+            "actor_type": "RepositoryRole",
+            "bypass_mode": "always"
+        },
+        {
+            "actor_id": 210920,
+            "actor_type": "Integration",
+            "bypass_mode": "always"
+        },
+        {
+            "actor_id": 1,
+            "actor_type": "OrganizationAdmin",
+            "bypass_mode": "always"
+        },
+        {
+            "actor_id": 5,
+            "actor_type": "RepositoryRole",
+            "bypass_mode": "pull_request"
+        }
+    ],
+    "conditions": {
+        "ref_name": {
+            "include": [
+                "~DEFAULT_BRANCH"
+            ],
+            "exclude": [
+                "refs/heads/oldmaster"
+            ]
+        },
+        "repository_name": {
+            "include": [
+                "test*"
+            ],
+            "exclude": [
+                "test",
+                "test1"
+            ],
+            "protected": true
+        }
+    },
+    "rules": [
+        {
+            "type": "creation"
+        },
+        {
+            "type": "update"
+        },
+        {
+            "type": "deletion"
+        },
+        {
+            "type": "required_linear_history"
+        },
+        {
+            "type": "required_signatures"
+        },
+        {
+            "type": "pull_request",
+            "parameters": {
+                "dismiss_stale_reviews_on_push": true,
+                "require_code_owner_review": true,
+                "require_last_push_approval": true,
+                "required_approving_review_count": 10,
+                "required_review_thread_resolution": true
+            }
+        },
+        {
+            "type": "commit_message_pattern",
+            "parameters": {
+                "name": "test commit_message_pattern",
+                "negate": true,
+                "operator": "starts_with",
+                "pattern": "skip*"
+            }
+        },
+        {
+            "type": "commit_author_email_pattern",
+            "parameters": {
+                "name": "test commit_author_email_pattern",
+                "negate": false,
+                "operator": "regex",
+                "pattern": "^.*@example.com$"
+            }
+        },
+        {
+            "type": "committer_email_pattern",
+            "parameters": {
+                "name": "test committer_email_pattern",
+                "negate": false,
+                "operator": "regex",
+                "pattern": "^.*@example.com$"
+            }
+        },
+        {
+            "type": "branch_name_pattern",
+            "parameters": {
+                "name": "test branch_name_pattern",
+                "negate": false,
+                "operator": "regex",
+                "pattern": "^(feature|bugfix|improvement|library|prerelease|release|hotfix)\/[a-z0-9._-]+$"
+            }
+        }
+    ]
+}
