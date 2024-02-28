@@ -23,12 +23,12 @@ describe('Teams', () => {
   beforeEach(() => {
     github = {
       paginate: jest.fn()
-      .mockResolvedValue()
-      .mockImplementation(async (fetch) => {
-        const response = await fetch()
-        return response.data
-      }),
+        .mockImplementation(async (fetch) => {
+          const response = await fetch()
+          return response.data
+        }),
       teams: {
+        create: jest.fn().mockResolvedValue(),
         getByName: jest.fn(),
         addOrUpdateRepoPermissionsInOrg: jest.fn().mockResolvedValue()
       },
@@ -61,7 +61,7 @@ describe('Teams', () => {
       await plugin.sync()
 
       expect(github.request).toHaveBeenCalledWith(
-        'PUT /teams/:team_id/repos/:owner/:repo',
+        'PUT /orgs/:owner/teams/:team_slug/repos/:owner/:repo',
         {
           org,
           owner: org,
@@ -81,17 +81,17 @@ describe('Teams', () => {
         permission: 'pull'
       })
 
-      expectTeamDeleted(removedTeamId)
+      expectTeamDeleted(removedTeamName)
     })
 
-    function expectTeamDeleted(teamId) {
+    function expectTeamDeleted(teamSlug) {
       expect(github.request).toHaveBeenCalledWith(
-        'DELETE /teams/:team_id/repos/:owner/:repo',
+        'DELETE /orgs/:owner/teams/:team_slug/repos/:owner/:repo',
         {
           org,
           owner: org,
           repo: 'test',
-          team_id: teamId
+          team_slug: teamSlug
         }
       )
     }
