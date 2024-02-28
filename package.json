@@ -17,7 +17,8 @@
     "test:me": "jest ",
     "test:unit:watch": "npm run test:unit -- --watch",
     "test:integration": "jest --testRegex=test/integration/.*\\.test\\.js",
-    "test:integration:debug": "LOG_LEVEL=debug DEBUG=nock run-s test:integration"
+    "test:integration:debug": "LOG_LEVEL=debug DEBUG=nock run-s test:integration",
+    "test:unit:ci": "npm run test:unit --reporters=default --reporters=github-actions"
   },
   "author": "Yadhav Jayaraman",
   "license": "ISC",
