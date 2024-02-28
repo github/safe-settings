@@ -13,12 +13,12 @@
     "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --validate-https --allowed-hosts npm",
     "lint:engines": "check-engine",
     "lint:peer": "npm ls >/dev/null",
-    "test:unit": "jest --roots=lib --roots=test/unit",
-    "test:unit:ci": "npm run test:unit --reporters=default --reporters=github-actions",
+    "test:unit": "jest --testRegex=test/unit/.*\\.test\\.js",
     "test:me": "jest ",
     "test:unit:watch": "npm run test:unit -- --watch",
-    "test:integration": "jest --roots=lib --roots=test/integration",
-    "test:integration:debug": "LOG_LEVEL=debug DEBUG=nock run-s test:integration"
+    "test:integration": "jest --testRegex=test/integration/.*\\.test\\.js",
+    "test:integration:debug": "LOG_LEVEL=debug DEBUG=nock run-s test:integration",
+    "test:unit:ci": "npm run test:unit --reporters=default --reporters=github-actions"
   },
   "author": "Yadhav Jayaraman",
   "license": "ISC",
