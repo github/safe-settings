@@ -1,0 +1,140 @@
+# Default values for safe-settings.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/github/safe-settings
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  automountServiceAccountToken: false
+
+podAnnotations: {}
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+envFrom: []
+# - secretRef:
+#     name: app-env
+
+env: []
+
+service:
+  type: ClusterIP
+  port: 3000
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+volumeMounts: []
+
+volumes: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+deploymentConfig:
+  restrictedRepos:
+    # You can exclude certain repos from safe-settings processing
+    #  If no file is specified, then the following repositories - 'admin', '.github', 'safe-settings' are exempted by default
+    exclude: ["^admin$", '^\.github$', "^safe-settings$", ".*-test"]
+    # Alternatively you can only include certain repos
+    include: ["^test$"]
+  configvalidators:
+    - plugin: collaborators
+      error: |
+        `Admin cannot be assigned to collaborators`
+      script: |
+        console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
+        return baseconfig.permission != 'admin'
+  overridevalidators:
+    - plugin: branches
+      error: |
+        `Branch protection required_approving_review_count cannot be overidden to a lower value`
+      script: |
+        console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
+        console.log(`overrideConfig ${JSON.stringify(overrideconfig)}`)
+        if (baseconfig.protection.required_pull_request_reviews.required_approving_review_count && overrideconfig.protection.required_pull_request_reviews.required_approving_review_count ) {
+          return overrideconfig.protection.required_pull_request_reviews.required_approving_review_count >= baseconfig.protection.required_pull_request_reviews.required_approving_review_count
+        }
+        return true
+    - plugin: labels
+      error: |
+        Some error
+      script: |
+        return true
+
+# -- Add dynamic manifests via values. Example:
+# extraObjects:
+# - kind: ConfigMap
+#   apiVersion: v1
+#   metadata:
+#     name: extra-cm-{{ .Release.Name }}
+#   data: |
+#     extra.yml: "does-my-install-need-extra-info: true"
+extraObjects: []
