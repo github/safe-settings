@@ -60,6 +60,7 @@ To ignore `safe-settings` for a specific list of repos, add them to the `restric
 
 > **Note**
 > The `include` and `exclude` attributes support as well regular expressions.
+> By default they look for regex, Example include: ['SQL'] will look apply to repos with SQL and SQL_ and SQL- etc if you want only SQL repo then use include:['^SQL$']
 
 ### Custom rules
 
@@ -361,7 +362,12 @@ repository:
   # Either `true` to allow automatically deleting head branches 
   # when pull requests are merged, or `false` to prevent automatic deletion.
   # Default: `false`
-  delete_branch_on_merge: true  
+  delete_branch_on_merge: true
+
+  # Either `true` to  allow update branch on pull requests, 
+  # or `false` to disallow update branch.
+  # Default: `false`
+  allow_update_branch: true  
       
   # Whether to archive this repository. false will unarchive a previously archived repository.
   archived: false
