@@ -18,7 +18,8 @@
    1. Org-level settings are defined in `.github/settings.yml`  
        > **Note**
        > It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
-       > This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.
+       > This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.<br>
+       > Similarly, the `.github` directory can be overridden with an `env` variable called `CONFIG_PATH`.
 
    2. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
    3. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
@@ -60,6 +61,7 @@ To ignore `safe-settings` for a specific list of repos, add them to the `restric
 
 > **Note**
 > The `include` and `exclude` attributes support as well regular expressions.
+> By default they look for regex, Example include: ['SQL'] will look apply to repos with SQL and SQL_ and SQL- etc if you want only SQL repo then use include:['^SQL$']
 
 ### Custom rules
 
@@ -361,7 +363,12 @@ repository:
   # Either `true` to allow automatically deleting head branches 
   # when pull requests are merged, or `false` to prevent automatic deletion.
   # Default: `false`
-  delete_branch_on_merge: true  
+  delete_branch_on_merge: true
+
+  # Either `true` to  allow update branch on pull requests, 
+  # or `false` to disallow update branch.
+  # Default: `false`
+  allow_update_branch: true  
       
   # Whether to archive this repository. false will unarchive a previously archived repository.
   archived: false

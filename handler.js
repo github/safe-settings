@@ -11,6 +11,6 @@ module.exports.webhooks = createLambdaFunction(appFn, {
 
 module.exports.scheduler = function () {
   const probot = createProbot()
-  const app = appFn(probot)
+  const app = appFn(probot, {})
   return app.syncInstallation()
 }

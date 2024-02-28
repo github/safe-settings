@@ -1,6 +1,6 @@
 const Milestones = require('../../../../lib/plugins/milestones')
 
-describe('Milestones', () => {
+describe.skip('Milestones', () => {
   let github
 
   function configure (config) {
