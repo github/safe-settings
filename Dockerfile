@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:20-alpine
 WORKDIR /opt/safe-settings
 ENV NODE_ENV production
 ## Set the Labels
@@ -8,12 +8,12 @@ LABEL version="1.0" \
 
 ## These files are copied separately to allow updates
 ## to the image to be as small as possible
-COPY  package.json /opt/safe-settings/
+COPY  package*.json /opt/safe-settings/
 COPY  index.js /opt/safe-settings/
 COPY  lib /opt/safe-settings/lib
 
 ## Install the app and dependencies
-RUN npm install
+RUN npm ci
 
 ## This app will listen on port 3000
 EXPOSE 3000

@@ -5,7 +5,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs20.x
   lambdaHashingVersion: 20201221
   environment:
     APP_ID: ${param:APP_ID}
