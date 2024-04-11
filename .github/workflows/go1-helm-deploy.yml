@@ -34,13 +34,11 @@ jobs:
           overrideFiles: './go1-values-override.yaml'
           overrides: |
               image.tag: ${{ github.event.inputs.release }}
-              env.APP_ID: ${{ env.APP_ID }}
-              env.PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
-              env.WEBHOOK_SECRET: ${{ env.WEBHOOK_SECRET }}
           helm-version: 'latest'
         id: bake
       - uses: Azure/k8s-deploy@v1
         with:
           manifests: ${{ steps.bake.outputs.manifestsBundle }}
+          namespace: 'safe-settings'
           images: |
               ghcr.io/github/safe-settings:${{ github.event.inputs.release }}
