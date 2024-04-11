@@ -1,0 +1,46 @@
+name: Deploy to Go1 AKS
+on:
+  workflow_dispatch:
+    inputs:
+      status:
+        description: 'Status of the previous workflow'
+        required: true
+        default: 'passed'
+      release:
+        description: 'Release tag from the previous workflow'
+        required: true
+env:
+  KUBECONFIG_CONTENTS: secrets.KUBECONFIG_PRODUCTION_K8S_AU
+  # require envs for safe-settings app https://github.com/github/safe-settings/blob/main-enterprise/docs/deploy.md
+  APP_ID: secrets.APP_ID
+  WEBHOOK_SECRET: secrets.WEBHOOK_SECRET
+  PRIVATE_KEY: secrets.PRIVATE_KEY
+jobs:
+  deploy-to-aks:
+    if: ${{ github.event.inputs.status == 'passed' }}
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: azure/k8s-set-context@v4.0.0
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ env.KUBECONFIG_CONTENTS }}
+      - uses: azure/k8s-bake@v3
+        with:
+          renderEngine: 'helm'
+          helmChart: './helm/safe-settings/'
+          overrideFiles: './go1-values-override.yaml'
+          overrides: |
+              image.tag: ${{ github.event.inputs.release }}
+              env.APP_ID: ${{ env.APP_ID }}
+              env.PRIVATE_KEY: ${{ env.PRIVATE_KEY }}
+              env.WEBHOOK_SECRET: ${{ env.WEBHOOK_SECRET }}
+          helm-version: 'latest'
+        id: bake
+      - uses: Azure/k8s-deploy@v1
+        with:
+          manifests: ${{ steps.bake.outputs.manifestsBundle }}
+          images: |
+              ghcr.io/github/safe-settings:${{ github.event.inputs.release }}
