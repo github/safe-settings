@@ -1,5 +1,9 @@
 deploymentConfig: {}
 
+envFrom: []
+- secretRef:
+    name: app-env
+
 ingress:
   enabled: true
   className: "nginx"
