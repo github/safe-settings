@@ -1,5 +1,4 @@
-deploymentConfig:
-  {}
+deploymentConfig: {}
 
 ingress:
   enabled: true

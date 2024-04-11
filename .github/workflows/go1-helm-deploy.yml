@@ -10,11 +10,11 @@ on:
         description: 'Release tag from the previous workflow'
         required: true
 env:
-  KUBECONFIG_CONTENTS: secrets.KUBECONFIG_PRODUCTION_K8S_AU
+  KUBECONFIG_CONTENTS: ${{ secrets.KUBECONFIG_PRODUCTION_K8S_AU }}
   # require envs for safe-settings app https://github.com/github/safe-settings/blob/main-enterprise/docs/deploy.md
-  APP_ID: secrets.APP_ID
-  WEBHOOK_SECRET: secrets.WEBHOOK_SECRET
-  PRIVATE_KEY: secrets.PRIVATE_KEY
+  APP_ID: ${{ secrets.APP_ID }}
+  WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 jobs:
   deploy-to-aks:
     if: ${{ github.event.inputs.status == 'passed' }}
