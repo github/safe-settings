@@ -23,9 +23,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - uses: azure/setup-kubectl@v3 # default is latest stable
-        # with:
-        #   version: 'latest' # default is latest stable
       - uses: azure/k8s-set-context@v4.0.0
         with:
           method: kubeconfig
