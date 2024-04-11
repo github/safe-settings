@@ -1,8 +1,8 @@
 deploymentConfig: {}
 
-envFrom: []
-- secretRef:
-    name: app-env
+envFrom:
+  - secretRef:
+      name: app-env
 
 ingress:
   enabled: true
