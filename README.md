@@ -16,14 +16,14 @@
    
 3. For The `repo`-targeted settings there can be at 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml`  
-       > [!Note]:
+       > [!Note]
        > It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
        > This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.<br>
        > Similarly, the `.github` directory can be overridden with an `env` variable called `CONFIG_PATH`.
 
    2. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder. 
    
-   > [!Note]:
+   > [!Note]
    > In `safe-settings`, sub orgs could be groups of repos based on `repo names`, or `teams` which the repos have collaborators from, or `custom property values` set for the repos
 
    3. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
