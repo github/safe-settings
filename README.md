@@ -63,7 +63,7 @@ To apply `safe-settings` __only__ to a specific list of repos, add them to the `
 
 To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
 
-> **Note**
+> [!Note]
 > The `include` and `exclude` attributes support as well regular expressions.
 > By default they look for regex, Example include: ['SQL'] will look apply to repos with SQL and SQL_ and SQL- etc if you want only SQL repo then use include:['^SQL$']
 
@@ -241,7 +241,7 @@ For e.g. If we have `override` validators that will fail if `org-level` branch p
 <img width="467" alt="image" src="https://github.com/github/safe-settings/assets/57544838/cc5d59fb-3d7c-477b-99e9-94bcafd07c0b">
 </p>
 
-> **NOTE**
+> [!NOTE]
 > If you don't want the PR message to have these details, it can be turned off by `env` setting `CREATE_PR_COMMENT`=`false`
 
 Here is a screenshot of what the users will see in the `checkrun` page:
