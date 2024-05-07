@@ -5,8 +5,13 @@ suborgrepos:
   - test*
 # You can use Glob patterns
 
+# List of repos that belong to the suborg
 suborgteams:
   - core
+
+# List of repos that belong to the suborg based on custom properties
+suborgproperties:     
+- EDP: true
 
 #repository: 
   # This is the settings that need to be applied to all repositories in the org 

@@ -5,7 +5,7 @@
 `Safe-settings`– an app to manage policy-as-code and apply repository settings to repositories across an organization.
 
 1. In `safe-settings` all the settings are stored centrally in an `admin` repo within the organization. This is important. Unlike [Settings Probot](https://github.com/probot/settings), the settings files cannot be in individual repositories.  
-    > **Note**
+    > [!Note]
     > It is possible to override this behavior and specify a custom repo instead of the `admin` repo.<br>
     > This could be done by setting an `env` variable called `ADMIN_REPO`.
 
@@ -16,19 +16,23 @@
    
 3. For The `repo`-targeted settings there can be at 3 levels at which the settings could be managed:
    1. Org-level settings are defined in `.github/settings.yml`  
-       > **Note**
+       > [!Note]
        > It is possible to override this behavior and specify a different filename for the `settings` yml repo.<br>
        > This could be done by setting an `env` variable called `SETTINGS_FILE_PATH`.<br>
        > Similarly, the `.github` directory can be overridden with an `env` variable called `CONFIG_PATH`.
 
-   2. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder.
+   2. `Suborg` level settings. A `suborg` is an arbitrary collection of repos belonging to projects, business units, or teams. The `suborg` settings reside in a yaml file for each `suborg` in the `.github/suborgs` folder. 
+   
+   > [!Note]
+   > In `safe-settings`, sub orgs could be groups of repos based on `repo names`, or `teams` which the repos have collaborators from, or `custom property values` set for the repos
+
    3. `Repo` level settings. They reside in a repo specific yaml in `.github/repos` folder
 4. It is recommended to break the settings into org-level, suborg-level, and repo-level units. This will allow different teams to define and manage policies for their specific projects or business units. With `CODEOWNERS`, this will allow different people to be responsible for approving changes in different projects.
 
-> **Note**
+> [!Note]
 > `Suborg` and `Repo` level settings directory structure cannot be customized.
 
-> **Note**
+> [!Note]
 > The settings file must have a `.yml` extension only. `.yaml` extension is ignored, for now.
 
 ## How it works
@@ -59,7 +63,7 @@ To apply `safe-settings` __only__ to a specific list of repos, add them to the `
 
 To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
 
-> **Note**
+> [!Note]
 > The `include` and `exclude` attributes support as well regular expressions.
 > By default they look for regex, Example include: ['SQL'] will look apply to repos with SQL and SQL_ and SQL- etc if you want only SQL repo then use include:['^SQL$']
 
@@ -237,7 +241,7 @@ For e.g. If we have `override` validators that will fail if `org-level` branch p
 <img width="467" alt="image" src="https://github.com/github/safe-settings/assets/57544838/cc5d59fb-3d7c-477b-99e9-94bcafd07c0b">
 </p>
 
-> **NOTE**
+> [!NOTE]
 > If you don't want the PR message to have these details, it can be turned off by `env` setting `CREATE_PR_COMMENT`=`false`
 
 Here is a screenshot of what the users will see in the `checkrun` page:

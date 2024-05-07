@@ -13,44 +13,25 @@
 # The list of events the GitHub App subscribes to.
 # Uncomment the event names below to enable them.
 default_events:
+  - custom_property_values
+  - repository_ruleset
   - check_run
   - check_suite
   - branch_protection_rule
-  # - commit_comment
-  # - create
-  # - delete
-  # - deployment
-  # - deployment_status
-  # - fork
-  # - gollum
-  # - issue_comment
-  # - issues
-  # - label
-  # - milestone
   - member
-  # - membership
-  # - org_block
-  # - organization
-  # - page_build
-  # - project
-  # - project_card
-  # - project_column
-  # - public
   - pull_request
   - push
-  # - release
   - repository
-  # - repository_import
-  # - status
   - team
-  # - team_add
-  # - watch
+
 
 # The set of permissions needed by the GitHub App. The format of the object uses
 # the permission name for the key (for example, issues) and the access type for
 # the value (for example, write).
 # Valid values are `read`, `write`, and `none`
 default_permissions:
+    organization_custom_properties: admin
+
     # Repository creation, deletion, settings, teams, and collaborators.
     # https://developer.github.com/v3/apps/permissions/#permission-on-administration
     administration: write

@@ -189,6 +189,26 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     robot.log.debug(JSON.stringify(res, null))
   }
 
+  async function info() {
+    const github = await robot.auth()
+    const installations = await github.paginate(
+      github.apps.listInstallations.endpoint.merge({ per_page: 100 })
+    )
+    robot.log.debug(`installations: ${JSON.stringify(installations)}`)
+    if (installations.length > 0) {
+      const installation = installations[0]
+      robot.log.debug(`Installation ID: ${installation.id}`)
+      robot.log.debug('Fetching the App Details')
+      const github = await robot.auth(installation.id)
+      const app = await github.apps.getAuthenticated()
+      robot.log.debug(`Validated the app is configured properly = \n${JSON.stringify(app.data, null, 2)}`)
+      robot.log.debug(`Registered App name = ${app.data.slug}\n`)
+      robot.log.debug(`Permissions = ${JSON.stringify(app.data.permissions)}\n`)
+      robot.log.debug(`Events = ${app.data.events}\n`)
+    }
+  }
+
+
   async function syncInstallation () {
     robot.log.trace('Fetching installations')
     const github = await robot.auth()
@@ -280,6 +300,18 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       return
     }
     robot.log.debug('Branch Protection edited by a Human')
+    return syncSettings(false, context)
+  })
+
+  robot.on('custom_property_values', async context => {
+    const { payload } = context
+    const { sender } = payload
+    robot.log.debug('Custom Property Value Updated for a repo by ', JSON.stringify(sender))
+    if (sender.type === 'Bot') {
+      robot.log.debug('Custom Property Value edited by Bot')
+      return
+    }
+    robot.log.debug('Custom Property Value edited by a Human')
     return syncSettings(false, context)
   })
 
@@ -525,6 +557,9 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       syncInstallation()
     })
   }
+  
+  //Uncomment below to get info about the app configuration
+  //info()
 
   return {
     syncInstallation
