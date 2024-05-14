@@ -1,6 +1,28 @@
+resources:
+  limits:
+    cpu: 200m
+    memory: 1024Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 75
+  # targetMemoryUtilizationPercentage: 80
+
 envFrom:
   - secretRef:
       name: app-env
+
+env:
+  # https://github.com/github/safe-settings?tab=readme-ov-file#schedule
+  - name: CRON
+    value: '*/5 * * * *' # Run every 5 minute
+  - name: ENABLE_PR_COMMENT
+    value: 'true'
 
 ingress:
   enabled: true
@@ -17,3 +39,29 @@ ingress:
    - secretName: safe-settings-go1-co-tls
      hosts:
        - safe-settings.go1.co
+
+deploymentConfig:
+  restrictedRepos:
+    # You can exclude certain repos from safe-settings processing
+    #  If no file is specified, then the following repositories - 'admin', '.github', 'safe-settings' are exempted by default
+    exclude: ['^\.github$', "^safe-settings$", ".*-test"]
+    # Alternatively you can only include certain repos
+    include: []
+  configvalidators:
+    - plugin: collaborators
+      error: |
+        `Admin cannot be assigned to collaborators`
+      script: |
+        console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
+        return baseconfig.permission != 'admin'
+  overridevalidators:
+    - plugin: branches
+      error: |
+        `Branch protection required_approving_review_count cannot be overidden to a lower value`
+      script: |
+        console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
+        console.log(`overrideConfig ${JSON.stringify(overrideconfig)}`)
+        if (baseconfig.protection.required_pull_request_reviews.required_approving_review_count && overrideconfig.protection.required_pull_request_reviews.required_approving_review_count ) {
+          return overrideconfig.protection.required_pull_request_reviews.required_approving_review_count >= baseconfig.protection.required_pull_request_reviews.required_approving_review_count
+        }
+        return true
