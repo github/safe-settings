@@ -13,15 +13,16 @@
 # The list of events the GitHub App subscribes to.
 # Uncomment the event names below to enable them.
 default_events:
-  - custom_property_values
-  - repository_ruleset
+  - branch_protection_rule
   - check_run
   - check_suite
-  - branch_protection_rule
+  - create
+  - custom_property_values
   - member
   - pull_request
   - push
   - repository
+  - repository_ruleset
   - team
 
 
