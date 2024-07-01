@@ -29,7 +29,7 @@
     "js-yaml": "^4.1.0",
     "node-cron": "^3.0.2",
     "octokit": "^3.1.2",
-    "probot": "^12.3.3"
+    "probot": "^13.3.0"
   },
   "devDependencies": {
     "@travi/any": "^2.1.8",
