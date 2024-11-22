@@ -130,7 +130,7 @@
     "repos_url": "https://api.github.com/users/_safe_settings%5Bbot%5D/repos",
     "events_url": "https://api.github.com/users/_safe_settings%5Bbot%5D/events{/privacy}",
     "received_events_url": "https://api.github.com/users/_safe_settings%5Bbot%5D/received_events",
-    "type": "Bot",
+    "type": "NotBot",
     "site_admin": false
   },
   "installation": {

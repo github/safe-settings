@@ -61,7 +61,8 @@
     "full_name": "bkeepers-inc/botland",
     "owner": {
       "name": "bkeepers-inc",
-      "email": null
+      "email": null,
+      "login": "bkeepers-inc"
     },
     "private": true,
     "html_url": "https://github.com/bkeepers-inc/botland",

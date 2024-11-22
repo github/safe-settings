@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
 
+const { getLog } = require('probot/lib/helpers/get-log')
 const { when } = require('jest-when')
 const Branches = require('../../../../lib/plugins/branches')
 
 describe('Branches', () => {
   let github
-  const log = jest.fn()
-  log.debug = jest.fn()
-  log.error = jest.fn()
+  const log = getLog()
+  log.level = process.env.LOG_LEVEL ?? 'info'
 
   function configure (config) {
     const noop = false
@@ -28,7 +28,7 @@ describe('Branches', () => {
             enforce_admins: { enabled: false }
           }
         }),
-        updateBranchProtection: jest.fn().mockImplementation(() => Promise.resolve('updateBranchProtection')),
+        updateBranchProtection: jest.fn().mockImplementation(() => Promise.resolve({ url: 'updateBranchProtection' })),
         deleteBranchProtection: jest.fn().mockImplementation(() => Promise.resolve('deleteBranchProtection'))
       }
     }
@@ -204,7 +204,7 @@ describe('Branches', () => {
     })
   })
 
-  describe.skip('return values', () => {
+  describe('return values', () => {
     it('returns updateBranchProtection Promise', () => {
       const plugin = configure(
         [{

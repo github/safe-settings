@@ -1,6 +1,13 @@
 /* eslint-disable no-undef */
-
+const { Octokit } = require('octokit')
 const Settings = require('../../../lib/settings')
+const yaml = require('js-yaml')
+// jest.mock('../../../lib/settings', () => {
+//   const OriginalSettings = jest.requireActual('../../../lib/settings')
+//   //const orginalSettingsInstance = new OriginalSettings(false, stubContext, mockRepo, config, mockRef, mockSubOrg)
+//   return OriginalSettings
+// })
+
 
 describe('Settings Tests', () => {
   let stubContext
@@ -8,19 +15,61 @@ describe('Settings Tests', () => {
   let stubConfig
   let mockRef
   let mockSubOrg
+  let subOrgConfig
 
-  function createSettings (config) {
-    return new Settings(false, stubContext, mockRepo, config, mockRef, mockSubOrg)
+  function createSettings(config) {
+    const settings = new Settings(false, stubContext, mockRepo, config, mockRef, mockSubOrg)
+    return settings;
   }
 
   beforeEach(() => {
+    const mockOctokit = jest.mocked(Octokit)
+    const content = Buffer.from(`
+suborgrepos:    
+- new-repo        
+#- test*    
+#- secret*  
+     
+suborgteams:
+- core
+
+suborgproperties:     
+- EDP: true
+- do_no_delete: true
+       
+teams:                 
+  - name: core        
+    permission: bypass 
+  - name: docss
+    permission: pull
+  - name: docs
+    permission: pull
+  
+validator:
+  pattern: '[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*' 
+
+repository:   
+  # A comma-separated list of topics to set on the repository
+  topics:   
+  - frontend
+     `).toString('base64');
+    mockOctokit.repos = {
+      getContent: jest.fn().mockResolvedValue({ data: { content } })
+    }
+
+    mockOctokit.request = {
+      endpoint: jest.fn().mockReturnValue({})
+    }
+
+    mockOctokit.paginate = jest.fn().mockResolvedValue([])
+
     stubContext = {
       payload: {
         installation: {
           id: 123
         }
       },
-      octokit: jest.fn(),
+      octokit: mockOctokit,
       log: {
         debug: jest.fn((msg) => {
           console.log(msg)
@@ -34,9 +83,11 @@ describe('Settings Tests', () => {
       }
     }
 
-    mockRepo = jest.fn()
-    mockRef = jest.fn()
-    mockSubOrg = jest.fn()
+
+
+    mockRepo = { owner: 'test', repo: 'test-repo' }
+    mockRef = 'main'
+    mockSubOrg = 'frontend'
   })
 
   describe('restrictedRepos', () => {
@@ -140,4 +191,76 @@ describe('Settings Tests', () => {
       })
     })
   }) // restrictedRepos
+
+  describe('loadConfigs', () => {
+    describe('load suborg configs', () => {
+      beforeEach(() => {
+        stubConfig = {
+          restrictedRepos: {
+          }
+        }
+        subOrgConfig = yaml.load(`
+          suborgrepos:    
+          - new-repo         
+               
+          suborgproperties:     
+          - EDP: true
+          - do_no_delete: true
+                 
+          teams:                 
+            - name: core        
+              permission: bypass 
+            - name: docss
+              permission: pull
+            - name: docs
+              permission: pull
+            
+          validator:
+            pattern: '[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*' 
+          
+          repository:   
+            # A comma-separated list of topics to set on the repository
+            topics:   
+            - frontend
+          
+          `)
+
+      })
+
+      it("Should load configMap for suborgs'", async () => {
+        //mockSubOrg = jest.fn().mockReturnValue(['suborg1', 'suborg2'])
+        mockSubOrg = undefined
+        settings = createSettings(stubConfig)
+        jest.spyOn(settings, 'loadConfigMap').mockImplementation(() => [{ name: "frontend", path: ".github/suborgs/frontend.yml" }])
+        jest.spyOn(settings, 'loadYaml').mockImplementation(() => subOrgConfig)
+        jest.spyOn(settings, 'getReposForTeam').mockImplementation(() => [{ name: 'repo-test' }])
+        jest.spyOn(settings, 'getReposForCustomProperty').mockImplementation(() => [{ repository_name: 'repo-for-property' }])
+
+        const subOrgConfigs = await settings.getSubOrgConfigs()
+        expect(settings.loadConfigMap).toHaveBeenCalledTimes(1)
+
+        // Get own properties of subOrgConfigs
+        const ownProperties = Object.getOwnPropertyNames(subOrgConfigs);
+        expect(ownProperties.length).toEqual(3)
+      })
+
+      it("Should throw an error when a repo is found in multiple suborgs configs'", async () => {
+        //mockSubOrg = jest.fn().mockReturnValue(['suborg1', 'suborg2'])
+        mockSubOrg = undefined
+        settings = createSettings(stubConfig)
+        jest.spyOn(settings, 'loadConfigMap').mockImplementation(() => [{ name: "frontend", path: ".github/suborgs/frontend.yml" }, { name: "backend", path: ".github/suborgs/backend.yml" }])
+        jest.spyOn(settings, 'loadYaml').mockImplementation(() => subOrgConfig)
+        jest.spyOn(settings, 'getReposForTeam').mockImplementation(() => [{ name: 'repo-test' }])
+        jest.spyOn(settings, 'getReposForCustomProperty').mockImplementation(() => [{ repository_name: 'repo-for-property' }])
+
+        expect(async () => await settings.getSubOrgConfigs()).rejects.toThrow('Multiple suborg configs for new-repo in .github/suborgs/backend.yml and .github/suborgs/frontend.yml')
+        // try {
+        //   await settings.getSubOrgConfigs()
+        // } catch (e) {
+        //   console.log(e)
+        // }
+      })
+    })
+  }) // loadConfigs
+
 }) // Settings Tests
