@@ -290,7 +290,21 @@ The following can be configured:
 - `Rulesets`
 - `Environments` - wait timer, required reviewers, prevent self review, protected branches deployment branch policy, custom deployment branch policy, variables, deployment protection rules
 
-It is possible to provide an `include` or `exclude` settings to restrict the `collaborators`, `teams`, `labels` to a list of repos or exclude a set of repos for a collaborator.
+> [!important]
+> It is possible to provide an `include` or `exclude` settings to restrict the `collaborators`, `teams`, `labels` to a list of repos or exclude a set of repos for a collaborator. 
+> The include/exclude pattern can also be for glob. For e.g.:
+```
+teams:
+  - name: Myteam-admins
+    permission: admin
+  - name: Myteam-developers
+    permission: push
+  - name: Other-team
+    permission: push
+    include:
+      - '*-config'
+```
+> Will only add `Other-team` to only `*-config` repos
 
 See [`docs/sample-settings/settings.yml`](docs/sample-settings/settings.yml) for a sample settings file.
 
