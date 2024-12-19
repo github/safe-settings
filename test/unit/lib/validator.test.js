@@ -113,7 +113,7 @@ describe('Validator Tests', () => {
 
     try {
       const ignorableFields = []
-      const mergeDeep = new MergeDeep(log, ignorableFields)
+      const mergeDeep = new MergeDeep(log, {}, ignorableFields)
       mergeDeep.mergeDeep(baseconfig, overrideconfig)
     } catch (err) {
       expect(err).toBeDefined()
@@ -168,7 +168,7 @@ describe('Validator Tests', () => {
 
     try {
       const ignorableFields = []
-      const mergeDeep = new MergeDeep(log, ignorableFields)
+      const mergeDeep = new MergeDeep(log, {}, ignorableFields)
       mergeDeep.mergeDeep(baseconfig, overrideconfig)
     } catch (err) {
       expect(err).toBeDefined()

@@ -13,44 +13,31 @@
 # The list of events the GitHub App subscribes to.
 # Uncomment the event names below to enable them.
 default_events:
+  - branch_protection_rule
   - check_run
   - check_suite
-  - branch_protection_rule
-  # - commit_comment
-  # - create
-  # - delete
-  # - deployment
-  # - deployment_status
-  # - fork
-  # - gollum
-  # - issue_comment
-  # - issues
-  # - label
-  # - milestone
+  - create
+  - custom_property_values
   - member
-  # - membership
-  # - org_block
-  # - organization
-  # - page_build
-  # - project
-  # - project_card
-  # - project_column
-  # - public
   - pull_request
   - push
-  # - release
   - repository
-  # - repository_import
-  # - status
+  - repository_ruleset
   - team
-  # - team_add
-  # - watch
+
 
 # The set of permissions needed by the GitHub App. The format of the object uses
 # the permission name for the key (for example, issues) and the access type for
 # the value (for example, write).
 # Valid values are `read`, `write`, and `none`
 default_permissions:
+    repository_custom_properties: write
+    organization_custom_properties: admin
+
+    # Workflows, workflow runs and artifacts. (needed to read environments when repo is private or internal)
+    # https://developer.github.com/v3/apps/permissions/#repository-permissions-for-actions
+    actions: read
+
     # Repository creation, deletion, settings, teams, and collaborators.
     # https://developer.github.com/v3/apps/permissions/#permission-on-administration
     administration: write
@@ -66,6 +53,10 @@ default_permissions:
     # Deployments and deployment statuses.
     # https://developer.github.com/v3/apps/permissions/#permission-on-deployments
     # deployments: read
+
+    # Manage repository environments.
+    # https://developer.github.com/v3/apps/permissions/#repository-permissions-for-environments
+    environments: write
 
     # Issues and related comments, assignees, labels, and milestones.
     # https://developer.github.com/v3/apps/permissions/#permission-on-issues
@@ -122,6 +113,10 @@ default_permissions:
     # Get notified of, and update, content references.
     # https://developer.github.com/v3/apps/permissions/
     organization_administration: write
+
+    # Manage Actions repository variables.
+    # https://developer.github.com/v3/apps/permissions/#repository-permissions-for-variables
+    variables: write
 
 
 # The name of the GitHub App. Defaults to the name specified in package.json

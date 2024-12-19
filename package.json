@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "nodemon --inspect",
     "start": "probot run ./index.js",
+    "full-sync": "node ./full-sync.js",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
     "lint:es": "eslint .",
     "lint:js": "standard",
@@ -27,6 +28,7 @@
     "deepmerge": "^4.3.1",
     "eta": "^3.0.3",
     "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
     "node-cron": "^3.0.2",
     "octokit": "^3.1.2",
     "probot": "^12.3.3"
@@ -36,7 +38,6 @@
     "@travi/any": "^2.1.8",
     "check-engine": "^1.10.1",
     "eslint": "^8.46.0",
-    "@eslint/eslintrc": "^2.0.2",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",

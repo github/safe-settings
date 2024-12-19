@@ -1,192 +1,399 @@
-# This settings can be used to create org level settings
+# This settings file can be used to create org-level settings
 
-#repository: 
-  # This is the settings that need to be applied to all repositories in the org 
-  # See https://developer.github.com/v3/repos/#edit for all available settings for a repository  
+# This is the settings that need to be applied to all repositories in the org
+# See https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-an-organization-repository for all available settings for a repository
+repository:
   # A short description of the repository that will show up on GitHub
-  #description: description of the repo
-  
+  description: description of the repo
+
   # A URL with more information about the repository
-  #homepage: https://example.github.io/
-    
-  # Keep this as true for most cases
-  # A lot of the policies below cannot be implemented on bare repos
-  # Pass true to create an initial commit with empty README.
-  #auto_init: true
-    
-  # A list of topics to set on the repository
-  #topics: 
-  #- github
-  #- safe-settings
-  #- new-topic
-  #- another-topic
-  #- topic-12
+  homepage: https://example.github.io/
+
+  # Create an initial commit with empty README.
+  # Keep this set to true in most cases since many of the policies below cannot be implemented on bare repos
+  auto_init: true
+
+  # A list of topics to set on the repository - can alternatively set like this: [github, probot, new-topic, another-topic, topic-12]
+  topics:
+    - new-topic
+    - another-topic
 
   # Settings for Code security and analysis
   # Dependabot Alerts
-  # security:
-    # enableVulnerabilityAlerts: true
-    # enableAutomatedSecurityFixes: true
-  
-  # Either `true` to make the repository private, or `false` to make it public. 
-  # If this value is changed and if Org members cannot change the visibility of repos
+  security:
+    enableVulnerabilityAlerts: true
+    enableAutomatedSecurityFixes: true
+
+  # Either `true` to make the repository private, or `false` to make it public.
+  # If this value is changed and if org members cannot change the visibility of repos
   # it would result in an error when updating a repo
-  #private: false
-  
-  # Can be public or private. If your organization is associated with an enterprise account using 
-  # GitHub Enterprise Cloud or GitHub Enterprise Server 2.20+, visibility can also be internal. 
-  #visibility: private
-  
+  private: true
+
+  # Can be public or private. If your organization is associated with an enterprise account using
+  # GitHub Enterprise Cloud or GitHub Enterprise Server 2.20+, visibility can also be internal.
+  visibility: private
+
   # Either `true` to enable issues for this repository, `false` to disable them.
-  #has_issues: true
-  
+  has_issues: true
+
   # Either `true` to enable projects for this repository, or `false` to disable them.
   # If projects are disabled for the organization, passing `true` will cause an API error.
-  #has_projects: true
-  
+  has_projects: true
+
   # Either `true` to enable the wiki for this repository, `false` to disable it.
-  #has_wiki: true
-  
+  has_wiki: true
+
   # The default branch for this repository.
-  #default_branch: main
-  
-  # Desired language or platform [.gitignore template](https://github.com/github/gitignore) 
-  # to apply. Use the name of the template without the extension. 
+  default_branch: main
+
+  # Desired language or platform [.gitignore template](https://github.com/github/gitignore)
+  # to apply. Use the name of the template without the extension.
   # For example, "Haskell".
-  #gitignore_template: node
-  
-  # Choose an [open source license template](https://choosealicense.com/) 
-  # that best suits your needs, and then use the 
-  # [license keyword](https://help.github.com/articles/licensing-a-repository/#searching-github-by-license-type) 
+  gitignore_template: node
+
+  # Choose an [open source license template](https://choosealicense.com/)
+  # that best suits your needs, and then use the
+  # [license keyword](https://help.github.com/articles/licensing-a-repository/#searching-github-by-license-type)
   # as the `license_template` string. For example, "mit" or "mpl-2.0".
-  #license_template: mit
-  
+  license_template: mit
+
   # Either `true` to allow squash-merging pull requests, or `false` to prevent
   # squash-merging.
-  #allow_squash_merge: true
-  
+  allow_squash_merge: true
+
   # Either `true` to allow merging pull requests with a merge commit, or `false`
   # to prevent merging pull requests with merge commits.
-  #allow_merge_commit: true
-  
+  allow_merge_commit: true
+
   # Either `true` to allow rebase-merging pull requests, or `false` to prevent
   # rebase-merging.
-  #allow_rebase_merge: true
-  
-  # Either `true` to allow auto-merge on pull requests, 
+  allow_rebase_merge: true
+
+  # Either `true` to allow auto-merge on pull requests,
   # or `false` to disallow auto-merge.
   # Default: `false`
-  #allow_auto_merge: true
-  
-  # Either `true` to allow automatically deleting head branches 
+  allow_auto_merge: true
+
+  # Either `true` to allow automatically deleting head branches
   # when pull requests are merged, or `false` to prevent automatic deletion.
   # Default: `false`
-  #delete_branch_on_merge: true 
+  delete_branch_on_merge: true
 
-  # Either `true` to  allow update branch on pull requests, 
+  # Either `true` to  allow update branch on pull requests,
   # or `false` to disallow update branch.
   # Default: `false`
-  # allow_update_branch: true 
-      
+  allow_update_branch: true
+
+  # Whether to archive this repository. false will unarchive a previously archived repository.
+  archived: false
+
 # The following attributes are applied to any repo within the org
 # So if a repo is not listed above is created or edited
 # The app will apply the following settings to it
-#labels:
+labels:
   # Labels: define labels for Issues and Pull Requests
-  #- name: bug
-  #  color: CC0000
-  #  description: An issue with the system
+  include:
+    - name: bug
+      color: CC0000
+      description: An issue with the system
 
-  #- name: feature
-    # If including a `#`, make sure to wrap it with quotes!
-  #  color: '#336699'
-  #  description: New functionality.
+    - name: feature
+      # If including a `#`, make sure to wrap it with quotes!
+      color: "#336699"
+      description: New functionality.
 
-  #- name: first-timers-only
-    # include the old name to rename an existing label
-  #  oldname: Help Wanted
-  #  color: '#326699'
+    - name: first-timers-only
+      # include the old name to rename an existing label
+      oldname: Help Wanted
+      color: "#326699"
 
-  #- name: new-label
-    # include the old name to rename an existing label
-  #  oldname: Help Wanted
-  #  color: '#326699'
+    - name: new-label
+      # include the old name to rename an existing label
+      oldname: Help Wanted
+      color: "#326699"
+  exclude:
+    # don't delete any labels created on GitHub that starts with "release"
+    - name: ^release
 
-#collaborators:
+# Milestones: define milestones for Issues and Pull Requests
+milestones:
+  - title: milestone-title
+    description: milestone-description
+    # The state of the milestone. Either `open` or `closed`
+    state: open
+
 # Collaborators: give specific users access to any repository.
-# See https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator for available options
+# See https://docs.github.com/en/rest/collaborators/collaborators?apiVersion=2022-11-28#add-a-repository-collaborator for available options
+collaborators:
+  - username: regpaco
+    # The permission to grant the collaborator. Can be one of:
+    # * `pull` - can pull, but not push to or administer this repository.
+    # * `push` - can pull and push, but not administer this repository.
+    # * `admin` - can pull, push and administer this repository.
+    permission: push
+  - username: beetlejuice
+    permission: pull
+    # You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator
+    exclude:
+      - actions-demo
+  - username: thor
+    permission: push
+    # You can include a list of repos for this collaborator and only those repos would have this collaborator
+    include:
+      - actions-demo
+      - another-repo
 
-#- username: drstrange
-#  permission: push
-# The permission to grant the collaborator. Can be one of:
-# * `pull` - can pull, but not push to or administer this repository.
-# * `push` - can pull and push, but not administer this repository.
-# * `admin` - can pull, push and administer this repository.
-#- username: beetlejuice
-#  permission: pull
-#  exclude:
-#  - actions-demo
-# You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator
-#- username: thor
-#  permission: push
-#  include:
-#  - actions-demo
-#  - another-repo
-# You can include a list of repos for this collaborator and only those repos would have this collaborator
-
-# See https://developer.github.com/v3/teams/#add-or-update-team-repository for available options
-#teams:
-#  - name: core
+# Teams
+# See https://docs.github.com/en/rest/teams/teams?apiVersion=2022-11-28#create-a-team for available options
+teams:
+  - name: core
     # The permission to grant the team. Can be one of:
     # * `pull` - can pull, but not push to or administer this repository.
     # * `push` - can pull and push, but not administer this repository.
     # * `admin` - can pull, push and administer this repository.
-#    permission: admin
-#  - name: docs
-#    permission: push
-#    exclude:
-#    - actions-demo
-# You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator
+    permission: admin
+  - name: docss
+    permission: push
+  - name: docs
+    permission: pull
+  # Visibility is only honored when the team is created not for existing teams.
+  # It can be either secret (default) or closed (visible to all members of the org)
+  - name: globalteam
+    permission: push
+    visibility: closed
 
-
-#branches:
+# Branch protection rules
+# See https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2022-11-28#update-branch-protection for available options
+branches:
   # If the name of the branch value is specified as `default`, then the app will create a branch protection rule to apply against the default branch in the repo
-#  - name: default
-    # https://developer.github.com/v3/repos/branches/#update-branch-protection
-    # Branch Protection settings. Set to null to disable
-#    protection:
+  - name: default
+    protection:
       # Required. Require at least one approving review on a pull request, before merging. Set to null to disable.
-#      required_pull_request_reviews:
+      required_pull_request_reviews:
         # The number of approvals required. (1-6)
-#        required_approving_review_count: 1
+        required_approving_review_count: 1
         # Dismiss approved reviews automatically when a new commit is pushed.
-#        dismiss_stale_reviews: true
+        dismiss_stale_reviews: true
         # Blocks merge until code owners have reviewed.
-#        require_code_owner_reviews: true
+        require_code_owner_reviews: true
         # Whether the most recent reviewable push must be approved by someone other than the person who pushed it.
-#        require_last_push_approval: true
+        require_last_push_approval: true
         # Allow specific users, teams, or apps to bypass pull request requirements. Set to null to disable.
-#        bypass_pull_request_allowances:
-#          apps: []
-#          users: []
-#          teams: []
+        bypass_pull_request_allowances:
+          apps: []
+          users: []
+          teams: []
         # Specify which users and teams can dismiss pull request reviews. Pass an empty dismissal_restrictions object to disable. User and team dismissal_restrictions are only available for organization-owned repositories. Omit this parameter for personal repositories.
-#        dismissal_restrictions:
-#          users: []
-#          teams: []
+        dismissal_restrictions:
+          users: []
+          teams: []
       # Required. Require status checks to pass before merging. Set to null to disable
-#      required_status_checks:
+      required_status_checks:
         # Required. Require branches to be up to date before merging.
-#        strict: true
+        strict: true
         # Required. The list of status checks to require in order to merge into this branch
-#        contexts: []
+        contexts: []
       # Required. Enforce all configured restrictions for administrators. Set to true to enforce required status checks for repository administrators. Set to null to disable.
-#      enforce_admins: true
+      enforce_admins: true
       # Required. Restrict who can push to this branch. Team and user restrictions are only available for organization-owned repositories. Set to null to disable.
-#      restrictions:
-#        apps: []
-#        users: []
-#        teams: []
-        
-#validator:
-  #pattern: '[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*' 
+      restrictions:
+        apps: []
+        users: []
+        teams: []
+
+# Custom properties
+# See https://docs.github.com/en/rest/repos/custom-properties?apiVersion=2022-11-28
+custom_properties:
+  - name: test
+    value: test
+
+# See the docs (https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/configuring-autolinks-to-reference-external-resources) for a description of autolinks and replacement values.
+autolinks:
+  - key_prefix: "JIRA-"
+    url_template: "https://jira.github.com/browse/JIRA-<num>"
+    is_alphanumeric: false
+  - key_prefix: "MYLINK-"
+    url_template: "https://mywebsite.com/<num>"
+
+# Repository name validation
+validator:
+  #pattern: '[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*'
+  pattern: "[a-zA-Z0-9_-]+"
+
+# Rulesets
+# See https://docs.github.com/en/rest/orgs/rules?apiVersion=2022-11-28#create-an-organization-repository-rulesetfor available options
+rulesets:
+  - name: Template
+    # The target of the ruleset. Can be one of:
+    # - branch
+    # - tag
+    target: branch
+    # The enforcement level of the ruleset. `evaluate` allows admins to test
+    # rules before enforcing them.
+    # - disabled
+    # - active
+    # - evaluate
+    enforcement: active
+
+    # The actors that can bypass the rules in this ruleset
+    bypass_actors:
+      - actor_id: number
+        # type: The type of actor that can bypass a ruleset
+        # - RepositoryRole
+        # - Team
+        # - Integration
+        # - OrganizationAdmin
+        actor_type: Team
+        #  When the specified actor can bypass the ruleset. `pull_request`
+        #  means that an actor can only bypass rules on pull requests.
+        #  - always
+        #  - pull_request
+        bypass_mode: pull_request
+
+      - actor_id: 1
+        actor_type: OrganizationAdmin
+        bypass_mode: always
+
+      - actor_id: 7898
+        actor_type: RepositoryRole
+        bypass_mode: always
+
+      - actor_id: 210920
+        actor_type: Integration
+        bypass_mode: always
+
+    conditions:
+      # Parameters for a repository ruleset ref name condition
+      ref_name:
+        # Array of ref names or patterns to include. One of these
+        # patterns must match for the condition to pass. Also accepts
+        # `~DEFAULT_BRANCH` to include the default branch or `~ALL` to
+        # include all branches.
+        include: ["~DEFAULT_BRANCH"]
+
+        # Array of ref names or patterns to exclude. The condition
+        # will not pass if any of these patterns match.
+        exclude: ["refs/heads/oldmaster"]
+
+      # This condition only exists at the org level (remove for suborg and repo level rulesets)
+      repository_name:
+        # Array of repository names or patterns to include.
+        # One of these patterns must match for the condition
+        # to pass. Also accepts `~ALL` to include all
+        # repositories.
+        include: ["test*"]
+        # Array of repository names or patterns to exclude. The
+        # condition will not pass if any of these patterns
+        # match.
+        exclude: ["test", "test1"]
+        # Whether renaming of target repositories is
+        # prevented.
+        protected: true
+
+    # Refer to https://docs.github.com/en/rest/orgs/rules#create-an-organization-repository-ruleset
+    rules:
+      - type: creation
+      - type: update
+        parameters:
+          # Branch can pull changes from its upstream repository
+          update_allows_fetch_and_merge: true
+      - type: deletion
+      - type: required_linear_history
+      - type: required_signatures
+
+      - type: required_deployments
+        parameters:
+          required_deployment_environments: ["staging"]
+
+      - type: pull_request
+        parameters:
+          # Reviewable commits pushed will dismiss previous pull
+          # request review approvals.
+          dismiss_stale_reviews_on_push: true
+          # Require an approving review in pull requests that modify
+          # files that have a designated code owner
+          require_code_owner_review: true
+          # Whether the most recent reviewable push must be approved
+          # by someone other than the person who pushed it.
+          require_last_push_approval: true
+          # The number of approving reviews that are required before a
+          # pull request can be merged.
+          required_approving_review_count: 1
+          # All conversations on code must be resolved before a pull
+          # request can be merged.
+          required_review_thread_resolution: true
+
+      # Choose which status checks must pass before branches can be merged
+      # into a branch that matches this rule. When enabled, commits must
+      # first be pushed to another branch, then merged or pushed directly
+      # to a branch that matches this rule after status checks have
+      # passed.
+      - type: required_status_checks
+        parameters:
+          # Whether pull requests targeting a matching branch must be
+          # tested with the latest code. This setting will not take
+          # effect unless at least one status check is enabled.
+          strict_required_status_checks_policy: true
+          required_status_checks:
+            - context: CodeQL
+              integration_id: 1234
+            - context: GHAS Compliance
+              integration_id: 1234
+
+      # Choose which workflows must pass before branches can be merged.
+      - type: workflows
+        parameters:
+          workflows:
+            - path: .github/workflows/example.yml
+              # Run $("meta[name=octolytics-dimension-repository_id]").getAttribute('content')
+              # in the browser console of the repository to get the repository_id
+              repository_id: 123456
+              # One of the following:
+              # Branch or tag
+              ref: refs/heads/main
+              # Commit SHA
+              sha: 1234567890abcdef
+
+      - type: commit_message_pattern
+        parameters:
+          name: test commit_message_pattern
+          # required:
+          #  - operator
+          #  - pattern
+          negate: true
+          operator: starts_with
+          # The operator to use for matching.
+          # - starts_with
+          # - ends_with
+          # - contains
+          # - regex
+          pattern: skip*
+          # The pattern to match with.
+
+      - type: commit_author_email_pattern
+        parameters:
+          name: test commit_author_email_pattern
+          negate: false
+          operator: regex
+          pattern: "^.*@example.com$"
+
+      - type: committer_email_pattern
+        parameters:
+          name: test committer_email_pattern
+          negate: false
+          operator: regex
+          pattern: "^.*@example.com$"
+
+      - type: branch_name_pattern
+        parameters:
+          name: test branch_name_pattern
+          negate: false
+          operator: regex
+          pattern: ".*\/.*"
+
+      - type: "tag_name_pattern"
+        parameters:
+          name: test tag_name_pattern
+          negate: false
+          operator: regex
+          pattern: ".*\/.*"
