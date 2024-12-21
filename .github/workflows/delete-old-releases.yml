@@ -1,0 +1,25 @@
+name: Delete old releases
+permissions: write-all
+  
+on:
+  workflow_dispatch:
+    inputs:
+      beforeDate:
+        type: string
+        required: true
+        description: YYYY-MM-DD - All releases before this date are deleted.
+        default: "2024-01-01"
+        
+jobs:
+  delete-releases:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Delete releases
+      run: |
+        for i in $(gh release list --repo https://github.com/$GITHUB_REPOSITORY --json createdAt,tagName --limit 1000  | jq --arg date $BEFORE_DATE '.[] | select(.createdAt < $date ) | .tagName' | tr -d '"'); do  gh release delete $i -y --cleanup-tag --repo https://github.com/$GITHUB_REPOSITORY ;    done
+        echo Deleted releases before $BEFORE_DATE in https://github.com/$GITHUB_REPOSITORY >> $GITHUB_STEP_SUMMARY
+      env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BEFORE_DATE: ${{ inputs.beforeDate }}
+         
+  
