@@ -255,14 +255,17 @@ Every deployment will need an [App](https://developer.github.com/apps/).
 
 #### Repository Permissions
 
+- Actions: **Read-only**
 - Administration: **Read & Write**
 - Checks: **Read & Write**
 - Commit statuses: **Read & Write**
 - Contents: **Read & Write**
 - Custom properties: **Read & Write**
+- Environments: **Read & Write**
 - Issues: **Read & Write**
 - Metadata: **Read-only**
 - Pull requests: **Read & Write**
+- Variables: **Read & Write**
 
 #### Organization Permissions
 

@@ -34,6 +34,10 @@ default_permissions:
     repository_custom_properties: write
     organization_custom_properties: admin
 
+    # Workflows, workflow runs and artifacts. (needed to read environments when repo is private or internal)
+    # https://developer.github.com/v3/apps/permissions/#repository-permissions-for-actions
+    actions: read
+
     # Repository creation, deletion, settings, teams, and collaborators.
     # https://developer.github.com/v3/apps/permissions/#permission-on-administration
     administration: write
@@ -49,6 +53,10 @@ default_permissions:
     # Deployments and deployment statuses.
     # https://developer.github.com/v3/apps/permissions/#permission-on-deployments
     # deployments: read
+
+    # Manage repository environments.
+    # https://developer.github.com/v3/apps/permissions/#repository-permissions-for-environments
+    environments: write
 
     # Issues and related comments, assignees, labels, and milestones.
     # https://developer.github.com/v3/apps/permissions/#permission-on-issues
@@ -105,6 +113,10 @@ default_permissions:
     # Get notified of, and update, content references.
     # https://developer.github.com/v3/apps/permissions/
     organization_administration: write
+
+    # Manage Actions repository variables.
+    # https://developer.github.com/v3/apps/permissions/#repository-permissions-for-variables
+    variables: write
 
 
 # The name of the GitHub App. Defaults to the name specified in package.json
