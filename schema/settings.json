@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "repositories": {
+      "allOf": [
+        {
+          "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2022-11-28.json#/paths/~1repos~1{owner}~1{repo}/patch/requestBody/content/application~1json/schema"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "auto_init": {
+              "description": "Create an initial commit with empty README. Keep this set to true in most cases since many of the policies below cannot be implemented on bare repos",
+              "type": "boolean"
+            },
+            "gitignore_template": {
+              "description": "Desired language or platform [.gitignore template](https://github.com/github/gitignore) to apply. Use the name of the template without the extension. For example, 'Haskell'.",
+              "type": "string"
+            },
+            "license_template": {
+              "description": "Choose an [open source license template](https://choosealicense.com/) that best suits your needs, and then use the [license keyword](https://help.github.com/articles/licensing-a-repository/#searching-github-by-license-type) as the `license_template` string. For example, 'mit' or 'mpl-2.0'.",
+              "type": "string"
+            },
+            "topics": {
+              "description": "A list of topics to set on the repository",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "security": {
+              "description": "Settings for Code security and analysis",
+              "type": "object",
+              "properties": {
+                "enableVulnerabilityAlerts": {
+                  "type": "boolean"
+                },
+                "enableAutomatedSecurityFixes": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "labels": {
+      "description": "Labels: define labels for Issues and Pull Requests",
+      "type": "object",
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "color": {
+                "description": "The hexadecimal color code for the label. If including a `#`, make sure to wrap it with quotes!",
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "oldname": {
+                "description": "Include the old name to rename an existing label",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "exclude": {
+          "description": "Ignore any labels matching these regexes (don't delete them)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "milestones": {
+      "description": "Milestones: define milestones for Issues and Pull Requests",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "state": {
+            "description": "The state of the milestone. Either `open` or `closed`",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "collaborators": {
+      "description": "Collaborators: give specific users access to any repository.",
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2022-11-28.json#/paths/~1repos~1{owner}~1{repo}~1collaborators~1{username}/put/requestBody/content/application~1json/schema"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string"
+              },
+              "exclude": {
+                "description": "You can exclude a list of repos for this collaborator and all repos except these repos would have this collaborator",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "include": {
+                "description": "You can include a list of repos for this collaborator and only those repos would have this collaborator",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "teams": {
+      "description": "Teams",
+      "type": "array",
+      "items": {
+        "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2022-11-28.json#/paths/~1orgs~1{org}~1teams/post/requestBody/content/application~1json/schema"
+      }
+    },
+    "branches": {
+      "description": "Branch protection rules",
+      "type": "array",
+      "items": {
+        "properties": {
+          "name": {
+            "description": "If the name of the branch value is specified as `default`, then the app will create a branch protection rule to apply against the default branch in the repo",
+            "type": "string"
+          },
+          "protection": {
+            "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2022-11-28.json#/paths/~1repos~1{owner}~1{repo}~1branches~1{branch}~1protection/put/requestBody/content/application~1json/schema"
+          }
+        }
+      }
+    },
+    "custom_properties": {
+      "description": "Custom properties",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "autolinks": {
+      "description": "Autolinks",
+      "type": "array",
+      "items": {
+        "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2022-11-28.json#/paths/~1repos~1{owner}~1{repo}~1autolinks/post/requestBody/content/application~1json/schema"
+      }
+    },
+    "validator": {
+      "description": "Repository name validation",
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        }
+      }
+    },
+    "rulesets": {
+      "description": "Rulesets",
+      "type": "array",
+      "items": {
+        "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2022-11-28.json#/paths/~1orgs~1{org}~1rulesets/post/requestBody/content/application~1json/schema"
+      }
+    }
+  }
+}
