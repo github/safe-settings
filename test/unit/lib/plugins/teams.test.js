@@ -84,7 +84,7 @@ describe('Teams', () => {
       expectTeamDeleted(removedTeamName)
     })
 
-    function expectTeamDeleted(teamSlug) {
+    function expectTeamDeleted (teamSlug) {
       expect(github.request).toHaveBeenCalledWith(
         'DELETE /orgs/:owner/teams/:team_slug/repos/:owner/:repo',
         {

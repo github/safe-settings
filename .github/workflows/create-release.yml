@@ -9,6 +9,10 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     if: ${{ github.actor != 'dependabot'}}
@@ -24,15 +28,15 @@ jobs:
           cache: "npm"
       - run: npm install
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5
       - name: Log in to the Container registry
-        uses: docker/login-action@v3 
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker Image Locally
-        uses: docker/build-push-action@master
+        uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355
         with:
           context: .
           file: ./Dockerfile
@@ -50,12 +54,12 @@ jobs:
           curl http://localhost:3000
       - name: Tag a final release
         id: finalrelease
-        uses: actionsdesk/semver@0.6.0-rc.10
+        uses: actionsdesk/semver@82aa4310e4e21c59cd0020007a4278e733e81dcb
         with:
           bump: final
       - name: Push Docker Image
         if: ${{ success() }}
-        uses: docker/build-push-action@master
+        uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355
         with:
           context: .
           file: ./Dockerfile
