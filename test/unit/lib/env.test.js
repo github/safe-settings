@@ -1,8 +1,6 @@
 /* eslint-disable no-undef */
 describe('env', () => {
-
   describe('load default values without override', () => {
-
     const envTest = require('../../../lib/env')
 
     it('loads default ADMIN_REPO if not passed', () => {
@@ -29,11 +27,9 @@ describe('env', () => {
       const CREATE_PR_COMMENT = envTest.CREATE_PR_COMMENT
       expect(CREATE_PR_COMMENT).toEqual('true')
     })
-
   })
 
   describe('load override values', () => {
-
     beforeAll(() => {
       jest.resetModules()
       process.env.ADMIN_REPO = '.github'
@@ -57,5 +53,4 @@ describe('env', () => {
       expect(CREATE_PR_COMMENT).toEqual('false')
     })
   })
-
 })

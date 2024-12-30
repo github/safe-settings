@@ -9,12 +9,12 @@ describe('MergeDeep Test', () => {
 repository:
   name: test
   # A short description of the repository that will show up on GitHub
-  description: description of the repos 
-      
+  description: description of the repos
+
   # A comma-separated list of topics to set on the repository
-  topics: 
-  - uber 
-  - newone 
+  topics:
+  - uber
+  - newone
 branches:
   # If the name of the branch is default, it will create a branch protection for the default branch in the repo
   - name: default
@@ -49,40 +49,40 @@ branches:
         `)
 
     const source = YAML.load(`
-  repository:      
-    name: test   
+  repository:
+    name: test
     org: decyjphr-org
-    force_create: false 
+    force_create: false
     description: description of test repository
     homepage: https://newhome.github.io/
-    topics: 
-    - red  
-    auto_init: true  
-    has_issues: true 
+    topics:
+    - red
+    auto_init: true
+    has_issues: true
     has_projects: true
     has_wiki: false
     has_downloads: true
     allow_squash_merge: true
     allow_merge_commit: false
     allow_rebase_merge: false
-    default_branch: develop  
-  
-  labels:  
+    default_branch: develop
+
+  labels:
     # Labels: define labels for Issues and Pull Requests
     - name: green
       color: '#B60205'
-      description: An issue sswithss the system 
-      
+      description: An issue sswithss the system
+
   validator:
-    #pattern: '[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*' 
-    pattern: '[a-zA-Z0-9_-]+'  
-    
+    #pattern: '[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*'
+    pattern: '[a-zA-Z0-9_-]+'
+
   collaborators:
   - username: regpaco
     permission: pull
-  
-  branches:      
-    - name: feature1 
+
+  branches:
+    - name: feature1
       # https://developer.github.com/v3/repos/branches/#update-branch-protection
       # Branch Protection settings. Set to null to disable
       protection:
@@ -109,8 +109,8 @@ branches:
         # Required. Restrict who can push to this branch. Team and user restrictions are only available for organization-owned repositories. Set to null to disable.
         restrictions:
           apps: []
-          users: [] 
-          teams: []    
+          users: []
+          teams: []
         `)
 
     const expected = {
@@ -472,17 +472,17 @@ branches:
     repository:
       name: new
       home: new home
-    labels:  
+    labels:
     # Labels: define labels for Issues and Pull Requests
     - name: green
       color: '#B60205'
-      description: An issue sswithss the system     
-         
+      description: An issue sswithss the system
+
     `)
     const target = YAML.load(`
   repository:
     name: new
-    home: old home  
+    home: old home
     `)
     const expected = {
       additions: {
@@ -612,7 +612,7 @@ branches:
         required_status_checks:
           strict: true
           contexts:
-            - "Lint, compile and build"    
+            - "Lint, compile and build"
     `)
 
     const expected = {
@@ -666,18 +666,18 @@ branches:
     const source = YAML.load(`
   x:
   - name: default
-    values: 
+    values:
       a: [a,b,c]
   - name: new
-    values: 
+    values:
       a: [b]
       `)
 
     const target = YAML.load(`
     x:
     - name: default
-      values: 
-        a: [c,a]    
+      values:
+        a: [c,a]
     `)
 
     const expected = JSON.parse('{"additions":{"x":[{"name":"new","values":{"a":["b"]}}]},"modifications":{"x":[{"values":{"a":["b"]},"name":"default"}]},"hasChanges":true}')
@@ -705,34 +705,34 @@ branches:
 
   it('Repo test', () => {
     const source = YAML.load(`
-  repository:      
-    name: test   
+  repository:
+    name: test
     org: decyjphr-org
-    force_create: false 
+    force_create: false
     description: description of test repository
     homepage: https://newhome.github.io/
-    topics: 
-    - red  
-    auto_init: true  
-    has_issues: true 
+    topics:
+    - red
+    auto_init: true
+    has_issues: true
     has_projects: true
     has_wiki: false
     has_downloads: true
     allow_squash_merge: true
     allow_merge_commit: false
     allow_rebase_merge: false
-    default_branch: develop  
+    default_branch: develop
         `)
 
     const target = YAML.load(`
   repository:
     # A short description of the repository that will show up on GitHub
-    description: description of the repos 
-      
+    description: description of the repos
+
     # A comma-separated list of topics to set on the repository
-    topics: 
-    - uber 
-    - newone 
+    topics:
+    - uber
+    - newone
         `)
 
     const expected = {
@@ -1314,6 +1314,263 @@ entries:
     // console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
   })
 
+  it('Ruleset Compare Works when required_status_checks change', () => {
+    const target = [
+      {
+        id: 68617,
+        name: 'demo',
+        target: 'branch',
+        source_type: 'Organization',
+        source: 'decyjphr-scale-test',
+        enforcement: 'disabled',
+        conditions: {
+          ref_name: {
+            exclude: [
+              'refs/heads/oldmaster'
+            ],
+            include: [
+              '~DEFAULT_BRANCH'
+            ]
+          },
+          repository_name: {
+            exclude: [
+              'test',
+              'test1'
+            ],
+            include: [
+              'test*'
+            ],
+            protected: true
+          }
+        },
+        rules: [
+          {
+            type: 'creation'
+          },
+          {
+            type: 'update'
+          },
+          {
+            type: 'deletion'
+          },
+          {
+            type: 'required_linear_history'
+          },
+          {
+            type: 'required_signatures'
+          },
+          {
+            type: 'required_status_checks',
+            parameters: {
+              strict_required_status_checks_policy: true,
+              required_status_checks: [
+                {
+                  context: 'Required Status Check 1',
+                  integration_id: 1234
+                },
+                {
+                  context: 'Required Status Check 2',
+                  integration_id: 1234
+                }
+              ]
+            }
+          },
+          {
+            type: 'pull_request',
+            parameters: {
+              require_code_owner_review: true,
+              require_last_push_approval: true,
+              dismiss_stale_reviews_on_push: true,
+              required_approving_review_count: 10,
+              required_review_thread_resolution: true
+            }
+          },
+          {
+            type: 'commit_message_pattern',
+            parameters: {
+              name: 'test commit_message_pattern',
+              negate: true,
+              pattern: 'skip*',
+              operator: 'starts_with'
+            }
+          },
+          {
+            type: 'commit_author_email_pattern',
+            parameters: {
+              name: 'test commit_author_email_pattern',
+              negate: false,
+              pattern: '^.*@example.com$',
+              operator: 'regex'
+            }
+          },
+          {
+            type: 'committer_email_pattern',
+            parameters: {
+              name: 'test committer_email_pattern',
+              negate: false,
+              pattern: '^.*@example.com$',
+              operator: 'regex'
+            }
+          },
+          {
+            type: 'branch_name_pattern',
+            parameters: {
+              name: 'test branch_name_pattern',
+              negate: false,
+              pattern: '.*/.*',
+              operator: 'regex'
+            }
+          }
+        ],
+        node_id: 'RRS_lACkVXNlcs4GH_FizgABDAk',
+        _links: {
+          self: {
+            href: 'https://api.github.com/orgs/decyjphr-scale-test/rulesets/68617'
+          },
+          html: {
+            href: 'https://github.com/organizations/decyjphr-scale-test/settings/rules/68617'
+          }
+        },
+        created_at: '2023-08-11T15:55:49.071Z',
+        updated_at: '2023-08-11T15:55:49.139Z',
+        bypass_actors: [
+          {
+            actor_id: 1,
+            actor_type: 'OrganizationAdmin',
+            bypass_mode: 'pull_request'
+          }
+        ]
+      }
+    ]
+    const source = [
+      {
+        name: 'demo',
+        target: 'branch',
+        enforcement: 'disabled',
+        bypass_actors: [
+          {
+            actor_id: 1,
+            actor_type: 'OrganizationAdmin',
+            bypass_mode: 'pull_request'
+          }
+        ],
+        conditions: {
+          ref_name: {
+            include: [
+              '~DEFAULT_BRANCH'
+            ],
+            exclude: [
+              'refs/heads/oldmaster'
+            ]
+          },
+          repository_name: {
+            include: [
+              'test*'
+            ],
+            exclude: [
+              'test',
+              'test1'
+            ],
+            protected: true
+          }
+        },
+        rules: [
+          {
+            type: 'creation'
+          },
+          {
+            type: 'update'
+          },
+          {
+            type: 'deletion'
+          },
+          {
+            type: 'required_linear_history'
+          },
+          {
+            type: 'required_signatures'
+          },
+          {
+            type: 'required_status_checks',
+            parameters: {
+              strict_required_status_checks_policy: true,
+              required_status_checks: [
+                {
+                  context: 'Required Status Check 3',
+                  integration_id: 5678
+                },
+                {
+                  context: 'Required Status Check 4',
+                  integration_id: 5678
+                }
+              ]
+            }
+          },
+          {
+            type: 'pull_request',
+            parameters: {
+              dismiss_stale_reviews_on_push: true,
+              require_code_owner_review: true,
+              require_last_push_approval: true,
+              required_approving_review_count: 10,
+              required_review_thread_resolution: true
+            }
+          },
+          {
+            type: 'commit_message_pattern',
+            parameters: {
+              name: 'test commit_message_pattern',
+              negate: true,
+              operator: 'starts_with',
+              pattern: 'skip*'
+            }
+          },
+          {
+            type: 'commit_author_email_pattern',
+            parameters: {
+              name: 'test commit_author_email_pattern',
+              negate: false,
+              operator: 'regex',
+              pattern: '^.*@example.com$'
+            }
+          },
+          {
+            type: 'committer_email_pattern',
+            parameters: {
+              name: 'test committer_email_pattern',
+              negate: false,
+              operator: 'regex',
+              pattern: '^.*@example.com$'
+            }
+          },
+          {
+            type: 'branch_name_pattern',
+            parameters: {
+              name: 'test branch_name_pattern',
+              negate: false,
+              operator: 'regex',
+              pattern: '.*/.*'
+            }
+          }
+        ]
+      }
+    ]
+    const ignorableFields = ['id', 'node_id', 'default', 'url']
+    const mockReturnGitHubContext = jest.fn().mockReturnValue({
+      request: () => {}
+    })
+    const mergeDeep = new MergeDeep(
+      log,
+      mockReturnGitHubContext,
+      ignorableFields
+    )
+    const merged = mergeDeep.compareDeep(target, source)
+    expect(merged.hasChanges).toBeTruthy()
+    console.log(`source ${JSON.stringify(source, null, 2)}`)
+    console.log(`target ${JSON.stringify(target, null, 2)}`)
+    console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
+  })
+
   it('Merge array as the second level with same id - add new value', () => {
     const target = YAML.load(`
      environments:
@@ -1403,7 +1660,7 @@ entries:
            - name: ROUTE53_HOSTNAME_DEVL
              value: 'https://foo-devl.com'
            - name: SECOND_VARIABLE_DEVL
-             value: 'My_SECOND_VARIABLE_DEVL'      
+             value: 'My_SECOND_VARIABLE_DEVL'
  `)
 
     const expected = {

@@ -4,8 +4,8 @@ describe('Labels', () => {
   let github
   let log
 
-  function configure(config) {
-    const nop = false;
+  function configure (config) {
+    const nop = false
     return new Labels(nop, github, { owner: 'bkeepers', repo: 'test' }, config, log)
   }
 
@@ -112,7 +112,7 @@ describe('Labels', () => {
       const plugin = configure({
         exclude: [
           { name: 'keep' },
-          { name: '^released' },
+          { name: '^released' }
         ],
         include: [
           { name: 'no-change', color: 'FF0000', description: '' },
