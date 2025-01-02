@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+const $RefParser = require('@apidevtools/json-schema-ref-parser')
+const fs = require('node:fs/promises');
+
+(async () => {
+  const schema = await fs.readFile('schema/settings.json', 'utf-8').then(JSON.parse)
+
+  await $RefParser.dereference(schema)
+
+  await fs.mkdir('schema/dereferenced', { recursive: true })
+  await fs.writeFile('schema/dereferenced/settings.json', JSON.stringify(schema, null, 2))
+})().catch(console.error)
