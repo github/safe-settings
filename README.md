@@ -382,7 +382,7 @@ You can pass environment variables; the easiest way to do it is via a `.env` fil
 
 ## How to use
 
-1. Create an `admin` repo (or an alternative of your choosing) within your organization. Remember to set `CONFIG_REPO` if you choose something other than `admin`. See [Environment variables](#environment-variables) for more details.
+1. Create an `admin` repo (or an alternative of your choosing) within your organization. Remember to set `ADMIN_REPO` if you choose something other than `admin`. See [Environment variables](#environment-variables) for more details.
 
 2. Add the settings for the `org`, `suborgs`, and `repos`. Sample files can be found [here](docs/sample-settings).
 
