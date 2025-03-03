@@ -26,7 +26,7 @@
   "license": "ISC",
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.7.2",
-    "@probot/adapter-aws-lambda-serverless": "^3.0.2",
+    "@probot/adapter-aws-lambda-serverless": "^4.0.3",
     "deepmerge": "^4.3.1",
     "eta": "^3.5.0",
     "js-yaml": "^4.1.0",
