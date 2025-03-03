@@ -32,8 +32,8 @@
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "node-cron": "^3.0.2",
-    "octokit": "^3.1.2",
-    "probot": "^12.3.3"
+    "octokit": "^4.1.2",
+    "probot": "^13.4.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
