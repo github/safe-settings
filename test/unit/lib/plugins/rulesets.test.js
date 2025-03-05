@@ -85,6 +85,7 @@ function generateResponseRuleset(id, name, conditions, checks, org=false) {
 describe('Rulesets', () => {
   let github
   const log = jest.fn()
+  log.info = jest.fn()
   log.debug = jest.fn()
   log.error = jest.fn()
 

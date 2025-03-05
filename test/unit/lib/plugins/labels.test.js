@@ -26,7 +26,7 @@ describe('Labels', () => {
         updateLabel: jest.fn().mockImplementation(() => Promise.resolve())
       }
     }
-    log = { debug: jest.fn(), error: console.error }
+    log = { ...console, debug: jest.fn() }
   })
 
   describe('sync', () => {
