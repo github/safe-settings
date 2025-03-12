@@ -1,34 +1,33 @@
 /* eslint-disable no-undef */
 
-const { when } = require('jest-when')
 const Rulesets = require('../../../../lib/plugins/rulesets')
 const version = {
   'X-GitHub-Api-Version': '2022-11-28'
 }
-const repo_conditions = {
+const repoConditions = {
   ref_name: {
     include: ['~ALL'],
     exclude: []
-  },
+  }
 }
-const org_conditions = {
+const orgConditions = {
   ref_name: {
     include: ['~ALL'],
     exclude: []
   },
   repository_name: {
-    include: ["~ALL"],
-    exclude: ["admin"]
+    include: ['~ALL'],
+    exclude: ['admin']
   }
 }
 
-function generateRequestRuleset(id, name, conditions, checks, org=false) {
+function generateRequestRuleset (id, name, conditions, checks, org = false) {
   request = {
-    id: id,
-    name: name,
+    id,
+    name,
     target: 'branch',
     enforcement: 'active',
-    conditions: conditions,
+    conditions,
     rules: [
       {
         type: 'required_status_checks',
@@ -50,13 +49,13 @@ function generateRequestRuleset(id, name, conditions, checks, org=false) {
   return request
 }
 
-function generateResponseRuleset(id, name, conditions, checks, org=false) {
+function generateResponseRuleset (id, name, conditions, checks, org = false) {
   response = {
-    id: id,
-    name: name,
+    id,
+    name,
     target: 'branch',
     enforcement: 'active',
-    conditions: conditions,
+    conditions,
     rules: [
       {
         type: 'required_status_checks',
@@ -66,7 +65,7 @@ function generateResponseRuleset(id, name, conditions, checks, org=false) {
         }
       }
     ],
-    headers: version,
+    headers: version
   }
   if (org) {
     response.source_type = 'Organization'
@@ -88,7 +87,7 @@ describe('Rulesets', () => {
   log.debug = jest.fn()
   log.error = jest.fn()
 
-  function configure (config, scope='repo') {
+  function configure (config, scope = 'repo') {
     const noop = false
     const errors = []
     return new Rulesets(noop, github, { owner: 'jitran', repo: 'test' }, config, log, errors, scope)
@@ -103,7 +102,7 @@ describe('Rulesets', () => {
           }
         })
       },
-      request: jest.fn().mockImplementation(() => Promise.resolve('request')),
+      request: jest.fn().mockImplementation(() => Promise.resolve('request'))
     }
 
     github.request.endpoint = {
@@ -111,7 +110,7 @@ describe('Rulesets', () => {
         method: 'GET',
         url: '/repos/jitran/test/rulesets',
         headers: version
-        }
+      }
       )
     }
   })
@@ -127,7 +126,7 @@ describe('Rulesets', () => {
           generateRequestRuleset(
             1,
             'All branches',
-            repo_conditions,
+            repoConditions,
             [
               { context: 'Status Check 1' },
               { context: 'Status Check 2' }
@@ -142,7 +141,7 @@ describe('Rulesets', () => {
           generateResponseRuleset(
             1,
             'All branches',
-            repo_conditions,
+            repoConditions,
             [
               { context: 'Status Check 1' },
               { context: 'Status Check 2' }
@@ -164,7 +163,7 @@ describe('Rulesets', () => {
           generateRequestRuleset(
             1,
             'All branches',
-            repo_conditions,
+            repoConditions,
             [
               { context: 'Status Check 1' },
               { context: '{{EXTERNALLY_DEFINED}}' }
@@ -179,7 +178,7 @@ describe('Rulesets', () => {
           generateResponseRuleset(
             1,
             'All branches',
-            repo_conditions,
+            repoConditions,
             []
           )
         )
@@ -194,7 +193,7 @@ describe('Rulesets', () => {
         generateRequestRuleset(
           1,
           'All branches 1',
-          repo_conditions,
+          repoConditions,
           [
             { context: 'Custom Check 1' },
             { context: 'Custom Check 2' }
@@ -203,7 +202,7 @@ describe('Rulesets', () => {
         generateRequestRuleset(
           2,
           'All branches 2',
-          repo_conditions,
+          repoConditions,
           [
             { context: 'Custom Check 3' },
             { context: 'Custom Check 4' }
@@ -212,7 +211,7 @@ describe('Rulesets', () => {
         generateRequestRuleset(
           3,
           'All branches 3',
-          repo_conditions,
+          repoConditions,
           [
             { context: 'Custom Check 5' },
             { context: 'Custom Check 6' }
@@ -226,7 +225,7 @@ describe('Rulesets', () => {
           generateRequestRuleset(
             1,
             'All branches 1',
-            repo_conditions,
+            repoConditions,
             [
               { context: 'Status Check 1' },
               { context: '{{EXTERNALLY_DEFINED}}' }
@@ -235,7 +234,7 @@ describe('Rulesets', () => {
           generateRequestRuleset(
             2,
             'All branches 2',
-            repo_conditions,
+            repoConditions,
             [
               { context: 'Status Check 1' },
               { context: 'Status Check 2' }
@@ -244,7 +243,7 @@ describe('Rulesets', () => {
           generateRequestRuleset(
             3,
             'All branches 3',
-            repo_conditions,
+            repoConditions,
             []
           )
         ]
@@ -257,7 +256,7 @@ describe('Rulesets', () => {
           generateResponseRuleset(
             1,
             'All branches 1',
-            repo_conditions,
+            repoConditions,
             [
               { context: 'Custom Check 1' },
               { context: 'Custom Check 2' }
@@ -270,7 +269,7 @@ describe('Rulesets', () => {
           generateResponseRuleset(
             2,
             'All branches 2',
-            repo_conditions,
+            repoConditions,
             [
               { context: 'Status Check 1' },
               { context: 'Status Check 2' }
@@ -283,7 +282,7 @@ describe('Rulesets', () => {
           generateResponseRuleset(
             3,
             'All branches 3',
-            repo_conditions,
+            repoConditions,
             []
           )
         )
@@ -302,7 +301,7 @@ describe('Rulesets', () => {
           generateRequestRuleset(
             1,
             'All branches',
-            org_conditions,
+            orgConditions,
             [
               { context: 'Status Check 1' },
               { context: 'Status Check 2' }
@@ -319,7 +318,7 @@ describe('Rulesets', () => {
           generateResponseRuleset(
             1,
             'All branches',
-            org_conditions,
+            orgConditions,
             [
               { context: 'Status Check 1' },
               { context: 'Status Check 2' }
@@ -342,7 +341,7 @@ describe('Rulesets', () => {
           generateRequestRuleset(
             1,
             'All branches',
-            org_conditions,
+            orgConditions,
             [
               { context: 'Status Check 1' },
               { context: '{{EXTERNALLY_DEFINED}}' }
@@ -359,7 +358,7 @@ describe('Rulesets', () => {
           generateResponseRuleset(
             1,
             'All branches',
-            org_conditions,
+            orgConditions,
             [],
             true
           )
@@ -375,7 +374,7 @@ describe('Rulesets', () => {
         generateRequestRuleset(
           1,
           'All branches 1',
-          org_conditions,
+          orgConditions,
           [
             { context: 'Custom Check 1' },
             { context: 'Custom Check 2' }
@@ -390,7 +389,7 @@ describe('Rulesets', () => {
           generateRequestRuleset(
             1,
             'All branches 1',
-            org_conditions,
+            orgConditions,
             [
               { context: 'Status Check 1' },
               { context: '{{EXTERNALLY_DEFINED}}' }
@@ -408,7 +407,7 @@ describe('Rulesets', () => {
           generateResponseRuleset(
             1,
             'All branches 1',
-            org_conditions,
+            orgConditions,
             [
               { context: 'Custom Check 1' },
               { context: 'Custom Check 2' }
