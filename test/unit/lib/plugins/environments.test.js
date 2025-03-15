@@ -403,6 +403,133 @@ describe('Environments Plugin test suite', () => {
     })
   })
 
+  // update variable
+  describe('When there is an existing variable and config calls for a different value', () => {
+    it('detect divergence and update the variable', async () => {
+      // arrange
+      environmentName = 'variables_environment'
+      // represent config with a reviewers being a user and a team
+      const plugin = new Environments(undefined, github, { owner: org, repo }, [
+        {
+          name: environmentName,
+          variables: [
+            {
+              name: 'TEST',
+              value: 'test-updated'
+            }
+          ]
+        }
+      ], log, errors)
+
+      // model an existing environment with a variable that has a different value
+      when(github.request)
+        .calledWith('GET /repos/:org/:repo/environments', { org, repo })
+        .mockResolvedValue({
+          data: {
+            environments: [
+              fillEnvironment({
+                name: environmentName
+              })
+            ]
+          }
+        })
+
+      // model an existing environment with a variable that has a different value
+      when(github.request)
+        .calledWith('GET /repos/:org/:repo/environments/:environment_name/variables', { org, repo, environment_name: environmentName })
+        .mockResolvedValue({
+          data: {
+            variables: [
+              {
+                name: 'TEST',
+                value: 'test'
+              }
+            ]
+          }
+        })
+
+      // act - run sync() in environments.js
+      await plugin.sync().then(() => {
+        // assert - update the variables
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments', { org, repo })
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments/:environment_name/variables', { org, repo, environment_name: environmentName })
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments/:environment_name/deployment_protection_rules', { org, repo, environment_name: environmentName })
+        expect(github.request).toHaveBeenCalledWith('PATCH /repos/:org/:repo/environments/:environment_name/variables/:variable_name', expect.objectContaining({
+          org,
+          repo,
+          environment_name: environmentName,
+          variable_name: 'test',
+          value: 'test-updated'
+        }))
+      })
+    })
+  })
+
+  // delete variable
+  describe('When there are multiple variables and config calls for one to be deleted', () => {
+    it('detect divergence and delete the variable', async () => {
+      // arrange
+      environmentName = 'variables_environment'
+      // represent config with a reviewers being a user and a team
+      const plugin = new Environments(undefined, github, { owner: org, repo }, [
+        {
+          name: environmentName,
+          variables: [
+            {
+              name: 'TEST',
+              value: 'test'
+            }
+          ]
+        }
+      ], log, errors)
+
+      // model an existing environment with a variable that has a different value
+      when(github.request)
+        .calledWith('GET /repos/:org/:repo/environments', { org, repo })
+        .mockResolvedValue({
+          data: {
+            environments: [
+              fillEnvironment({
+                name: environmentName
+              })
+            ]
+          }
+        })
+
+      // model an existing environment with a variable that has a different value
+      when(github.request)
+        .calledWith('GET /repos/:org/:repo/environments/:environment_name/variables', { org, repo, environment_name: environmentName })
+        .mockResolvedValue({
+          data: {
+            variables: [
+              {
+                name: 'TEST',
+                value: 'test'
+              },
+              {
+                name: 'TEST2',
+                value: 'test2'
+              }
+            ]
+          }
+        })
+
+      // act - run sync() in environments.js
+      await plugin.sync().then(() => {
+        // assert - update the variables
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments', { org, repo })
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments/:environment_name/variables', { org, repo, environment_name: environmentName })
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments/:environment_name/deployment_protection_rules', { org, repo, environment_name: environmentName })
+        expect(github.request).toHaveBeenCalledWith('DELETE /repos/:org/:repo/environments/:environment_name/variables/:variable_name', expect.objectContaining({
+          org,
+          repo,
+          environment_name: environmentName,
+          variable_name: 'test2'
+        }))
+      })
+    })
+  })
+
   // add deployment protection rules
   describe('When there are no existing deployment protection rules, but config calls for one', () => {
     it('detect divergence and add the deployment protection rule', async () => {

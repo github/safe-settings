@@ -123,6 +123,46 @@ overridevalidators:
 
 A sample of `deployment-settings` file is found [here](docs/sample-settings/sample-deployment-settings.yml).
 
+### Custom Status Checks
+For branch protection rules and rulesets, you can allow for status checks to be defined outside of safe-settings together with your usual safe settings.
+
+This can be defined at the org, sub-org, and repo level.
+
+To configure this for branch protection rules, specify `{{EXTERNALLY_DEFINED}}` under the `contexts` keyword:
+```yaml
+branches:
+  - name: main
+    protection:
+      ...
+      required_status_checks:
+        contexts:
+          - "{{EXTERNALLY_DEFINED}}"
+```
+
+For rulesets, specify `{{EXTERNALLY_DEFINED}}` under the `required_status_checks` keyword:
+```yaml
+rulesets:
+  - name: Status Checks
+    ...
+    rules:
+      - type: required_status_checks
+        parameters:
+          required_status_checks:
+            - context: "{{EXTERNALLY_DEFINED}}"
+```
+
+Notes:
+  - For the same branch that is covered by multi-level branch protection rules, contexts defined at the org level are merged into the sub-org and repo level contexts, while contexts defined at the sub-org level are merged into the repo level contexts.
+  - Rules from the sub-org level are merged into the repo level when their ruleset share the same name. Becareful not to define the same rule type in both levels as it will be rejected by GitHub.
+  - When `{{EXTERNALLY_DEFINED}}` is defined for a new branch protection rule or ruleset configuration, they will be deployed with no status checks.
+  - When an existing branch protection rule or ruleset configuration is amended with `{{EXTERNALLY_DEFINED}}`, the status checks in the existing rules in GitHub will remain as is.
+
+> ⚠️ **Warning:**
+When `{{EXTERNALLY_DEFINED}}` is removed from an existing branch protection rule or ruleset configuration, the status checks in the existing rules in GitHub will revert to the checks that are defined in safe-settings. From this point onwards, all status checks configured through the GitHub UI will be reverted back to the safe-settings configuration.
+
+#### Status checks inheritance across scopes
+Refer to [Status checks](docs/status-checks.md).
+
 ### Performance
 When there are 1000s of repos to be managed -- and there is a global settings change -- safe-settings will have to work efficiently and only make the necessary API calls.
 
