@@ -4,6 +4,7 @@
 - type-fest, 0.3.1,(MIT OR CC0-1.0),
 - type-fest, 0.6.0,(MIT OR CC0-1.0),
 - type-fest, 0.8.1,(MIT OR CC0-1.0),
+- @apidevtools/json-schema-ref-parser, MIT
 - @babel/code-frame, 7.12.13, MIT,
 - @babel/code-frame, 7.5.5, MIT,
 - @babel/compat-data, 7.13.11, MIT,
