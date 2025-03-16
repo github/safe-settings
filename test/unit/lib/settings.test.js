@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const { Octokit } = require('octokit')
+const { Octokit } = require('@octokit/core')
 const Settings = require('../../../lib/settings')
 const yaml = require('js-yaml')
 // jest.mock('../../../lib/settings', () => {
@@ -7,7 +7,6 @@ const yaml = require('js-yaml')
 //   //const orginalSettingsInstance = new OriginalSettings(false, stubContext, mockRepo, config, mockRef, mockSubOrg)
 //   return OriginalSettings
 // })
-
 
 describe('Settings Tests', () => {
   let stubContext

@@ -1,5 +1,6 @@
 const { when } = require('jest-when')
 const Environments = require('../../../../lib/plugins/environments')
+const NopCommand = require('../../../../lib/nopcommand');
 
 describe('Environments Plugin test suite', () => {
   let github
@@ -397,6 +398,133 @@ describe('Environments Plugin test suite', () => {
           environment_name: environmentName,
           name: 'test',
           value: 'test'
+        }))
+      })
+    })
+  })
+
+  // update variable
+  describe('When there is an existing variable and config calls for a different value', () => {
+    it('detect divergence and update the variable', async () => {
+      // arrange
+      environmentName = 'variables_environment'
+      // represent config with a reviewers being a user and a team
+      const plugin = new Environments(undefined, github, { owner: org, repo }, [
+        {
+          name: environmentName,
+          variables: [
+            {
+              name: 'TEST',
+              value: 'test-updated'
+            }
+          ]
+        }
+      ], log, errors)
+
+      // model an existing environment with a variable that has a different value
+      when(github.request)
+        .calledWith('GET /repos/:org/:repo/environments', { org, repo })
+        .mockResolvedValue({
+          data: {
+            environments: [
+              fillEnvironment({
+                name: environmentName
+              })
+            ]
+          }
+        })
+
+      // model an existing environment with a variable that has a different value
+      when(github.request)
+        .calledWith('GET /repos/:org/:repo/environments/:environment_name/variables', { org, repo, environment_name: environmentName })
+        .mockResolvedValue({
+          data: {
+            variables: [
+              {
+                name: 'TEST',
+                value: 'test'
+              }
+            ]
+          }
+        })
+
+      // act - run sync() in environments.js
+      await plugin.sync().then(() => {
+        // assert - update the variables
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments', { org, repo })
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments/:environment_name/variables', { org, repo, environment_name: environmentName })
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments/:environment_name/deployment_protection_rules', { org, repo, environment_name: environmentName })
+        expect(github.request).toHaveBeenCalledWith('PATCH /repos/:org/:repo/environments/:environment_name/variables/:variable_name', expect.objectContaining({
+          org,
+          repo,
+          environment_name: environmentName,
+          variable_name: 'test',
+          value: 'test-updated'
+        }))
+      })
+    })
+  })
+
+  // delete variable
+  describe('When there are multiple variables and config calls for one to be deleted', () => {
+    it('detect divergence and delete the variable', async () => {
+      // arrange
+      environmentName = 'variables_environment'
+      // represent config with a reviewers being a user and a team
+      const plugin = new Environments(undefined, github, { owner: org, repo }, [
+        {
+          name: environmentName,
+          variables: [
+            {
+              name: 'TEST',
+              value: 'test'
+            }
+          ]
+        }
+      ], log, errors)
+
+      // model an existing environment with a variable that has a different value
+      when(github.request)
+        .calledWith('GET /repos/:org/:repo/environments', { org, repo })
+        .mockResolvedValue({
+          data: {
+            environments: [
+              fillEnvironment({
+                name: environmentName
+              })
+            ]
+          }
+        })
+
+      // model an existing environment with a variable that has a different value
+      when(github.request)
+        .calledWith('GET /repos/:org/:repo/environments/:environment_name/variables', { org, repo, environment_name: environmentName })
+        .mockResolvedValue({
+          data: {
+            variables: [
+              {
+                name: 'TEST',
+                value: 'test'
+              },
+              {
+                name: 'TEST2',
+                value: 'test2'
+              }
+            ]
+          }
+        })
+
+      // act - run sync() in environments.js
+      await plugin.sync().then(() => {
+        // assert - update the variables
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments', { org, repo })
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments/:environment_name/variables', { org, repo, environment_name: environmentName })
+        expect(github.request).toHaveBeenCalledWith('GET /repos/:org/:repo/environments/:environment_name/deployment_protection_rules', { org, repo, environment_name: environmentName })
+        expect(github.request).toHaveBeenCalledWith('DELETE /repos/:org/:repo/environments/:environment_name/variables/:variable_name', expect.objectContaining({
+          org,
+          repo,
+          environment_name: environmentName,
+          variable_name: 'test2'
         }))
       })
     })
@@ -1060,3 +1188,39 @@ describe('Environments Plugin test suite', () => {
     })
   })
 })
+
+describe('nopifyRequest', () => {
+  let github;
+  let plugin;
+  const org = 'bkeepers';
+  const repo = 'test';
+  const environment_name = 'test-environment';
+  const url = 'PUT /repos/:org/:repo/environments/:environment_name';
+  const options = { org, repo, environment_name, wait_timer: 1 };
+  const description = 'Update environment wait timer';
+
+  beforeEach(() => {
+    github = {
+      request: jest.fn(() => Promise.resolve(true))
+    };
+    plugin = new Environments(undefined, github, { owner: org, repo }, [], { debug: jest.fn(), error: console.error }, []);
+  });
+
+  it('should make a request when nop is false', async () => {
+    plugin.nop = false;
+
+    await plugin.nopifyRequest(url, options, description);
+
+    expect(github.request).toHaveBeenCalledWith(url, options);
+  });
+
+  it('should return NopCommand when nop is true', async () => {
+    plugin.nop = true;
+
+    const result = await plugin.nopifyRequest(url, options, description);
+
+    expect(result).toEqual([
+      new NopCommand('Environments', { owner: org, repo }, url, description)
+    ]);
+  });
+});
