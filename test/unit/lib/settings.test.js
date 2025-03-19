@@ -237,6 +237,7 @@ repository:
     describe('repository defined in a file using the .yaml extension', () => {
       beforeEach(() => {
         stubConfig = {
+          deploymentConfig: {},
           repoConfigs: {
             'repository.yaml': { repository: { name: 'repository', config: 'config1' } }
           }
@@ -257,6 +258,7 @@ repository:
     describe('repository defined in a file using the .yml extension', () => {
       beforeEach(() => {
         stubConfig = {
+          deploymentConfig: {},
           repoConfigs: {
             'repository.yml': { repository: { name: 'repository', config: 'config1' } }
           }
