@@ -258,41 +258,48 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     const { payload } = context
     const { repository } = payload
 
-    const adminRepo = repository.name === env.ADMIN_REPO
-    if (!adminRepo) {
-      return
-    }
-
     const defaultBranch = payload.ref === 'refs/heads/' + repository.default_branch
     if (!defaultBranch) {
       robot.log.debug('Not working on the default branch, returning...')
       return
     }
 
-    const settingsModified = payload.commits.find(commit => {
-      return commit.added.includes(Settings.FILE_NAME) ||
-        commit.modified.includes(Settings.FILE_NAME)
-    })
-    if (settingsModified) {
-      robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
-      return syncAllSettings(false, context)
-    }
+    const adminRepo = repository.name === env.ADMIN_REPO
+    if (adminRepo) {
+      const settingsModified = payload.commits.find(commit => {
+        return commit.added.includes(Settings.FILE_NAME) ||
+          commit.modified.includes(Settings.FILE_NAME)
+      })
+      if (settingsModified) {
+        robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
+        return syncAllSettings(false, context)
+      }
 
-    const repoChanges = getAllChangedRepoConfigs(payload, context.repo().owner)
-    if (repoChanges.length > 0) {
-      return Promise.all(repoChanges.map(repo => {
-        return syncSettings(false, context, repo)
-      }))
-    }
+      const repoChanges = getAllChangedRepoConfigs(payload, context.repo().owner)
+      if (repoChanges.length > 0) {
+        return Promise.all(repoChanges.map(repo => {
+          return syncSettings(false, context, repo)
+        }))
+      }
 
-    const changes = getAllChangedSubOrgConfigs(payload)
-    if (changes.length) {
-      return Promise.all(changes.map(suborg => {
-        return syncSubOrgSettings(false, context, suborg)
-      }))
-    }
+      const changes = getAllChangedSubOrgConfigs(payload)
+      if (changes.length) {
+        return Promise.all(changes.map(suborg => {
+          return syncSubOrgSettings(false, context, suborg)
+        }))
+      }
 
-    robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
+      robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
+    } else {
+      const settingsModified = payload.commits.find(commit => {
+        return commit.added.includes('.github/settings.yml') ||
+          commit.modified.includes('.github/settings.yml')
+      })
+      if (settingsModified) {
+        robot.log.debug(`Changes in '.github/settings.yml' detected, doing a sync for ${repository.name}...`)
+        return syncSettings(false, context)
+      }
+    }
   })
 
   robot.on('create', async context => {
