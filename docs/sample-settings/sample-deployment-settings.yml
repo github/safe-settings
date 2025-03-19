@@ -27,3 +27,8 @@ overridevalidators:
       Some error
     script: |
       return true
+unsafeFields:
+  # You can specify the fields that are allowed to be controlled by individual repositories
+  - /repository/description
+  - /repository/allow_auto_merge
+  

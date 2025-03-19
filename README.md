@@ -2,11 +2,16 @@
 
 [![Create a release](https://github.com/github/safe-settings/actions/workflows/create-release.yml/badge.svg)](https://github.com/github/safe-settings/actions/workflows/create-release.yml)
 
-`Safe-settings` – an app to manage policy-as-code and apply repository settings across an organization.
+`Safe-settings` - an app to manage policy-as-code and apply repository settings across an organization.
 
-1. In `safe-settings`, all the settings are stored centrally in an `admin` repo within the organization. Unlike the [GitHub Repository Settings App](https://github.com/repository-settings/app), the settings files cannot be in individual repositories.
+## Settings Locations
 
-   > It is possible specify a custom repo instead of the `admin` repo with `ADMIN_REPO`. See [Environment variables](#environment-variables) for more details.
+Settings can be stored in:
+- An `admin` repository within the organization.
+    > It is possible to specify a custom repo instead of the `admin` repo with `ADMIN_REPO`. See [Environment variables](#environment-variables) for more details.
+- A `.github/settings.yml` file in each repository (like the [GitHub Repository Settings App](https://github.com/repository-settings/app)). See [Unsafe Settings](#unsafe-settings) for more details.
+
+### `admin` Repository
 
 1. The **settings** in the **default** branch are applied. If the settings are changed on a non-default branch and a PR is created to merge the changes, the app runs in a `dry-run` mode to evaluate and validate the changes. Checks pass or fail based on the `dry-run` results.
 
@@ -31,6 +36,13 @@
 > The `suborg` and `repo` level settings directory structure cannot be customized.
 >
 
+### Unsafe Settings
+
+In the [runtime settings](#runtime-settings) file, it is possible to specify a list of `unsafeFields` that are allowed to be configured by repositories in the organization. Each `unsafeField` is expressed as a [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901). All values under an `unsafeField` are also 'unsafe', so it is advised to provide the unsafeFields as precisely as possible.
+
+See the [sample deployment settings](./docs/sample-settings/sample-deployment-settings.yml) for an example of configuring `unsafeFields`.
+
+With this set, repositories can create `.github/settings.yml` files (not currently configurable) that will be merged with values in the `admin` repository when safe-settings is run. Entries in this file that do not match `unsafeFields` in the runtime settings will be ignored.
 
 ## How it works
 
@@ -409,8 +421,17 @@ You can pass environment variables; the easiest way to do it is via a `.env` fil
 
 1. Besides the above settings files, the application can be bootstrapped with `runtime` settings.
 2. The `runtime` settings are configured in `deployment-settings.yml` that is in the directory from where the GitHub app is running.
-3. Currently the only setting that is possible are `restrictedRepos: [... ]` which allows you to configure a list of repos within your `org` that are excluded from the settings. If the `deployment-settings.yml` is not present, the following repos are added by default to the `restricted`repos list: `'admin', '.github', 'safe-settings'`
 
+#### Restricted Repos
+
+Use `restrictedRepos: [...]` to configure a list of repos within your `org` that are excluded from the settings. If the `deployment-settings.yml` is not present, the following repos are added by default to the `restricted`repos list:
+  - `admin`
+  - `.github`
+  - `safe-settings`
+
+#### Unsafe Fields
+
+Use `unsafeFields: [...]` to mark fields as configurable from individual repos. See [Unsafe Settings](#unsafe-settings) for more details.
 
 ### Notes
 

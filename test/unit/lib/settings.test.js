@@ -2,11 +2,22 @@
 const { Octokit } = require('@octokit/core')
 const Settings = require('../../../lib/settings')
 const yaml = require('js-yaml')
+const ConfigManager = require('../../../lib/configManager')
 // jest.mock('../../../lib/settings', () => {
 //   const OriginalSettings = jest.requireActual('../../../lib/settings')
 //   //const orginalSettingsInstance = new OriginalSettings(false, stubContext, mockRepo, config, mockRef, mockSubOrg)
 //   return OriginalSettings
 // })
+
+jest.mock('../../../lib/plugins/repository.js', () => jest.fn(() => ({
+  sync: jest.fn(async () => ({}))
+})))
+const mockRepoPlugin = require('../../../lib/plugins/repository.js')
+
+jest.mock('../../../lib/plugins/custom_properties.js', () => jest.fn(() => ({
+  sync: jest.fn(async () => ({}))
+})))
+const mockCustomPropsPlugin = require('../../../lib/plugins/custom_properties.js')
 
 describe('Settings Tests', () => {
   let stubContext
@@ -15,6 +26,7 @@ describe('Settings Tests', () => {
   let mockRef
   let mockSubOrg
   let subOrgConfig
+  let mockOctokit
 
   function createSettings(config) {
     const settings = new Settings(false, stubContext, mockRepo, config, mockRef, mockSubOrg)
@@ -22,7 +34,7 @@ describe('Settings Tests', () => {
   }
 
   beforeEach(() => {
-    const mockOctokit = jest.mocked(Octokit)
+    mockOctokit = jest.mocked(Octokit)
     const content = Buffer.from(`
 suborgrepos:
 - new-repo
@@ -82,11 +94,11 @@ repository:
       }
     }
 
-
-
     mockRepo = { owner: 'test', repo: 'test-repo' }
     mockRef = 'main'
     mockSubOrg = 'frontend'
+
+    jest.clearAllMocks()
   })
 
   describe('restrictedRepos', () => {
@@ -264,7 +276,6 @@ repository:
             - frontend
 
           `)
-
       })
 
       it("Should load configMap for suborgs'", async () => {
@@ -303,4 +314,62 @@ repository:
     })
   }) // loadConfigs
 
+  describe('updateRepos', () => {
+    beforeEach(() => {
+      repoConfig = {
+        repository: {
+          description: 'This is a description'
+        },
+        custom_properties: [{ name: 'test', value: 'test' }]
+      }
+    })
+
+    describe('without unsafeFields', () => {
+      beforeEach(() => {
+        stubConfig = {
+          restrictedRepos: {},
+          unsafeFields: []
+        }
+      })
+
+      it('should not set the description or custom properties', async () => {
+        settings = new Settings(false, stubContext, mockRepo, stubConfig, mockRef, null)
+
+        jest.spyOn(settings, 'loadConfigMap').mockImplementation(() => [])
+        jest.spyOn(settings, 'getRepoConfigMap').mockImplementation(() => [])
+        jest.spyOn(ConfigManager, 'loadYaml').mockImplementation(() => repoConfig)
+        mockOctokit.repos.get = jest.fn().mockResolvedValue({ data: {} })
+
+        await settings.loadConfigs({ repo: 'test-repo' })
+        await settings.updateRepos({ repo: 'test-repo' })
+
+        expect(mockRepoPlugin).not.toHaveBeenCalled()
+        expect(mockCustomPropsPlugin).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('with unsafeFields', () => {
+      beforeEach(() => {
+        stubConfig = {
+          restrictedRepos: {},
+          unsafeFields: ['/repository/description', '/custom_properties']
+        }
+      })
+
+      it('should call the plugins to set the values', async () => {
+        settings = new Settings(false, stubContext, mockRepo, stubConfig, mockRef, null)
+
+        jest.spyOn(settings, 'loadConfigMap').mockImplementation(() => [])
+        jest.spyOn(settings, 'getRepoConfigMap').mockImplementation(() => [])
+        jest.spyOn(ConfigManager, 'loadYaml').mockImplementation(() => repoConfig)
+        mockOctokit.repos.get = jest.fn().mockResolvedValue({ data: {} })
+
+        await settings.loadConfigs({ repo: 'test-repo' })
+        await settings.updateRepos({ repo: 'test-repo' })
+
+        expect(mockRepoPlugin).toHaveBeenCalledWith(false, expect.anything(), {"repo": "test-repo"}, { "description": "This is a description" }, 123, expect.anything(), [])
+        expect(mockCustomPropsPlugin).toHaveBeenCalledWith(false, expect.anything(), {"repo": "test-repo"}, [{"name": "test", "value": "test"}], expect.anything(), [])
+      })
+    })
+  }) // updateRepos
 }) // Settings Tests
