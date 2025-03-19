@@ -13,6 +13,7 @@ describe('Repository', () => {
     }
   }
   const log = jest.fn()
+  log.info = jest.fn()
   log.debug = jest.fn()
   log.error = jest.fn()
 

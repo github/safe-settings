@@ -6,6 +6,7 @@ const Branches = require('../../../../lib/plugins/branches')
 describe('Branches', () => {
   let github
   const log = jest.fn()
+  log.info = jest.fn()
   log.debug = jest.fn()
   log.error = jest.fn()
 

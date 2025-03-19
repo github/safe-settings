@@ -4,7 +4,7 @@ describe('Collaborators', () => {
   let github
 
   function configure (config) {
-    const log = { debug: jest.fn(), error: console.error }
+    const log = { ...console, debug: jest.fn() }
     return new Collaborators(undefined, github, { owner: 'bkeepers', repo: 'test' }, config, log)
   }
 
