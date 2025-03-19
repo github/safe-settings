@@ -4,6 +4,7 @@ const fs = require('fs')
 const cron = require('node-cron')
 const Glob = require('./lib/glob')
 const ConfigManager = require('./lib/configManager')
+const DeploymentConfig = require('./lib/deploymentConfig')
 const NopCommand = require('./lib/nopcommand')
 const env = require('./lib/env')
 
@@ -13,11 +14,11 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
   let appSlug = 'safe-settings'
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
     try {
-      deploymentConfig = await loadYamlFileSystem()
+      deploymentConfig = await loadYamlFileSystem(context)
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
       const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      const config = { deploymentConfig, runtimeConfig }
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       if (ref) {
         return Settings.syncAll(nop, context, repo, config, ref)
@@ -42,11 +43,11 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
 
   async function syncSubOrgSettings (nop, context, suborg, repo = context.repo(), ref) {
     try {
-      deploymentConfig = await loadYamlFileSystem()
+      deploymentConfig = await loadYamlFileSystem(context)
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
       const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      const config = { deploymentConfig, runtimeConfig }
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       return Settings.syncSubOrgs(nop, context, suborg, repo, config, ref)
     } catch (e) {
@@ -67,11 +68,11 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
 
   async function syncSettings (nop, context, repo = context.repo(), ref) {
     try {
-      deploymentConfig = await loadYamlFileSystem()
+      deploymentConfig = await loadYamlFileSystem(context)
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
       const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      const config = { deploymentConfig, runtimeConfig }
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       return Settings.sync(nop, context, repo, config, ref)
     } catch (e) {
@@ -92,14 +93,14 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
 
   async function renameSync (nop, context, repo = context.repo(), rename, ref) {
     try {
-      deploymentConfig = await loadYamlFileSystem()
+      deploymentConfig = await loadYamlFileSystem(context)
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
       const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
-      const renameConfig = Object.assign({}, config, rename)
+      const renameConfig = Object.assign({}, runtimeConfig, rename)
+      const config = { deploymentConfig, runtimeConfig: renameConfig }
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
-      return Settings.sync(nop, context, repo, renameConfig, ref)
+      return Settings.sync(nop, context, repo, config, ref)
     } catch (e) {
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
@@ -121,16 +122,8 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
    *
    * @return The parsed YAML file
    */
-  async function loadYamlFileSystem () {
-    if (deploymentConfig === undefined) {
-      const deploymentConfigPath = env.DEPLOYMENT_CONFIG_FILE
-      if (fs.existsSync(deploymentConfigPath)) {
-        deploymentConfig = yaml.load(fs.readFileSync(deploymentConfigPath))
-      } else {
-        deploymentConfig = { restrictedRepos: ['admin', '.github', 'safe-settings'] }
-      }
-    }
-    return deploymentConfig
+  async function loadYamlFileSystem (context) {
+    return new DeploymentConfig(context)
   }
 
   function getAllChangedSubOrgConfigs (payload) {

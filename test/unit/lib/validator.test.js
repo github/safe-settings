@@ -4,6 +4,8 @@ const MergeDeep = require('../../../lib/mergeDeep')
 const YAML = require('js-yaml')
 const log = require('pino')('test.log')
 
+jest.mock('../../../lib/deploymentConfig')
+
 describe('Validator Tests', () => {
   it('Branch override validator test', () => {
     const overrideMock = jest.fn((baseconfig, overrideconfig) => {
@@ -20,8 +22,10 @@ describe('Validator Tests', () => {
       console.log(`Branch config validator, baseconfig ${baseconfig}`)
       return false
     })
-    DeploymentConfig.overridevalidators = { branches: { canOverride: overrideMock, error: 'Branch overrideValidators.error' } }
-    DeploymentConfig.configvalidators = { branches: { isValid: configMock, error: 'Branch configValidators.error' } }
+    DeploymentConfig.mockImplementation(() => ({
+      overridevalidators: { branches: { canOverride: overrideMock, error: 'Branch overrideValidators.error' } },
+      configvalidators: { branches: { isValid: configMock, error: 'Branch configValidators.error' } }
+    }))
 
     const overrideconfig = YAML.load(`
           branches:
@@ -77,8 +81,10 @@ describe('Validator Tests', () => {
       console.log(`Repo config validator, baseconfig ${baseconfig}`)
       return false
     })
-    DeploymentConfig.overridevalidators = { repository: { canOverride: overrideMock, error: 'Repo overrideValidators.error' } }
-    DeploymentConfig.configvalidators = { repository: { isValid: configMock, error: 'Repo configValidators.error' } }
+    DeploymentConfig.mockImplementation(() => ({
+      overridevalidators: { repository: { canOverride: overrideMock, error: 'Repo overrideValidators.error' } },
+      configvalidators: { branches: { isValid: configMock, error: 'Branch configValidators.error' } }
+    }))
 
     const overrideconfig = YAML.load(`
   repository:
@@ -132,8 +138,10 @@ describe('Validator Tests', () => {
       console.log(`Repo config validator, baseconfig ${baseconfig}`)
       return false
     })
-    DeploymentConfig.overridevalidators = { repository: { canOverride: overrideMock, error: 'Repo overrideValidators.error' } }
-    DeploymentConfig.configvalidators = { repository: { isValid: configMock, error: 'Repo configValidators.error' } }
+    DeploymentConfig.mockImplementation(() => ({
+      overridevalidators: { repository: { canOverride: overrideMock, error: 'Repo overrideValidators.error' } },
+      configvalidators: { repository: { isValid: configMock, error: 'Repo configValidators.error' } }
+    }))
 
     const overrideconfig = YAML.load(`
   repository:
