@@ -28,7 +28,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
-          filename = env.DEPLOYMENT_CONFIG_FILE
+          filename = env.DEPLOYMENT_CONFIG_FILE_PATH
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
@@ -53,7 +53,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
-          filename = env.DEPLOYMENT_CONFIG_FILE
+          filename = env.DEPLOYMENT_CONFIG_FILE_PATH
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
@@ -78,7 +78,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
-          filename = env.DEPLOYMENT_CONFIG_FILE
+          filename = env.DEPLOYMENT_CONFIG_FILE_PATH
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
@@ -104,7 +104,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
         if (!deploymentConfig) {
-          filename = env.DEPLOYMENT_CONFIG_FILE
+          filename = env.DEPLOYMENT_CONFIG_FILE_PATH
           deploymentConfig = {}
         }
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
@@ -123,7 +123,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
    */
   async function loadYamlFileSystem () {
     if (deploymentConfig === undefined) {
-      const deploymentConfigPath = env.DEPLOYMENT_CONFIG_FILE
+      const deploymentConfigPath = env.DEPLOYMENT_CONFIG_FILE_PATH
       if (fs.existsSync(deploymentConfigPath)) {
         deploymentConfig = yaml.load(fs.readFileSync(deploymentConfigPath))
       } else {
@@ -134,7 +134,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
   }
 
   function getAllChangedSubOrgConfigs (payload) {
-    const settingPattern = new Glob(`${env.CONFIG_PATH}/suborgs/*.yml`)
+    const settingPattern = Settings.SUB_ORG_PATTERN
     // Changes will be an array of files that were added
     const added = payload.commits.map(c => {
       return (c.added.filter(s => {
@@ -158,7 +158,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
   }
 
   function getAllChangedRepoConfigs (payload, owner) {
-    const settingPattern = new Glob(`${env.CONFIG_PATH}/repos/*.yml`)
+    const settingPattern = Settings.REPO_PATTERN
     // Changes will be an array of files that were added
     const added = payload.commits.map(c => {
       return (c.added.filter(s => {
@@ -270,11 +270,11 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     }
 
     const settingsModified = payload.commits.find(commit => {
-      return commit.added.includes(Settings.FILE_NAME) ||
-        commit.modified.includes(Settings.FILE_NAME)
+      return commit.added.includes(Settings.FILE_PATH) ||
+        commit.modified.includes(Settings.FILE_PATH)
     })
     if (settingsModified) {
-      robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
+      robot.log.debug(`Changes in '${Settings.FILE_PATH}' detected, doing a full synch...`)
       return syncAllSettings(false, context)
     }
 
@@ -292,7 +292,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       }))
     }
 
-    robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
+    robot.log.debug(`No changes in '${Settings.FILE_PATH}' detected, returning...`)
   })
 
   robot.on('create', async context => {
@@ -597,21 +597,21 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     const changes = await context.octokit.repos.compareCommitsWithBasehead(params)
     const files = changes.data.files.map(f => { return f.filename })
 
-    const settingsModified = files.includes(Settings.FILE_NAME)
+    const settingsModified = files.includes(Settings.FILE_PATH)
 
     if (settingsModified) {
-      robot.log.debug(`Changes in '${Settings.FILE_NAME}' detected, doing a full synch...`)
+      robot.log.debug(`Changes in '${Settings.FILE_PATH}' detected, doing a full synch...`)
       return syncAllSettings(true, context, context.repo(), pull_request.head.ref)
     }
 
-    const repoChanges = getChangedRepoConfigName(new Glob(`${env.CONFIG_PATH}/repos/*.yml`), files, context.repo().owner)
+    const repoChanges = getChangedRepoConfigName(Settings.REPO_PATTERN, files, context.repo().owner)
     if (repoChanges.length > 0) {
       return Promise.all(repoChanges.map(repo => {
         return syncSettings(true, context, repo, pull_request.head.ref)
       }))
     }
 
-    const subOrgChanges = getChangedSubOrgConfigName(new Glob(`${env.CONFIG_PATH}/suborgs/*.yml`), files, context.repo().owner)
+    const subOrgChanges = getChangedSubOrgConfigName(Settings.SUB_ORG_PATTERN, files, context.repo().owner)
     if (subOrgChanges.length) {
       return Promise.all(subOrgChanges.map(suborg => {
         return syncSubOrgSettings(true, context, suborg, context.repo(), pull_request.head.ref)
