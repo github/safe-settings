@@ -22,7 +22,7 @@ describe('repository plugin', function () {
     const config = yaml.safeLoad(configFile, 'utf8')
     const encodedConfig = configFile.toString('base64')
     githubScope
-      .get(`/repos/${repository.owner.name}/${repository.name}/contents/${settings.FILE_NAME}`)
+      .get(`/repos/${repository.owner.name}/${repository.name}/contents/${settings.FILE_PATH}`)
       .reply(200, { content: encodedConfig, name: 'settings.yml', type: 'file' })
     githubScope
       .patch(`/repos/${repository.owner.name}/${repository.name}`, body => {
