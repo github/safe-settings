@@ -302,8 +302,14 @@ describe('Environments Plugin test suite', () => {
           deployment_branch_policy: {
             protected_branches: false,
             custom_branch_policies: [
-              'master',
-              'dev'
+              {
+                names: ['main','dev'],
+                type: 'branch'
+              },
+              {
+                names: ['v*.*.*'],
+                type: 'tag'
+              }
             ]
           }
         }
@@ -342,13 +348,22 @@ describe('Environments Plugin test suite', () => {
           org,
           repo,
           environment_name: environmentName,
-          name: 'master'
+          name: 'main',
+          type: 'branch'
         }))
         expect(github.request).toHaveBeenCalledWith('POST /repos/:org/:repo/environments/:environment_name/deployment-branch-policies', expect.objectContaining({
           org,
           repo,
           environment_name: environmentName,
-          name: 'dev'
+          name: 'dev',
+          type: 'branch'
+        }))
+        expect(github.request).toHaveBeenCalledWith('POST /repos/:org/:repo/environments/:environment_name/deployment-branch-policies', expect.objectContaining({
+          org,
+          repo,
+          environment_name: environmentName,
+          name: 'v*.*.*',
+          type: 'tag'
         }))
       })
     })
@@ -753,8 +768,14 @@ describe('Environments Plugin test suite', () => {
           deployment_branch_policy: {
             protected_branches: false,
             custom_branch_policies: [
-              'master',
-              'dev'
+              {
+                names: ['main','dev'],
+                type: 'branch'
+              },
+              {
+                names: ['v*.*.*'],
+                type: 'tag'
+              }
             ]
           }
         },
@@ -890,14 +911,24 @@ describe('Environments Plugin test suite', () => {
           org,
           repo,
           environment_name: 'deployment-branch-policy-custom_environment',
-          name: 'master'
+          name: 'main',
+          type: 'branch'
         }))
 
         expect(github.request).toHaveBeenCalledWith('POST /repos/:org/:repo/environments/:environment_name/deployment-branch-policies', expect.objectContaining({
           org,
           repo,
           environment_name: 'deployment-branch-policy-custom_environment',
-          name: 'dev'
+          name: 'dev',
+          type: 'branch'
+        }))
+
+        expect(github.request).toHaveBeenCalledWith('POST /repos/:org/:repo/environments/:environment_name/deployment-branch-policies', expect.objectContaining({
+          org,
+          repo,
+          environment_name: 'deployment-branch-policy-custom_environment',
+          name: 'v*.*.*',
+          type: 'tag'
         }))
 
         expect(github.request).toHaveBeenCalledWith('POST /repos/:org/:repo/environments/:environment_name/variables', expect.objectContaining({
@@ -957,8 +988,14 @@ describe('Environments Plugin test suite', () => {
           deployment_branch_policy: {
             protected_branches: false,
             custom_branch_policies: [
-              'master',
-              'dev'
+              {
+                names: ['main','dev'],
+                type: 'branch'
+              },
+              {
+                names: ['v*.*.*'],
+                type: 'tag'
+              }
             ]
           }
         },
@@ -1012,8 +1049,14 @@ describe('Environments Plugin test suite', () => {
           deployment_branch_policy: {
             protected_branches: false,
             custom_branch_policies: [
-              'master',
-              'dev'
+              {
+                names: ['main','dev'],
+                type: 'branch'
+              },
+              {
+                names: ['v*.*.*'],
+                type: 'tag'
+              }
             ]
           }
         },
@@ -1149,14 +1192,24 @@ describe('Environments Plugin test suite', () => {
           org,
           repo,
           environment_name: 'deployment-branch-policy-custom_environment',
-          name: 'master'
+          name: 'main',
+          type: 'branch'
         }))
 
         expect(github.request).toHaveBeenCalledWith('POST /repos/:org/:repo/environments/:environment_name/deployment-branch-policies', expect.objectContaining({
           org,
           repo,
           environment_name: 'deployment-branch-policy-custom_environment',
-          name: 'dev'
+          name: 'dev',
+          type: 'branch'
+        }))
+
+        expect(github.request).toHaveBeenCalledWith('POST /repos/:org/:repo/environments/:environment_name/deployment-branch-policies', expect.objectContaining({
+          org,
+          repo,
+          environment_name: 'deployment-branch-policy-custom_environment',
+          name: 'v*.*.*',
+          type: 'tag'
         }))
 
         expect(github.request).toHaveBeenCalledWith('POST /repos/:org/:repo/environments/:environment_name/variables', expect.objectContaining({
