@@ -10,9 +10,9 @@ describe('Branches', () => {
   log.error = jest.fn()
 
   function configure (config) {
-    const noop = false
+    const nop = false
     const errors = []
-    return new Branches(noop, github, { owner: 'bkeepers', repo: 'test' }, config, log, errors)
+    return new Branches(nop, github, { owner: 'bkeepers', repo: 'test' }, config, log, errors)
   }
 
   beforeEach(() => {
