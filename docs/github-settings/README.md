@@ -10,3 +10,4 @@
 | Configure deployment environments | [Deployment Environments](6.%20deployment-environments.md) |
 | Configure auto-link references | [AutoLinks](7.%20autolinks.md) |
 | Configure pre-defined labels for issues and pull requests | [Labels](8.%20labels.md) |
+

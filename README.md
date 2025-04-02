@@ -30,7 +30,6 @@
 > [!NOTE]
 > The `suborg` and `repo` level settings directory structure cannot be customized.
 >
-> Settings files must have a `.yml` extension only. For now, the `.yaml` extension is ignored.
 
 
 ## How it works

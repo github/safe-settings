@@ -17,9 +17,9 @@ describe('Repository', () => {
   log.error = jest.fn()
 
   function configure (config) {
-    const noop = false
+    const nop = false
     const errors = []
-    return new Repository(noop, github, { owner: 'bkeepers', repo: 'test' }, config, 1, log, errors)
+    return new Repository(nop, github, { owner: 'bkeepers', repo: 'test' }, config, 1, log, errors)
   }
 
   describe('sync', () => {
