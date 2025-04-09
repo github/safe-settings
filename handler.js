@@ -2,7 +2,7 @@ const {
   createLambdaFunction,
   createProbot
 } = require('@probot/adapter-aws-lambda-serverless')
-const { getProbotOctoKit } = require('lib/proxyAwareProbotOctokit')
+const { getProbotOctoKit } = require('./lib/proxyAwareProbotOctokit')
 
 const appFn = require('./')
 
