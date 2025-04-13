@@ -78,7 +78,7 @@ This will start the container in the background and detached.
   - `docker ps`
 - This should show the `safe-settings` alive and running
 
-### Start Docker container attached in forground (Debug)
+### Start Docker container attached in foreground (Debug)
 - If you need to run the container in interactive mode to validate connectivity and functionality:
   - `docker run -it -p 3000:3000 safe-settings`
 - You will now have the log of the container showing to your terminal, and can validate connectivity and functionality.
