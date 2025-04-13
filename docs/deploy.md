@@ -54,8 +54,8 @@ Optional values in the .env file can be found under the [Environment variables](
 
 Once you have the `.env` file configured, you are ready to start the building of the container.
 
-### Docker
-#### Build the Docker container
+## Docker
+### Build the Docker container
 Once you have configured the **GitHub App** and updated the source code, you should be ready to build the container.
 - Change directory to inside the code base
   - `cd safe-settings/`
@@ -63,33 +63,39 @@ Once you have configured the **GitHub App** and updated the source code, you sho
   - `docker build -t safe-settings .`
 - This process should complete successfully and you will then have a **Docker** container ready for deployment
 
-#### Run the Docker container
+### Run the Docker container
 Once the container has been successfully built, you can deploy it and start utilizing the **GitHub App**.
 
-#### Start the container with docker-compose
+### Start the container with docker-compose
 If you have docker-compose installed, you can simply start and stop the **Docker** container with:
 - `cd safe-settings/; docker-compose --env-file .env up -d`
 This will start the container in the background and detached.
 
-#### Start Docker container Detached in background
+### Start Docker container Detached in background
 - Start the container detached with port assigned (*Assuming port 3000 for the webhook*)
   - `docker run -d -p 3000:3000 safe-settings`
 - You should now have the container running in the background and can validate it running with the command:
   - `docker ps`
 - This should show the `safe-settings` alive and running
 
-#### Start Docker container attached in forground (Debug)
+### Start Docker container attached in forground (Debug)
 - If you need to run the container in interactive mode to validate connectivity and functionality:
   - `docker run -it -p 3000:3000 safe-settings`
 - You will now have the log of the container showing to your terminal, and can validate connectivity and functionality.
 
-#### Connect to running Docker container (Debug)
+### Connect to running Docker container (Debug)
 - If you need to connect to the container thats already running, you can run the following command:
   - `docker exec -it safe-settings /bin/sh`
 - You will now be inside the running **Docker** container and can perform any troubleshooting needed
 
-### Deploy the app to AWS Lambda
+## Deploy the app to AWS Lambda
 [Serverless Framework Deployment of safe-settings on AWS](AWS-README.md)
+
+### Proxy Support
+The AWS Lambda handler, `handler.js` uses a custom  `Octokit` factory that creates Octokit with ___Proxied fetch___ instead of the regular ___fetch___ when the `http_proxy`/`https_proxy` env variables are set.
+
+In the future we can use the same pattern to support proxy in all deployments of the app.
+
 ## Deploy the app in Kubernetes
 
 ### __Deploying using kubectl__
