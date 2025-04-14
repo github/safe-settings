@@ -114,8 +114,8 @@ default_permissions:
     # https://developer.github.com/v3/apps/permissions/
     organization_administration: write
 
-    # Manage Actions repository variables.
-    # https://developer.github.com/v3/apps/permissions/#organization-permissions-for-variables
+    # Manage Actions variables.
+    # https://docs.github.com/en/rest/actions/variables?apiVersion=2022-11-28
     actions_variables: write
 
 
