@@ -205,24 +205,24 @@ Probot runs like [any other Node app](https://devcenter.heroku.com/articles/depl
 
 1.  Make sure you have the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) client installed.
 
-1.  Clone the app that you want to deploy. e.g. `git clone https://github.com/probot/stale`
+2.  Clone the app that you want to deploy. e.g. `git clone https://github.com/probot/stale`
 
-1.  Create the Heroku app with the `heroku create` command:
+3.  Create the Heroku app with the `heroku create` command:
 
         $ heroku create
         Creating arcane-lowlands-8408... done, stack is cedar
         http://arcane-lowlands-8408.herokuapp.com/ | git@heroku.com:arcane-lowlands-8408.git
         Git remote heroku added
 
-1.  Go back to your [app settings page](https://github.com/settings/apps) and update the **Webhook URL** to the URL of your deployment, e.g. `http://arcane-lowlands-8408.herokuapp.com/`.
+4.  Go back to your [app settings page](https://github.com/settings/apps) and update the **Webhook URL** to the "${URL_of_your_deployment}/api/github/webhooks", e.g. `http://arcane-lowlands-8408.herokuapp.com/api/github/webhooks`.
 
-1.  Configure the Heroku app, replacing the `APP_ID` and `WEBHOOK_SECRET` with the values for those variables, and setting the path for the `PRIVATE_KEY`:
+5.  Configure the Heroku app, replacing the `APP_ID` and `WEBHOOK_SECRET` with the values for those variables, and setting the path for the `PRIVATE_KEY`:
 
         $ heroku config:set APP_ID=aaa \
             WEBHOOK_SECRET=bbb \
             PRIVATE_KEY="$(cat ~/Downloads/*.private-key.pem)"
 
-1.  Deploy the app to heroku with `git push`:
+6.  Deploy the app to heroku with `git push`:
 
         $ git push heroku master
         ...
@@ -231,11 +231,15 @@ Probot runs like [any other Node app](https://devcenter.heroku.com/articles/depl
         -----> Launching... done
               http://arcane-lowlands-8408.herokuapp.com deployed to Heroku
 
-1.  Your app should be up and running! To verify that your app
+7.  Your app should be up and running! To verify that your app
     is receiving webhook data, you can tail your app's logs:
 
          $ heroku config:set LOG_LEVEL=trace
          $ heroku logs --tail
+
+8. SSL [Optional]: If you want to secure webhook payloads, go to Heroku app settings => Configure SSL => Automatic Certificate Management (ACM) which uses Let's encrypt (or upload your own). Then go to the GitHub app settings, and update the url to use https:// instead
+
+9. Cron [Optional]: You can configure this app to run on a schedule using the var (CRON), you can set it in the app settings in the UI, or using `heroku config:set CRON='0 * * * *'` to run every hour for ex.
 
 ## Create the GitHub App
 
