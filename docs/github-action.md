@@ -38,13 +38,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: github/safe-settings
-          ref: $SAFE_SETTINGS_VERSION
-          path: $SAFE_SETTINGS_CODE_DIR
+          ref: ${{ env.SAFE_SETTINGS_VERSION }}
+          path: ${{ env.SAFE_SETTINGS_CODE_DIR }}
       - uses: actions/setup-node@v4
       - run: npm install
-        working-directory: $SAFE_SETTINGS_CODE_DIR
+        working-directory: ${{ env.SAFE_SETTINGS_CODE_DIR }}
       - run: npm run full-sync
-        working-directory: $SAFE_SETTINGS_CODE_DIR
+        working-directory: ${{ env.SAFE_SETTINGS_CODE_DIR }}
         env:
           GH_ORG: ${{ vars.SAFE_SETTINGS_GH_ORG }}
           APP_ID: ${{ vars.SAFE_SETTINGS_APP_ID }}
