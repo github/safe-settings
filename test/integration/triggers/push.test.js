@@ -19,7 +19,7 @@ describe('push trigger', function () {
       payload: {
         ref: 'refs/heads/wip',
         repository,
-        commits: [{ modified: [settings.FILE_NAME], added: [] }]
+        commits: [{ modified: [settings.FILE_PATH], added: [] }]
       }
     })
   })

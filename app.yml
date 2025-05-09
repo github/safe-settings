@@ -114,9 +114,9 @@ default_permissions:
     # https://developer.github.com/v3/apps/permissions/
     organization_administration: write
 
-    # Manage Actions repository variables.
-    # https://developer.github.com/v3/apps/permissions/#repository-permissions-for-variables
-    variables: write
+    # Manage Actions variables.
+    # https://docs.github.com/en/rest/actions/variables?apiVersion=2022-11-28
+    actions_variables: write
 
 
 # The name of the GitHub App. Defaults to the name specified in package.json
