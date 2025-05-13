@@ -303,4 +303,159 @@ repository:
     })
   }) // loadConfigs
 
+  describe('loadYaml', () => {
+    let settings;
+
+    beforeEach(() => {
+      Settings.fileCache = {};
+      stubContext = {
+        octokit: {
+          repos: {
+            getContent: jest.fn()
+          },
+          request: jest.fn(),
+          paginate: jest.fn()
+        },
+        log: {
+          debug: jest.fn(),
+          info: jest.fn(),
+          error: jest.fn()
+        },
+        payload: {
+          installation: {
+            id: 123
+          }
+        }
+      };
+      settings = createSettings({});
+    });
+
+    it('should return parsed YAML content when file is fetched successfully', async () => {
+      // Given
+      const filePath = 'path/to/file.yml';
+      const content = Buffer.from('key: value').toString('base64');
+      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+        data: { content },
+        headers: { etag: 'etag123' }
+      });
+
+      // When
+      const result = await settings.loadYaml(filePath);
+
+      // Then
+      expect(result).toEqual({ key: 'value' });
+      expect(Settings.fileCache[`${mockRepo.owner}/${filePath}`]).toEqual({
+        etag: 'etag123',
+        data: { content }
+      });
+    });
+
+    it('should return cached content when file has not changed (304 response)', async () => {
+      // Given
+      const filePath = 'path/to/file.yml';
+      const content = Buffer.from('key: value').toString('base64');
+      Settings.fileCache[`${mockRepo.owner}/${filePath}`] = { etag: 'etag123', data: { content } };
+      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue({ status: 304 });
+
+      // When
+      const result = await settings.loadYaml(filePath);
+
+      // Then
+      expect(result).toEqual({ key: 'value' });
+      expect(settings.github.repos.getContent).toHaveBeenCalledWith(
+        expect.objectContaining({ headers: { 'If-None-Match': 'etag123' } })
+      );
+    });
+
+    it('should not return cached content when the cache is for another org', async () => {
+      // Given
+      const filePath = 'path/to/file.yml';
+      const content = Buffer.from('key: value').toString('base64');
+      const wrongContent = Buffer.from('wrong: content').toString('base64');
+      Settings.fileCache['another-org/path/to/file.yml'] = { etag: 'etag123', data: { wrongContent } };
+      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+        data: { content },
+        headers: { etag: 'etag123' }
+      });
+
+      // When
+      const result = await settings.loadYaml(filePath);
+
+      // Then
+      expect(result).toEqual({ key: 'value' });
+    })
+
+    it('should return null when the file path is a folder', async () => {
+      // Given
+      const filePath = 'path/to/folder';
+      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+        data: []
+      });
+
+      // When
+      const result = await settings.loadYaml(filePath);
+
+      // Then
+      expect(result).toBeNull();
+    });
+
+    it('should return null when the file is a symlink or submodule', async () => {
+      // Given
+      const filePath = 'path/to/symlink';
+      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+        data: { content: null }
+      });
+
+      // When
+      const result = await settings.loadYaml(filePath);
+
+      // Then
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle 404 errors gracefully and return null', async () => {
+      // Given
+      const filePath = 'path/to/nonexistent.yml';
+      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue({ status: 404 });
+
+      // When
+      const result = await settings.loadYaml(filePath);
+
+      // Then
+      expect(result).toBeNull();
+    });
+
+    it('should throw an error for non-404 exceptions when not in nop mode', async () => {
+      // Given
+      const filePath = 'path/to/error.yml';
+      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
+
+      // When / Then
+      await expect(settings.loadYaml(filePath)).rejects.toThrow('Unexpected error');
+    });
+
+    it('should log and append NopCommand for non-404 exceptions in nop mode', async () => {
+      // Given
+      const filePath = 'path/to/error.yml';
+      settings.nop = true;
+      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
+      jest.spyOn(settings, 'appendToResults');
+
+      // When
+      const result = await settings.loadYaml(filePath);
+
+      // Then
+      expect(result).toBeUndefined();
+      expect(settings.appendToResults).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'ERROR',
+            action: expect.objectContaining({
+              msg: expect.stringContaining('Unexpected error')
+            })
+          })
+        ])
+      );
+    });
+  });
 }) // Settings Tests
