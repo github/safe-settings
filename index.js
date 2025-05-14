@@ -145,7 +145,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     ]
 
     return changes.map((file) => ({
-      name: file.match(/([^/]+)\.yml$/)[1],
+      repo: file.match(/([^/]+)\.yml$/)[1],
       path: file
     }))
   }
@@ -162,7 +162,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     ]
 
     return changes.map((file) => ({
-      name: file.match(/([^/]+)\.yml$/)[1],
+      repo: file.match(/([^/]+)\.yml$/)[1],
       owner
     }))
   }
