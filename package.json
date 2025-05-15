@@ -33,7 +33,9 @@
     "lodash": "^4.17.21",
     "node-cron": "^3.0.2",
     "octokit": "^4.1.2",
-    "probot": "^13.4.4"
+    "probot": "^13.4.4",
+    "proxy-from-env": "^1.1.0",
+    "undici": "^7.7.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
