@@ -10,7 +10,7 @@ describe('Variables', () => {
     return variables
   }
 
-  function configure (config) {
+  function configure () {
     const log = { debug: console.debug, error: console.error }
     const errors = []
     return new Variables(undefined, github, { owner: org, repo }, [{ name: 'test', value: 'test' }], log, errors)
