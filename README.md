@@ -65,7 +65,7 @@ If you rename a `<repo.yml>` that corresponds to a repo, safe-settings will rena
 
 ### Restricting `safe-settings` to specific repos
 
-To restrict which repositories `safe-settings` can manage, create a `deployment-settings.yml` file. This file controls the app's scope throught the `restrictedRepos` configuration:
+To restrict which repositories `safe-settings` can manage, create a `deployment-settings.yml` file. This file controls the app's scope through the `restrictedRepos` configuration:
 
 ```yml
 # Using include/exclude
