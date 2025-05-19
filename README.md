@@ -92,7 +92,7 @@ restrictedRepos:
 When using `include` and `exclude`:
 
 - If `include` is specified, will **only** run on repositories that match pattern(s)
-- If `exlcude` is specified, will run on all repositories **expect** those matching pattern(s)
+- If `exclude` is specified, will run on all repositories **except** those matching pattern(s)
 - If both are specified, will run only on included repositories that are'nt excluded
 
 By default, if no configuration file is provided, `safe-settings` will excludes these repos: `admin`, `.github` and `safe-settings`.
