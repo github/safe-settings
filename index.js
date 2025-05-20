@@ -134,75 +134,60 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
   }
 
   function getAllChangedSubOrgConfigs (payload) {
-    const settingPattern = Settings.SUB_ORG_PATTERN
-    // Changes will be an array of files that were added
-    const added = payload.commits.map(c => {
-      return (c.added.filter(s => {
-        robot.log.debug(JSON.stringify(s))
-        return (s.search(settingPattern) >= 0)
-      }))
-    }).flat(2)
-    const modified = payload.commits.map(c => {
-      return (c.modified.filter(s => {
-        robot.log.debug(JSON.stringify(s))
-        return (s.search(settingPattern) >= 0)
-      }))
-    }).flat(2)
-    const changes = added.concat(modified)
-    const configs = changes.map(file => {
-      const matches = file.match(settingPattern)
-      robot.log.debug(`${JSON.stringify(file)} \n ${matches[1]}`)
-      return { name: matches[1] + '.yml', path: file }
-    })
-    return configs
+    const pattern = Settings.SUB_ORG_PATTERN
+
+    const getMatchingFiles = (commits, type) =>
+      commits.flatMap((c) => c[type].filter((file) => pattern.test(file)))
+
+    const changes = [
+      ...getMatchingFiles(payload.commits, 'added'),
+      ...getMatchingFiles(payload.commits, 'modified')
+    ]
+
+    return changes.map((file) => ({
+      repo: file.match(/([^/]+)\.yml$/)[1],
+      path: file
+    }))
   }
 
   function getAllChangedRepoConfigs (payload, owner) {
-    const settingPattern = Settings.REPO_PATTERN
-    // Changes will be an array of files that were added
-    const added = payload.commits.map(c => {
-      return (c.added.filter(s => {
-        robot.log.debug(JSON.stringify(s))
-        return (s.search(settingPattern) >= 0)
-      }))
-    }).flat(2)
-    const modified = payload.commits.map(c => {
-      return (c.modified.filter(s => {
-        robot.log.debug(JSON.stringify(s))
-        return (s.search(settingPattern) >= 0)
-      }))
-    }).flat(2)
-    const changes = added.concat(modified)
-    const configs = changes.map(file => {
-      robot.log.debug(`${JSON.stringify(file)}`)
-      return { repo: file.match(settingPattern)[1], owner }
-    })
-    return configs
+    const pattern = Settings.REPO_PATTERN
+
+    const getMatchingFiles = (commits, type) =>
+      commits.flatMap((c) => c[type].filter((file) => pattern.test(file)))
+
+    const changes = [
+      ...getMatchingFiles(payload.commits, 'added'),
+      ...getMatchingFiles(payload.commits, 'modified')
+    ]
+
+    return changes.map((file) => ({
+      repo: file.match(/([^/]+)\.yml$/)[1],
+      owner
+    }))
   }
 
-  function getChangedRepoConfigName (glob, files, owner) {
-    const modifiedFiles = files.filter(s => {
-      robot.log.debug(JSON.stringify(s))
-      return (s.search(glob) >= 0)
-    })
+  function getChangedRepoConfigName (files, owner) {
+    const pattern = Settings.REPO_PATTERN
 
-    return modifiedFiles.map(modifiedFile => {
-      return { repo: modifiedFile.match(glob)[1], owner }
-    })
+    const modifiedFiles = files.filter((s) => pattern.test(s))
+
+    return modifiedFiles.map((modifiedFile) => ({
+      repo: modifiedFile.match(/([^/]+)\.yml$/)[1],
+      owner
+    }))
   }
 
-  function getChangedSubOrgConfigName (glob, files) {
-    const modifiedFiles = files.filter(s => {
-      robot.log.debug(JSON.stringify(s))
-      return (s.search(glob) >= 0)
-    })
+  function getChangedSubOrgConfigName (files) {
+    const pattern = Settings.SUB_ORG_PATTERN
 
-    return modifiedFiles.map(modifiedFile => {
-      robot.log.debug(`${JSON.stringify(modifiedFile)}`)
-      return { name: modifiedFile.match(glob)[1] + '.yml', path: modifiedFile }
-    })
+    const modifiedFiles = files.filter((s) => pattern.test(s))
+
+    return modifiedFiles.map((modifiedFile) => ({
+      name: modifiedFile.match(/([^/]+)\.yml$/)[1],
+      path: modifiedFile
+    }))
   }
-
   async function createCheckRun (context, pull_request, head_sha, head_branch) {
     const { payload } = context
     // robot.log.debug(`Check suite was requested! for ${context.repo()} ${pull_request.number} ${head_sha} ${head_branch}`)
@@ -604,14 +589,14 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       return syncAllSettings(true, context, context.repo(), pull_request.head.ref)
     }
 
-    const repoChanges = getChangedRepoConfigName(Settings.REPO_PATTERN, files, context.repo().owner)
+    const repoChanges = getChangedRepoConfigName(files, context.repo().owner)
     if (repoChanges.length > 0) {
       return Promise.all(repoChanges.map(repo => {
         return syncSettings(true, context, repo, pull_request.head.ref)
       }))
     }
 
-    const subOrgChanges = getChangedSubOrgConfigName(Settings.SUB_ORG_PATTERN, files, context.repo().owner)
+    const subOrgChanges = getChangedSubOrgConfigName(files)
     if (subOrgChanges.length) {
       return Promise.all(subOrgChanges.map(suborg => {
         return syncSubOrgSettings(true, context, suborg, context.repo(), pull_request.head.ref)

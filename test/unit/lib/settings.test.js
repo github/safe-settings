@@ -116,7 +116,7 @@ repository:
       beforeEach(() => {
         stubConfig = {
           restrictedRepos: {
-            exclude: ['foo', '.*-test$', '^personal-.*$']
+            exclude: ['foo', '*-test', 'personal-*']
           }
         }
       })
@@ -143,7 +143,7 @@ repository:
       beforeEach(() => {
         stubConfig = {
           restrictedRepos: {
-            include: ['foo', '.*-test$', '^personal-.*$']
+            include: ['foo', '*-test', 'personal-*']
           }
         }
       })
