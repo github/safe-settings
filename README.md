@@ -64,16 +64,40 @@ The App listens to the following webhook events:
 If you rename a `<repo.yml>` that corresponds to a repo, safe-settings will rename the repo to the new name. This behavior will take effect whether the env variable `BLOCK_REPO_RENAME_BY_HUMAN` is set or not.
 
 ### Restricting `safe-settings` to specific repos
-`safe-settings` can be turned on only to a subset of repos by specifying them in the runtime settings file, `deployment-settings.yml`. If no file is specified, then the following repositories -  `'admin', '.github', 'safe-settings'` are exempted by default.
-A sample of `deployment-settings` file is found [here](docs/sample-settings/sample-deployment-settings.yml).
 
-To apply `safe-settings` __only__ to a specific list of repos, add them to the `restrictedRepos` section as `include` array.
+To restrict which repositories `safe-settings` can manage, create a `deployment-settings.yml` file. This file controls the app's scope through the `restrictedRepos` configuration:
 
-To ignore `safe-settings` for a specific list of repos, add them to the `restrictedRepos` section as `exclude` array.
+```yml
+# Using include/exclude
+restrictedRepos:
+  include:
+    - api
+    - core-*    # Matches `core-api`, `core-service`, etc.
+  exclude:
+    - admin
+    - .github
+    - safe-settings
+    - test-*    # Matches `test-repo`, etc.
+
+# Or using simple array syntax for includes
+restrictedRepos: 
+  - admin
+  - .github
+  # ...
+```
 
 > [!NOTE]
-> The `include` and `exclude` attributes support as well regular expressions.
-> By default they look for regex, Example include: ['SQL'] will look apply to repos with SQL and SQL_ and SQL- etc if you want only SQL repo then use include:['^SQL$']
+> Pattern matching uses glob expressions, e.g use * for wildcards.
+
+When using `include` and `exclude`:
+
+- If `include` is specified, will **only** run on repositories that match pattern(s)
+- If `exclude` is specified, will run on all repositories **except** those matching pattern(s)
+- If both are specified, will run only on included repositories that are'nt excluded
+
+By default, if no configuration file is provided, `safe-settings` will excludes these repos: `admin`, `.github` and `safe-settings`.
+
+See our [deployment-settings.yml sample](docs/sample-settings/sample-deployment-settings.yml).
 
 ### Custom rules
 
@@ -329,24 +353,28 @@ The following can be configured:
 - `Rulesets`
 - `Environments` - wait timer, required reviewers, prevent self review, protected branches deployment branch policy, custom deployment branch policy, variables, deployment protection rules
 
-> [!important]
-> It is possible to provide an `include` or `exclude` settings to restrict the `collaborators`, `teams`, `labels` to a list of repos or exclude a set of repos for a collaborator. 
-> The include/exclude pattern can also be for glob. For e.g.:
-```
-teams:
-  - name: Myteam-admins
-    permission: admin
-  - name: Myteam-developers
-    permission: push
-  - name: Other-team
-    permission: push
-    include:
-      - '*-config'
-```
-> Will only add `Other-team` to only `*-config` repos
-
 See [`docs/sample-settings/settings.yml`](docs/sample-settings/settings.yml) for a sample settings file.
 
+> [!note]
+> When using `collaborators`, `teams` or `labels`, you can control which repositories they apply to using `include` and `exclude`:
+>
+> - If `include` is specified, settings will **only** apply to repositories that match those patterns
+> - If `exclude` is specified, settings will apply to all repositories **except** those matching the patterns  
+> - If both are specified, `exclude` takes precedence over `include` but `include` patterns will still be respected
+>
+> Pattern matching uses glob expressions, e.g use * for wildcards. For example:
+>
+> ```yml
+> teams:
+>   - name: Myteam-admins
+>     permission: admin
+>   - name: Myteam-developers
+>     permission: push
+>   - name: Other-team
+>     permission: push
+>     include:
+>       - '*-config'
+>  ```
 
 ### Additional values
 
