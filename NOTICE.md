@@ -850,7 +850,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 - isexe, 2.0.0, ISC,
 - json-stringify-safe, 5.0.1, ISC,
 - lru-cache, 6.0.0, ISC,
-- minimatch, 3.0.4, ISC,
+- minimatch, 10.0.1, ISC,
 - octokit-auth-probot, 1.2.3, ISC,
 - once, 1.4.0, ISC,
 - probot, 11.0.6, ISC,
