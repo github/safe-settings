@@ -38,7 +38,7 @@ function buildPushEvent () {
     payload: {
       ref: 'refs/heads/master',
       repository,
-      commits: [{ modified: [settings.FILE_NAME], added: [] }]
+      commits: [{ modified: [settings.FILE_PATH], added: [] }]
     }
   }
 }

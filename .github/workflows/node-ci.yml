@@ -2,6 +2,9 @@ name: Node.js CI
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -15,7 +18,12 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm install
       - run: npm run test:unit:ci
+    strategy:
+      matrix:
+        node-version:
+          - 18
+          - 20

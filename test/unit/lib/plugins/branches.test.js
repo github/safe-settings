@@ -10,9 +10,9 @@ describe('Branches', () => {
   log.error = jest.fn()
 
   function configure (config) {
-    const noop = false
+    const nop = false
     const errors = []
-    return new Branches(noop, github, { owner: 'bkeepers', repo: 'test' }, config, log, errors)
+    return new Branches(nop, github, { owner: 'bkeepers', repo: 'test' }, config, log, errors)
   }
 
   beforeEach(() => {
@@ -161,6 +161,74 @@ describe('Branches', () => {
         return plugin.sync().then(() => {
           expect(github.repos.updateBranchProtection).not.toHaveBeenCalled()
           expect(github.repos.deleteBranchProtection).not.toHaveBeenCalled()
+        })
+      })
+    })
+
+    describe('when {{EXTERNALLY_DEFINED}} is present in "required_status_checks" and no status checks exist in GitHub', () => {
+      it('it initialises the status checks with an empty list', () => {
+        const plugin = configure(
+          [{
+            name: 'main',
+            protection: {
+              required_status_checks: {
+                strict: true,
+                contexts: ['{{travis-ci', '{{EXTERNALLY_DEFINED}}']
+              }
+            }
+          }]
+        )
+
+        return plugin.sync().then(() => {
+          expect(github.repos.updateBranchProtection).toHaveBeenCalledWith({
+            owner: 'bkeepers',
+            repo: 'test',
+            branch: 'main',
+            required_status_checks: {
+              strict: true,
+              contexts: []
+            },
+            headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
+          })
+        })
+      })
+    })
+
+    describe('when {{EXTERNALLY_DEFINED}} is present in "required_status_checks" and status checks exist in GitHub', () => {
+      it('it retains the status checks from GitHub', () => {
+        github.repos.getBranchProtection = jest.fn().mockResolvedValue({
+          data: {
+            enforce_admins: { enabled: false },
+            protection: {
+              required_status_checks: {
+                contexts: ['check-1', 'check-2']
+              }
+            }
+          }
+        })
+        const plugin = configure(
+          [{
+            name: 'main',
+            protection: {
+              required_status_checks: {
+                strict: true,
+                contexts: ['{{travis-ci', '{{EXTERNALLY_DEFINED}}']
+              }
+            }
+          }]
+        )
+
+        return plugin.sync().then(() => {
+          expect(github.repos.updateBranchProtection).toHaveBeenCalledWith({
+            owner: 'bkeepers',
+            repo: 'test',
+            branch: 'main',
+            required_status_checks: {
+              strict: true,
+              contexts: ['check-1', 'check-2']
+            },
+            headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
+          })
         })
       })
     })

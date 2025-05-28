@@ -8,9 +8,16 @@
         "standard"
     ],
     "parserOptions": {
-        "ecmaVersion": 12
+        "ecmaVersion": 13
     },
     "rules": {
     },
-    "ignorePatterns": ["test/**/*.js"]
+    "overrides": [
+        {
+            "files": ["test/**/*.js"],
+            "env": {
+                "jest": true
+            }
+        }
+    ]
 }

@@ -4,6 +4,7 @@
 - type-fest, 0.3.1,(MIT OR CC0-1.0),
 - type-fest, 0.6.0,(MIT OR CC0-1.0),
 - type-fest, 0.8.1,(MIT OR CC0-1.0),
+- @apidevtools/json-schema-ref-parser, MIT
 - @babel/code-frame, 7.12.13, MIT,
 - @babel/code-frame, 7.5.5, MIT,
 - @babel/compat-data, 7.13.11, MIT,
@@ -849,7 +850,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 - isexe, 2.0.0, ISC,
 - json-stringify-safe, 5.0.1, ISC,
 - lru-cache, 6.0.0, ISC,
-- minimatch, 3.0.4, ISC,
+- minimatch, 10.0.1, ISC,
 - octokit-auth-probot, 1.2.3, ISC,
 - once, 1.4.0, ISC,
 - probot, 11.0.6, ISC,

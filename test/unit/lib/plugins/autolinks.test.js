@@ -16,7 +16,7 @@ describe('Autolinks', () => {
       repos: {
         listAutolinks: jest.fn().mockResolvedValue([]),
         createAutolink: jest.fn().mockResolvedValue(),
-        deleteAutolink: jest.fn().mockResolvedValue(),
+        deleteAutolink: jest.fn().mockResolvedValue()
       }
     }
   })
@@ -32,7 +32,7 @@ describe('Autolinks', () => {
         { key_prefix: 'SAME_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: true },
         { key_prefix: 'NEW_ALPHA-UNDEFINED-', url_template: 'https://test/<num>' },
         { key_prefix: 'NEW_ALPHA-FALSE-', url_template: 'https://test/<num>', is_alphanumeric: false },
-        { key_prefix: 'NEW_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: true },
+        { key_prefix: 'NEW_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: true }
       ])
 
       github.repos.listAutolinks.mockResolvedValueOnce({
@@ -45,7 +45,7 @@ describe('Autolinks', () => {
           { id: '6', key_prefix: 'SAME_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: true },
           { id: '7', key_prefix: 'NEW_ALPHA-UNDEFINED-', url_template: 'https://test/<num>', is_alphanumeric: false },
           { id: '8', key_prefix: 'NEW_ALPHA-FALSE-', url_template: 'https://test/<num>', is_alphanumeric: true },
-          { id: '9', key_prefix: 'NEW_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: false },
+          { id: '9', key_prefix: 'NEW_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: false }
         ]
       })
 
@@ -54,89 +54,89 @@ describe('Autolinks', () => {
           key_prefix: 'ADD-',
           url_template: 'https://test/<num>',
           is_alphanumeric: true,
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).toHaveBeenCalledWith({
           autolink_id: '2',
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).toHaveBeenCalledWith({
           autolink_id: '3',
-           ...repo
+          ...repo
         })
         expect(github.repos.createAutolink).toHaveBeenCalledWith({
           key_prefix: 'NEW_URL-',
           url_template: 'https://new-url/<num>',
           is_alphanumeric: true,
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).not.toHaveBeenCalledWith({
           autolink_id: '4',
-           ...repo
+          ...repo
         })
         expect(github.repos.createAutolink).not.toHaveBeenCalledWith({
           key_prefix: 'SAME_ALPHA-UNDEFINED-',
           url_template: 'https://test/<num>',
           is_alphanumeric: true,
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).not.toHaveBeenCalledWith({
           autolink_id: '5',
-           ...repo
+          ...repo
         })
         expect(github.repos.createAutolink).not.toHaveBeenCalledWith({
           key_prefix: 'SAME_ALPHA-FALSE-',
           url_template: 'https://test/<num>',
           is_alphanumeric: false,
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).not.toHaveBeenCalledWith({
           autolink_id: '6',
-           ...repo
+          ...repo
         })
         expect(github.repos.createAutolink).not.toHaveBeenCalledWith({
           key_prefix: 'SAME_ALPHA-TRUE-',
           url_template: 'https://test/<num>',
           is_alphanumeric: true,
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).toHaveBeenCalledWith({
           autolink_id: '7',
-           ...repo
+          ...repo
         })
         expect(github.repos.createAutolink).toHaveBeenCalledWith({
           key_prefix: 'NEW_ALPHA-UNDEFINED-',
           url_template: 'https://test/<num>',
           is_alphanumeric: true,
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).toHaveBeenCalledWith({
           autolink_id: '8',
-           ...repo
+          ...repo
         })
         expect(github.repos.createAutolink).toHaveBeenCalledWith({
           key_prefix: 'NEW_ALPHA-FALSE-',
           url_template: 'https://test/<num>',
           is_alphanumeric: false,
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).toHaveBeenCalledWith({
           autolink_id: '9',
-           ...repo
+          ...repo
         })
         expect(github.repos.createAutolink).toHaveBeenCalledWith({
           key_prefix: 'NEW_ALPHA-TRUE-',
           url_template: 'https://test/<num>',
           is_alphanumeric: true,
-           ...repo
+          ...repo
         })
 
         expect(github.repos.deleteAutolink).toHaveBeenCalledTimes(5)
