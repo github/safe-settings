@@ -1,0 +1,5 @@
+variables:
+  - name: MY_VAR_1
+    permission: batman
+  - name: MY_VAR_2
+    permission: superman
