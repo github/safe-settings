@@ -234,7 +234,22 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
         log: robot.log,
         repo: () => { return { repo: env.ADMIN_REPO, owner: installation.account.login } }
       }
-      return syncAllSettings(nop, context)
+      
+      // Use environment variable for branch reference, fallback to undefined (main branch)
+      let ref = process.env.SAFE_SETTINGS_BRANCH || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || process.env.GITHUB_REF
+      
+      // If we have a ref and it doesn't start with refs/, assume it's a branch name and add refs/heads/
+      if (ref && !ref.startsWith('refs/')) {
+        ref = `refs/heads/${ref}`
+      }
+      // If it starts with refs/heads/ already, use as-is
+      // If it's undefined, will use main branch
+      
+      if (ref) {
+        robot.log.info(`Using branch reference: ${ref}`)
+      }
+      
+      return syncAllSettings(nop, context, context.repo(), ref)
     }
     return null
   }
