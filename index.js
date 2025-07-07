@@ -578,9 +578,23 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     if (check_suite.before === '0000000000000000000000000000000000000000') {
       check_suite.before = check_suite.pull_requests[0].base.sha
     }
-    params = Object.assign(context.repo(), { basehead: `${check_suite.before}...${check_suite.after}` })
-    const changes = await context.octokit.repos.compareCommitsWithBasehead(params)
-    const files = changes.data.files.map(f => { return f.filename })
+    params = Object.assign(context.repo(), { pull_number: pull_request.number, per_page: 100 })
+
+    const files = await context.octokit.paginate(context.octokit.pulls.listFiles, params, (response) => {
+      const files = new Set()
+
+      for (const file of response.data) {
+        files.add(file.filename)
+
+        if (file.previous_filename) {
+          files.add(file.previous_filename)
+        }
+      }
+
+      return Array.from(files)
+    })
+
+    robot.log.debug('Files changed', { files })
 
     const settingsModified = files.includes(Settings.FILE_PATH)
 
