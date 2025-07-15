@@ -166,7 +166,7 @@ Follow the instructions [here](#build-the-docker-container) on how to do it.
 
 
 > [!NOTE]
-> If you want a reproducible build then you should specify a non floating tag for the image `ghcr.io/github/safe-settings:2.1.10` .
+> If you want a reproducible build then you should specify a non floating tag for the image `ghcr.io/github/safe-settings:2.1.13` .
 
 Once you built the image and pushed it to your registry you can specify it in your `values` file like this:
 
