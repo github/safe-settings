@@ -11,3 +11,6 @@ branches:
           teams:
             - core
       enforce_admins: true
+      restrictions:
+        teams:
+          - core
