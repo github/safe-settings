@@ -10,6 +10,7 @@ branches:
         bypass_pull_request_allowances:
           teams:
             - core
+      required_status_checks: null
       enforce_admins: true
       restrictions:
         teams:
