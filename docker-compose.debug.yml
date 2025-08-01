@@ -1,9 +1,11 @@
-version: '3.4'
+version: "3.4"
 
 services:
   probot:
     image: safe-settings:latest
     build: .
+    env_file:
+      - .env
     environment:
       NODE_ENV: development
       APP_ID: ${APP_ID}

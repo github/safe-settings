@@ -1,6 +1,13 @@
-repository:
-  name: settings
-  description: Pull Requests for GitHub repository settings
-  homepage: https://github.com/apps/settings
-  topics: probot-app, github-app
-  has_wiki: false
+branches:
+  - name: default
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+        require_last_push_approval: true
+        require_linear_history: false
+        bypass_pull_request_allowances:
+          teams:
+            - core
+      enforce_admins: true
