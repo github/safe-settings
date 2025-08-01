@@ -2,6 +2,13 @@
 
 This is our own documentation for deploying to GCP. In general this should only need to be done once, unless we need to modify any of the core logic. Changes to settings in [`.github`](./.github) will be automatically picked up.
 
+Authenticate:
+
+```bash
+$ gcloud auth print-access-token | helm registry login -u oauth2accesstoken \
+--password-stdin https://us-central1-docker.pkg.dev
+```
+
 Package Helm chart:
 
 ```bash
@@ -42,5 +49,12 @@ $ gcloud container clusters get-credentials --zone us-central1-a safe-settings-c
 $ source .env
 helm install safe-settings oci://us-central1-docker.pkg.dev/hacktron-462816/safe-settings/safe-settings --version 0.1.0 --set env.ADMIN_REPO="$ADMIN_REPO" --set env.GH_ORG="$GH_ORG" --set env.CRON="$CRON" --set env.APP_ID="\"$APP_ID\"" --set env.PRIVATE_KEY="$PRIVATE_KEY" --set env.WEBHOOK_SECRET="$WEBHOOK_SECRET" --set env.GITHUB_CLIENT_ID="$GITHUB_CLIENT_ID" --set env.GITHUB_CLIENT_SECRET="$GITHUB_CLIENT_SECRET" --set env.WEBHOOK_PROXY_URL="$WEBHOOK_PROXY_URL"
 
-$ helm upgrade --install safe-settings oci://us-central1-docker.pkg.dev/hacktron-462816/safe-settings/safe-settings --set env.ADMIN_REPO="$ADMIN_REPO" --set env.GH_ORG="$GH_ORG" --set env.CRON="$CRON" --set env.APP_ID="$APP_ID" --set env.PRIVATE_KEY="$PRIVATE_KEY" --set env.WEBHOOK_SECRET="$WEBHOOK_SECRET" --set env.GITHUB_CLIENT_ID="$GITHUB_CLIENT_ID" --set env.GITHUB_CLIENT_SECRET="$GITHUB_CLIENT_SECRET" --set env.WEBHOOK_PROXY_URL="$WEBHOOK_PROXY_URL" --force 
+$ helm upgrade --install safe-settings oci://us-central1-docker.pkg.dev/hacktron-462816/safe-settings/safe-settings --set env.ADMIN_REPO="$ADMIN_REPO" --set env.GH_ORG="$GH_ORG" --set env.CRON="$CRON" --set env.APP_ID="$APP_ID" --set env.PRIVATE_KEY="$PRIVATE_KEY" --set env.WEBHOOK_SECRET="$WEBHOOK_SECRET" --set env.GITHUB_CLIENT_ID="$GITHUB_CLIENT_ID" --set env.GITHUB_CLIENT_SECRET="$GITHUB_CLIENT_SECRET" --set env.WEBHOOK_PROXY_URL="$WEBHOOK_PROXY_URL" --set env.LOG_LEVEL="$LOG_LEVEL" --force 
+```
+
+If we need to SSH into the nodes through `gcloud computer ssh --tunnel-through-iap`:
+
+```bash
+$ gcloud container node-pools update --zone us-central1-a default-pool --cluster=safe-settings-cluster --tags=ssh-iap
+$ gcloud container clusters update --zone us-central1-a safe-settings-cluster --autoprovisioning-network-tags=ssh-iap
 ```
