@@ -8,10 +8,14 @@ branches:
         require_last_push_approval: true
         require_linear_history: false
         bypass_pull_request_allowances:
+          users: []
           teams:
             - core
+          apps: []
       required_status_checks: null
       enforce_admins: true
       restrictions:
+        users: []
         teams:
           - core
+        apps: []
