@@ -5,7 +5,7 @@
 replicaCount: 2
 
 image:
-  repository: ghcr.io/github/safe-settings
+  repository: us-central1-docker.pkg.dev/hacktron-462816/safe-settings/github-app
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -44,7 +44,7 @@ envFrom: []
 # - secretRef:
 #     name: app-env
 
-env: []
+env: {}
 
 service:
   type: ClusterIP
