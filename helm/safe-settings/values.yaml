@@ -3,6 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 2
+revisionHistoryLimit: 10
 
 image:
   repository: ghcr.io/github/safe-settings
