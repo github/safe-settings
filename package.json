@@ -27,6 +27,7 @@
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^12.0.2",
     "@probot/adapter-aws-lambda-serverless": "^4.0.3",
+    "ajv": "^8.17.1",
     "deepmerge": "^4.3.1",
     "eta": "^3.5.0",
     "js-yaml": "^4.1.0",

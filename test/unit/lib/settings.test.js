@@ -82,8 +82,6 @@ repository:
       }
     }
 
-
-
     mockRepo = { owner: 'test', repo: 'test-repo' }
     mockRef = 'main'
     mockSubOrg = 'frontend'
