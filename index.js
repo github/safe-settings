@@ -206,12 +206,14 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       github.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
     robot.log.debug(`installations: ${JSON.stringify(installations)}`)
-    if (installations.length > 0) {
-      const installation = installations[0]
+    const installation = installations.find(inst => inst.account.login === env.GH_ORG)
+    if (installation) {
       const github = await robot.auth(installation.id)
       const app = await github.apps.getAuthenticated()
       appSlug = app.data.slug
       robot.log.debug(`Validated the app is configured properly = \n${JSON.stringify(app.data, null, 2)}`)
+    } else {
+      robot.log.error(`No installation found for organization: ${env.GH_ORG}`)
     }
   }
 
@@ -223,8 +225,8 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       github.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
 
-    if (installations.length > 0) {
-      const installation = installations[0]
+    const installation = installations.find(inst => inst.account.login === env.GH_ORG)
+    if (installation) {
       const github = await robot.auth(installation.id)
       const context = {
         payload: {
@@ -235,6 +237,8 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
         repo: () => { return { repo: env.ADMIN_REPO, owner: installation.account.login } }
       }
       return syncAllSettings(nop, context)
+    } else {
+      robot.log.error(`No installation found for organization: ${env.GH_ORG}`)
     }
     return null
   }
