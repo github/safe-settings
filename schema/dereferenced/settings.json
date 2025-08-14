@@ -1205,6 +1205,10 @@
                         "required_review_thread_resolution": {
                           "type": "boolean",
                           "description": "All conversations on code must be resolved before a pull request can be merged."
+                        },
+                        "automatic_copilot_code_review_enabled": {
+                          "type": "boolean",
+                          "description": "Request Copilot code review for new pull requests automatically if the author has access to Copilot code review."
                         }
                       },
                       "required": [

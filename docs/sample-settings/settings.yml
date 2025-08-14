@@ -322,6 +322,10 @@ rulesets:
           # All conversations on code must be resolved before a pull
           # request can be merged.
           required_review_thread_resolution: true
+          # Request Copilot code review for new pull requests 
+          # automatically if the author has access to Copilot code 
+          # review
+          automatic_copilot_code_review_enabled: true
 
       # Choose which status checks must pass before branches can be merged
       # into a branch that matches this rule. When enabled, commits must
