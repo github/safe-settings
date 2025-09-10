@@ -1,6 +1,6 @@
 const { when } = require('jest-when')
 const Environments = require('../../../../lib/plugins/environments')
-const NopCommand = require('../../../../lib/nopcommand');
+const NopCommand = require('../../../../lib/nopcommand')
 
 describe('Environments Plugin test suite', () => {
   let github
@@ -312,7 +312,7 @@ describe('Environments Plugin test suite', () => {
             protected_branches: false,
             custom_branch_policies: [
               {
-                names: ['main','dev'],
+                names: ['main', 'dev'],
                 type: 'branch'
               },
               {
@@ -389,7 +389,7 @@ describe('Environments Plugin test suite', () => {
           name: environmentName,
           deployment_branch_policy: {
             protected_branches: false,
-            custom_branch_policies: ["main", "dev"]
+            custom_branch_policies: ['main', 'dev']
           }
         }
       ], log, errors)
@@ -841,7 +841,7 @@ describe('Environments Plugin test suite', () => {
             protected_branches: false,
             custom_branch_policies: [
               {
-                names: ['main','dev'],
+                names: ['main', 'dev'],
                 type: 'branch'
               },
               {
@@ -855,7 +855,7 @@ describe('Environments Plugin test suite', () => {
           name: 'deployment-branch-policy-custom_environment_legacy',
           deployment_branch_policy: {
             protected_branches: false,
-            custom_branch_policies: ["main", "dev"]
+            custom_branch_policies: ['main', 'dev']
           }
         },
         {
@@ -1098,7 +1098,7 @@ describe('Environments Plugin test suite', () => {
             protected_branches: false,
             custom_branch_policies: [
               {
-                names: ['main','dev'],
+                names: ['main', 'dev'],
                 type: 'branch'
               },
               {
@@ -1112,7 +1112,7 @@ describe('Environments Plugin test suite', () => {
           name: 'deployment-branch-policy-custom_environment_legacy',
           deployment_branch_policy: {
             protected_branches: false,
-            custom_branch_policies: ["main", "dev"]
+            custom_branch_policies: ['main', 'dev']
           }
         },
         {
@@ -1166,7 +1166,7 @@ describe('Environments Plugin test suite', () => {
             protected_branches: false,
             custom_branch_policies: [
               {
-                names: ['main','dev'],
+                names: ['main', 'dev'],
                 type: 'branch'
               },
               {
@@ -1180,7 +1180,7 @@ describe('Environments Plugin test suite', () => {
           name: 'new-deployment-branch-policy-custom-legacy',
           deployment_branch_policy: {
             protected_branches: false,
-            custom_branch_policies: ["main", "dev"]
+            custom_branch_policies: ['main', 'dev']
           }
         },
         {
@@ -1396,37 +1396,37 @@ describe('Environments Plugin test suite', () => {
 })
 
 describe('nopifyRequest', () => {
-  let github;
-  let plugin;
-  const org = 'bkeepers';
-  const repo = 'test';
-  const environment_name = 'test-environment';
-  const url = 'PUT /repos/:org/:repo/environments/:environment_name';
-  const options = { org, repo, environment_name, wait_timer: 1 };
-  const description = 'Update environment wait timer';
+  let github
+  let plugin
+  const org = 'bkeepers'
+  const repo = 'test'
+  const environment_name = 'test-environment'
+  const url = 'PUT /repos/:org/:repo/environments/:environment_name'
+  const options = { org, repo, environment_name, wait_timer: 1 }
+  const description = 'Update environment wait timer'
 
   beforeEach(() => {
     github = {
       request: jest.fn(() => Promise.resolve(true))
-    };
-    plugin = new Environments(undefined, github, { owner: org, repo }, [], { debug: jest.fn(), error: console.error }, []);
-  });
+    }
+    plugin = new Environments(undefined, github, { owner: org, repo }, [], { debug: jest.fn(), error: console.error }, [])
+  })
 
   it('should make a request when nop is false', async () => {
-    plugin.nop = false;
+    plugin.nop = false
 
-    await plugin.nopifyRequest(url, options, description);
+    await plugin.nopifyRequest(url, options, description)
 
-    expect(github.request).toHaveBeenCalledWith(url, options);
-  });
+    expect(github.request).toHaveBeenCalledWith(url, options)
+  })
 
   it('should return NopCommand when nop is true', async () => {
-    plugin.nop = true;
+    plugin.nop = true
 
-    const result = await plugin.nopifyRequest(url, options, description);
+    const result = await plugin.nopifyRequest(url, options, description)
 
     expect(result).toEqual([
       new NopCommand('Environments', { owner: org, repo }, url, description)
-    ]);
-  });
-});
+    ])
+  })
+})

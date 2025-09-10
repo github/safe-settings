@@ -6,11 +6,21 @@ const Glob = require('./lib/glob')
 const ConfigManager = require('./lib/configManager')
 const NopCommand = require('./lib/nopcommand')
 const env = require('./lib/env')
+const { setupRoutes } = require('./lib/routes')
+const { initCache } = require('./lib/installationCache')
+const { hubSyncHandler } = require('./lib/hubSyncHandler')
 
 let deploymentConfig
 
 module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) => {
   let appSlug = 'safe-settings'
+
+  // Initialize all routes (static UI + API) via centralized module
+  setupRoutes(robot, getRouter)
+
+  // Initialize installation cache (env-controlled prefetch)
+  initCache(robot)
+
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
     try {
       deploymentConfig = await loadYamlFileSystem()
@@ -519,6 +529,19 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       return
     }
     return createCheckRun(context, pull_request, payload.pull_request.head.sha, payload.pull_request.head.ref)
+  })
+
+  /**
+   * @description Handle pull_request.closed events to support hub synchronization
+   * @param {Object} context - The context object provided by Probot
+   */
+  robot.on('pull_request.closed', async context => {
+    try {
+      await hubSyncHandler(robot, context)
+    } catch (err) {
+      robot.log.error(`pull_request.closed handler failed: ${err && err.message ? err.message : err}`)
+    }
+    return null
   })
 
   robot.on(['check_suite.rerequested'], async context => {
