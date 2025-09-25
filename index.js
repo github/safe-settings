@@ -624,6 +624,32 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     return syncSettings(false, context)
   })
 
+  robot.on('repository.archived', async context => {
+    const { payload } = context
+    const { sender } = payload
+
+    if (sender.type === 'Bot') {
+      robot.log.debug('Repository Archived by a Bot')
+      return
+    }
+    robot.log.debug('Repository Archived by a Human')
+
+    return syncSettings(false, context)
+  })
+
+  robot.on('repository.unarchived', async context => {
+    const { payload } = context
+    const { sender } = payload
+
+    if (sender.type === 'Bot') {
+      robot.log.debug('Repository Unarchived by a Bot')
+      return
+    }
+    robot.log.debug('Repository Unarchived by a Human')
+
+    return syncSettings(false, context)
+  })
+
   if (process.env.CRON) {
     /*
     # ┌────────────── second (optional)
