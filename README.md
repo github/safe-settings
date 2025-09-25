@@ -1,6 +1,11 @@
-# GitHub Safe-Settings
+# 🛡️ GitHub Safe-Settings
 
 [![Create a release](https://github.com/github/safe-settings/actions/workflows/create-release.yml/badge.svg)](https://github.com/github/safe-settings/actions/workflows/create-release.yml)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+
+> **Policy-as-Code for GitHub Organizations**  
+> Centrally manage and enforce repository settings, branch protections, teams, and more across your entire GitHub organization.
 
 `Safe-settings` – an app to manage policy-as-code and apply repository settings across an organization.
 
@@ -29,8 +34,121 @@
 
 > [!NOTE]
 > The `suborg` and `repo` level settings directory structure cannot be customized.
->
 
+## 🚀 Quick Start
+
+### 1. **Deploy Safe-Settings**
+
+Choose your preferred deployment method:
+
+- **🌟 AWS Lambda (**: Use the [SafeSettings-Template](https://github.com/bheemreddy181/SafeSettings-Template) for production-ready deployment with Docker containers, GitHub Actions CI/CD, and comprehensive testing
+- **🐳 Docker**: Deploy using Docker containers locally or in your infrastructure
+- **☁️ Cloud Platforms**: Deploy to Heroku, Glitch, or Kubernetes
+
+👉 **[View all deployment options →](docs/deploy.md)**
+
+### 2. **Create Admin Repository**
+
+Create an `admin` repository in your organization to store all configuration files:
+
+```bash
+# Create admin repo in your organization
+gh repo create your-org/admin --private
+```
+
+### 3. **Configure Settings Structure**
+
+Set up your configuration files in the admin repository:
+
+```
+admin/
+├── .github/
+│   ├── settings.yml          # Organization-wide settings
+│   ├── suborgs/              # Sub-organization settings
+│   │   ├── frontend-team.yml
+│   │   └── backend-team.yml
+│   └── repos/                # Repository-specific settings
+│       ├── api-service.yml
+│       └── web-app.yml
+```
+
+### 4. **Install GitHub App**
+
+Install the Safe-Settings GitHub App in your organization with the required permissions.
+
+👉 **[Complete setup guide →](#how-to-use)**
+
+## 📊 Visual Architecture
+
+### Configuration Hierarchy
+
+```mermaid
+graph TD
+    A[Organization Settings<br/>.github/settings.yml] --> B[Sub-Organization Settings<br/>.github/suborgs/*.yml]
+    B --> C[Repository Settings<br/>.github/repos/*.yml]
+    
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    style B fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    style C fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000
+```
+
+**Precedence Order**: Repository > Sub-Organization > Organization
+
+### Request Flow
+
+```mermaid
+sequenceDiagram
+    participant GH as GitHub
+    participant SS as Safe-Settings
+    participant AR as Admin Repo
+    participant TR as Target Repos
+    
+    Note over GH,TR: Webhook Event Processing
+    
+    GH->>+SS: Webhook Event<br/>(push, repo created, etc.)
+    SS->>SS: Validate Event Source
+    SS->>+AR: Fetch Configuration Files<br/>(.github/settings.yml, suborgs/, repos/)
+    AR-->>-SS: Return Config Files
+    
+    SS->>SS: Merge Configurations<br/>(Org → Suborg → Repo)
+    SS->>SS: Compare with Current<br/>GitHub Settings
+    
+    alt Configuration Changes Detected
+        SS->>+TR: Apply Settings<br/>(Branch Protection, Teams, etc.)
+        TR-->>-SS: Confirm Changes
+        SS->>GH: Create Check Run<br/>(Success/Failure)
+    else No Changes Needed
+        SS->>GH: Create Check Run<br/>(No Changes)
+    end
+    
+    SS-->>-GH: HTTP 200 Response
+    
+    Note over GH,TR: Pull Request Validation (Dry-Run Mode)
+    
+    GH->>+SS: PR Event<br/>(opened, synchronize)
+    SS->>+AR: Fetch PR Changes<br/>(Modified Config Files)
+    AR-->>-SS: Return Changed Configs
+    
+    SS->>SS: Validate Changes<br/>(Dry-Run Mode)
+    SS->>SS: Run Custom Validators<br/>(if configured)
+    
+    alt Validation Passes
+        SS->>GH: ✅ Check Success<br/>+ PR Comment (optional)
+    else Validation Fails
+        SS->>GH: ❌ Check Failure<br/>+ Error Details
+    end
+    
+    SS-->>-GH: HTTP 200 Response
+    
+    Note over GH,TR: Scheduled Sync (Drift Prevention)
+    
+    SS->>SS: Cron Trigger<br/>(if configured)
+    SS->>+AR: Fetch All Configurations
+    AR-->>-SS: Return All Configs
+    SS->>+TR: Sync All Repositories<br/>(Prevent Drift)
+    TR-->>-SS: Confirm Sync
+    SS->>GH: Create Check Run<br/>(Sync Results)
+```
 
 ## How it works
 
