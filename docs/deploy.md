@@ -21,7 +21,7 @@ To deploy the app anywhere, you will need 3 key environment variables:
 ### Prepare the source code
 You will first need to clone the source code to your local environment that will run the **Docker** container.
 
-Note: If running locally without Docker, ensure that Node 16.x or later is installed.
+Note: If running locally without Docker, ensure that Node 18.x or later is installed (Node 20.x LTS recommended).
 
 - Clone the codebase
   - `git clone https://github.com/github/safe-settings.git` or `git clone <this repo>`
@@ -89,7 +89,22 @@ This will start the container in the background and detached.
 - You will now be inside the running **Docker** container and can perform any troubleshooting needed
 
 ## Deploy the app to AWS Lambda
-[Serverless Framework Deployment of safe-settings on AWS](AWS-README.md)
+
+### Production-Ready Template 
+
+For a complete, production-ready AWS Lambda deployment, use the [SafeSettings-Template](https://github.com/bheemreddy181/SafeSettings-Template):
+
+- **🚀 Quick Start**: Click "Use this template" to get started immediately
+- **🏗️ Modern Architecture**: Docker-based deployment with dual Lambda functions
+- **🧪 Full CI/CD**: GitHub Actions with automated testing and deployment
+- **📊 Smart Routing**: Handles both webhooks and scheduled sync operations
+- **⚡ Serverless**: Auto-scaling with pay-per-execution pricing
+
+See the [AWS Lambda Deployment Guide](awslambda.md) for detailed setup instructions.
+
+### Alternative: Serverless Framework
+
+For the original Serverless Framework approach, see [AWS-README.md](AWS-README.md).
 
 ### Proxy Support
 The AWS Lambda handler, `handler.js` uses a custom  `Octokit` factory that creates Octokit with ___Proxied fetch___ instead of the regular ___fetch___ when the `http_proxy`/`https_proxy` env variables are set.
