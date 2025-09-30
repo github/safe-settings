@@ -549,6 +549,14 @@ You can pass environment variables; the easiest way to do it is via a `.env` fil
   ```
   BLOCK_REPO_RENAME_BY_HUMAN=true
   ```
+1. Specify a custom branch for configuration files using `SAFE_SETTINGS_BRANCH`. This is useful for testing configuration changes from a PR branch before merging. For e.g.
+  ```
+  SAFE_SETTINGS_BRANCH=feature/my-branch
+  ```
+  Alternative environment variables that are automatically detected (in order of priority):
+  - `GITHUB_HEAD_REF` (GitHub Actions PR head branch)
+  - `GITHUB_REF_NAME` (GitHub Actions branch name)
+  - `GITHUB_REF` (GitHub Actions full ref, will be converted to branch name)
 
 
 ### Runtime Settings

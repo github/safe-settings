@@ -4,15 +4,22 @@
 # If no file is specified, the following repositories are excluded by default
 # restrictedRepos: ['admin', '.github', 'safe-settings']
 
+# restrictedRepos supports both glob patterns and regex patterns
+# Glob patterns: use * for wildcards (e.g., admin-*, core-*)
+# Regex patterns: use regex syntax (e.g., ^admin-.*$, ^\\.github$)
+# The system automatically detects the pattern type based on regex indicators
 restrictedRepos:
   exclude: 
     - admin
     - .github
     - safe-settings
-    - admin-*
+    - admin-*              # Glob pattern: matches admin-test, admin-config, etc.
+    - ^test-.*$            # Regex pattern: matches test- prefix
+    - ^\\.github$          # Regex pattern: matches exactly .github
   include:
     - docs
-    - core-*
+    - core-*               # Glob pattern: matches core-api, core-service, etc.
+    - ^production-.*env$   # Regex pattern: matches production-*env
 
 configvalidators:
   - plugin: collaborators
