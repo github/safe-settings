@@ -307,6 +307,10 @@ rulesets:
 
       - type: pull_request
         parameters:
+          # Request Copilot code review for new pull requests
+          # automatically if the author has access to Copilot code
+          # review
+          automatic_copilot_code_review_enabled: true
           # Reviewable commits pushed will dismiss previous pull
           # request review approvals.
           dismiss_stale_reviews_on_push: true

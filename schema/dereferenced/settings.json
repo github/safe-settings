@@ -1184,6 +1184,10 @@
                     "parameters": {
                       "type": "object",
                       "properties": {
+                        "automatic_copilot_code_review_enabled": {
+                          "type": "boolean",
+                          "description": "Request Copilot code review for new pull requests automatically if the author has access to Copilot code review."
+                        },
                         "dismiss_stale_reviews_on_push": {
                           "type": "boolean",
                           "description": "New, reviewable commits pushed will dismiss previous pull request review approvals."
