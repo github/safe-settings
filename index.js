@@ -639,7 +639,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
 
   robot.on('workflow_run.completed', async context => {
     const { payload } = context
-    const { workflow_run, sender } = payload
+    const { workflow_run } = payload
 
     robot.log.debug(`Workflow run completed: ${workflow_run.name} in ${payload.repository.name}`)
 
@@ -647,7 +647,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     // These workflows have a specific path pattern
     if (workflow_run.path === 'dynamic/github-code-scanning/codeql') {
       robot.log.debug(`Code Scanning Default Setup workflow detected for ${payload.repository.name}`)
-      
+
       // Trigger sync to validate code scanning configuration
       return syncSettings(false, context)
     }
