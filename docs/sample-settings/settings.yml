@@ -24,7 +24,26 @@ repository:
     enableVulnerabilityAlerts: true
     enableAutomatedSecurityFixes: true
 
-  # Either `true` to make the repository private, or `false` to make it public.
+# Code Scanning Default Setup
+# Enforce which languages are allowed to be scanned by GitHub Code Scanning Default Setup
+# This is enforced at the org level and cannot be overridden by suborg or repo configs
+code_scanning:
+  default_setup:
+    # Whether to enforce code scanning default setup language restrictions
+    enabled: true
+    languages:
+      # List of languages that are allowed to be scanned
+      # Valid values: c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift
+      allowed:
+        - javascript-typescript
+        - python
+        - java-kotlin
+      # Optional: List of languages that are explicitly blocked
+      # blocked:
+      #   - ruby
+      #   - swift
+
+# Repository settings
   # If this value is changed and if org members cannot change the visibility of repos
   # it would result in an error when updating a repo
   private: true

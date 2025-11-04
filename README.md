@@ -178,6 +178,8 @@ The App listens to the following webhook events:
 
 - __custom_property_values__: If new repository properties are set for a repository, `safe-settings` will run to so that if a sub-org config is defined by that property, it will be applied for the repo
 
+- **workflow_run.completed**: When a Code Scanning Default Setup workflow completes (identified by the path `dynamic/github-code-scanning/codeql`), `safe-settings` will validate that only approved languages are being scanned and enforce compliance by updating the configuration if unauthorized languages are detected.
+
 ### Use `safe-settings` to rename repos
 If you rename a `<repo.yml>` that corresponds to a repo, safe-settings will rename the repo to the new name. This behavior will take effect whether the env variable `BLOCK_REPO_RENAME_BY_HUMAN` is set or not.
 
@@ -470,6 +472,7 @@ The following can be configured:
 - `Repository name validation` using regex pattern
 - `Rulesets`
 - `Environments` - wait timer, required reviewers, prevent self review, protected branches deployment branch policy, custom deployment branch policy, variables, deployment protection rules
+- `Code Scanning Default Setup` - enforce allowed/blocked languages for code scanning
 
 See [`docs/sample-settings/settings.yml`](docs/sample-settings/settings.yml) for a sample settings file.
 
@@ -491,8 +494,64 @@ See [`docs/sample-settings/settings.yml`](docs/sample-settings/settings.yml) for
 >   - name: Other-team
 >     permission: push
 >     include:
->       - '*-config'
->  ```
+       - '*-config'
+  ```
+
+### Code Scanning Default Setup
+
+`Safe-settings` can enforce policies for GitHub Code Scanning Default Setup, ensuring that only approved programming languages are scanned across your organization.
+
+#### How it works
+
+1. **Reactive Enforcement**: When a Code Scanning Default Setup workflow completes, the `workflow_run.completed` webhook is triggered. Safe-settings identifies these workflows by their path `dynamic/github-code-scanning/codeql` and validates the configuration.
+
+2. **Proactive Enforcement**: During scheduled syncs (if `CRON` is configured), safe-settings checks all repositories to ensure compliance and prevent configuration drift.
+
+3. **Language Validation**: The app fetches the current Code Scanning Default Setup configuration via the GitHub API and validates that only allowed languages are being scanned.
+
+4. **Automatic Remediation**: If unauthorized languages are detected, safe-settings automatically updates the configuration to remove them, keeping only the approved languages.
+
+#### Configuration
+
+Code scanning policies are defined in your `settings.yml` file and are **enforced at the org level only** - they cannot be overridden by suborg or repo-level configurations.
+
+```yaml
+code_scanning:
+  default_setup:
+    # Enable or disable enforcement (default: true)
+    enabled: true
+    languages:
+      # Define allowed languages (if specified, only these are permitted)
+      allowed:
+        - javascript-typescript
+        - python
+        - java-kotlin
+      # Optionally define explicitly blocked languages
+      blocked:
+        - ruby
+        - go
+```
+
+**Supported Languages:**
+- `c-cpp`
+- `csharp`
+- `go`
+- `java-kotlin`
+- `javascript-typescript`
+- `python`
+- `ruby`
+- `swift`
+
+#### Behavior
+
+- If `allowed` is specified, only languages in this list will be permitted
+- If `blocked` is specified, these languages will be explicitly denied
+- Both can be used together for fine-grained control
+- Unauthorized languages are automatically removed from the repository's configuration
+- Changes are logged and reported in check runs during PR validation
+
+> [!IMPORTANT]
+> This feature only manages **Default Setup** configurations created through GitHub's UI. It does not affect custom Code Scanning workflows (Advanced Setup) that you create manually.
 
 ### Additional values
 
