@@ -34,6 +34,9 @@ code_scanning:
     languages:
       # List of languages that are allowed to be scanned
       # Valid values: c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift
+      # Note: Use 'javascript-typescript' for JavaScript/TypeScript repos. The API may return
+      # 'javascript', 'typescript', and 'javascript-typescript' separately, but configuration
+      # only accepts 'javascript-typescript'. The validation automatically normalizes these.
       allowed:
         - javascript-typescript
         - python

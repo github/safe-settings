@@ -537,7 +537,7 @@ code_scanning:
 - `csharp`
 - `go`
 - `java-kotlin`
-- `javascript-typescript`
+- `javascript-typescript` (note: GitHub API may return `javascript`, `typescript`, and `javascript-typescript` separately, but configuration only accepts `javascript-typescript`)
 - `python`
 - `ruby`
 - `swift`
@@ -549,6 +549,7 @@ code_scanning:
 - Both can be used together for fine-grained control
 - Unauthorized languages are automatically removed from the repository's configuration
 - Changes are logged and reported in check runs during PR validation
+- Language validation automatically normalizes `javascript` and `typescript` to `javascript-typescript` for consistency
 
 > [!IMPORTANT]
 > This feature only manages **Default Setup** configurations created through GitHub's UI. It does not affect custom Code Scanning workflows (Advanced Setup) that you create manually.
