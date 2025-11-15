@@ -494,8 +494,8 @@ See [`docs/sample-settings/settings.yml`](docs/sample-settings/settings.yml) for
 >   - name: Other-team
 >     permission: push
 >     include:
-       - '*-config'
-  ```
+  >     - '*-config'
+  > ```
 
 ### Code Scanning Default Setup
 
