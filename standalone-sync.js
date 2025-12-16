@@ -287,12 +287,25 @@ async function main() {
         if (suborgConfig) {
           logger.debug(`Applying suborg config: ${suborgName}`)
           // Merge suborg settings (arrays like rulesets and teams should be combined)
+          // For custom_properties, merge arrays and let suborg properties override org properties by name
+          const mergedCustomProps = [...(mergedSettings.custom_properties || [])]
+          if (suborgConfig.custom_properties) {
+            suborgConfig.custom_properties.forEach(suborgProp => {
+              const existingIndex = mergedCustomProps.findIndex(p => p.name === suborgProp.name)
+              if (existingIndex >= 0) {
+                mergedCustomProps[existingIndex] = suborgProp
+              } else {
+                mergedCustomProps.push(suborgProp)
+              }
+            })
+          }
+          
           mergedSettings = {
             ...mergedSettings,
             ...suborgConfig,
             rulesets: [...(mergedSettings.rulesets || []), ...(suborgConfig.rulesets || [])],
             teams: suborgConfig.teams || mergedSettings.teams,
-            custom_properties: suborgConfig.custom_properties || mergedSettings.custom_properties
+            custom_properties: mergedCustomProps
           }
         }
         
@@ -300,12 +313,25 @@ async function main() {
           logger.debug(`Applying repo-specific config`)
           // Repo-specific settings are merged with inherited settings
           // Arrays like rulesets are combined (org + suborg + repo)
+          // For custom_properties, merge arrays and let repo properties override org/suborg properties by name
+          const mergedCustomProps = [...(mergedSettings.custom_properties || [])]
+          if (repoConfig.custom_properties) {
+            repoConfig.custom_properties.forEach(repoProp => {
+              const existingIndex = mergedCustomProps.findIndex(p => p.name === repoProp.name)
+              if (existingIndex >= 0) {
+                mergedCustomProps[existingIndex] = repoProp
+              } else {
+                mergedCustomProps.push(repoProp)
+              }
+            })
+          }
+          
           mergedSettings = {
             ...mergedSettings,
             ...repoConfig,
             rulesets: [...(mergedSettings.rulesets || []), ...(repoConfig.rulesets || [])],
             teams: repoConfig.teams || mergedSettings.teams,
-            custom_properties: repoConfig.custom_properties || mergedSettings.custom_properties
+            custom_properties: mergedCustomProps
           }
         }
         
