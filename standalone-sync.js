@@ -45,9 +45,10 @@ if (!TOKEN) {
 }
 
 // Simple logger
+const logLevels = { error: 0, warn: 1, info: 2, debug: 3, trace: 4 }
 const logger = {
-  levels: { error: 0, warn: 1, info: 2, debug: 3, trace: 4 },
-  currentLevel: logger?.levels?.[LOG_LEVEL] ?? 2,
+  levels: logLevels,
+  currentLevel: logLevels[LOG_LEVEL] ?? 2,
   
   log (level, ...args) {
     if (this.levels[level] <= this.currentLevel) {
@@ -86,7 +87,20 @@ async function main() {
     
     // Load configuration files
     logger.info('Loading configuration files...')
-    const configPath = path.join(process.cwd(), '..', 'admin-repo', CONFIG_PATH)
+    
+    // Support both local testing and GitHub Actions paths
+    // Local: CONFIG_PATH can be absolute or relative to cwd
+    // GitHub Actions: CONFIG_PATH is in ../admin-repo/ directory
+    let configPath
+    if (path.isAbsolute(CONFIG_PATH)) {
+      configPath = CONFIG_PATH
+    } else if (fs.existsSync(path.join(process.cwd(), '..', 'admin-repo', CONFIG_PATH))) {
+      // GitHub Actions structure
+      configPath = path.join(process.cwd(), '..', 'admin-repo', CONFIG_PATH)
+    } else {
+      // Local testing - relative to current directory
+      configPath = path.resolve(CONFIG_PATH)
+    }
     
     // Load deployment settings
     let deploymentConfig = {}
