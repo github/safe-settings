@@ -124,6 +124,24 @@ async function main() {
     const orgSettings = yaml.load(fs.readFileSync(settingsPath, 'utf8'))
     logger.info('Organization settings loaded')
     
+    // Load suborg settings
+    const suborgsPath = path.join(configPath, 'suborgs')
+    const suborgSettings = {}
+    
+    if (fs.existsSync(suborgsPath)) {
+      logger.debug(`Loading suborg settings from: ${suborgsPath}`)
+      const suborgFiles = fs.readdirSync(suborgsPath).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'))
+      
+      for (const file of suborgFiles) {
+        const suborgName = path.basename(file, path.extname(file))
+        const suborgConfigPath = path.join(suborgsPath, file)
+        suborgSettings[suborgName] = yaml.load(fs.readFileSync(suborgConfigPath, 'utf8'))
+        logger.debug(`Loaded settings for suborg: ${suborgName}`)
+      }
+      
+      logger.info(`Loaded settings for ${Object.keys(suborgSettings).length} sub-organizations`)
+    }
+    
     // Load repo-specific settings
     const reposPath = path.join(configPath, 'repos')
     const repoSettings = {}
@@ -186,26 +204,89 @@ async function main() {
     
     logger.info(`Processing ${filteredRepos.length} repositories after filtering`)
     
+    // Helper function to determine which suborg a repo belongs to
+    function getSuborgForRepo(repoName) {
+      const suborgConfig = deploymentConfig.subOrgConfig || {}
+      
+      for (const [suborgName, config] of Object.entries(suborgConfig)) {
+        // Check include patterns
+        if (config.include) {
+          for (const pattern of config.include) {
+            const regex = new RegExp(pattern.replace(/\*/g, '.*'))
+            if (regex.test(repoName)) {
+              // Check exclude patterns
+              let excluded = false
+              if (config.exclude) {
+                for (const excludePattern of config.exclude) {
+                  const excludeRegex = new RegExp(excludePattern.replace(/\*/g, '.*'))
+                  if (excludeRegex.test(repoName)) {
+                    excluded = true
+                    break
+                  }
+                }
+              }
+              if (!excluded) {
+                return suborgName
+              }
+            }
+          }
+        }
+      }
+      
+      return null
+    }
+    
     // Process each repository
     const results = { success: [], failed: [], skipped: [] }
     
     for (const repo of filteredRepos) {
       try {
-        logger.info(`Processing repository: ${repo.name}`)
+        // Determine which suborg this repo belongs to
+        const suborgName = getSuborgForRepo(repo.name)
         
         // Check if repo has specific settings
         const repoConfig = repoSettings[repo.name]
+        const suborgConfig = suborgName ? suborgSettings[suborgName] : null
         
-        if (!repoConfig) {
-          logger.debug(`No specific config for ${repo.name}, using org defaults`)
+        if (!repoConfig && !suborgConfig) {
+          logger.trace(`Skipping ${repo.name} - no config`)
           results.skipped.push(repo.name)
           continue
         }
         
-        // Merge settings: org defaults + repo specific
-        const mergedSettings = {
-          ...orgSettings,
-          ...repoConfig
+        // Build config source description
+        const configSources = []
+        if (suborgConfig) configSources.push(`suborg:${suborgName}`)
+        if (repoConfig) configSources.push('repo-specific')
+        const configSource = configSources.length > 0 ? ` [${configSources.join(' + ')}]` : ''
+        
+        logger.info(`Processing repository: ${repo.name}${configSource}`)
+        
+        // Merge settings: org defaults + suborg + repo specific
+        let mergedSettings = { ...orgSettings }
+        
+        if (suborgConfig) {
+          logger.debug(`Applying suborg config: ${suborgName}`)
+          // Merge suborg settings (arrays like rulesets and teams should be combined)
+          mergedSettings = {
+            ...mergedSettings,
+            ...suborgConfig,
+            rulesets: [...(mergedSettings.rulesets || []), ...(suborgConfig.rulesets || [])],
+            teams: suborgConfig.teams || mergedSettings.teams,
+            custom_properties: suborgConfig.custom_properties || mergedSettings.custom_properties
+          }
+        }
+        
+        if (repoConfig) {
+          logger.debug(`Applying repo-specific config`)
+          // Repo-specific settings override everything
+          mergedSettings = {
+            ...mergedSettings,
+            ...repoConfig,
+            rulesets: repoConfig.rulesets || mergedSettings.rulesets,
+            teams: repoConfig.teams || mergedSettings.teams,
+            custom_properties: repoConfig.custom_properties || mergedSettings.custom_properties
+          }
         }
         
         logger.debug(`Merged settings for ${repo.name}:`, JSON.stringify(mergedSettings, null, 2))
