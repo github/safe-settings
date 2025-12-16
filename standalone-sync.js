@@ -12,7 +12,12 @@ const { Octokit } = require('@octokit/rest')
 const yaml = require('js-yaml')
 const fs = require('fs')
 const path = require('path')
-const Settings = require('./lib/settings')
+
+// Import plugins directly instead of using Settings orchestration
+const RepositoryPlugin = require('./lib/plugins/repository')
+const TeamsPlugin = require('./lib/plugins/teams')
+const RulesetsPlugin = require('./lib/plugins/rulesets')
+const CustomPropertiesPlugin = require('./lib/plugins/custom_properties')
 
 // Required environment variables
 const {
@@ -231,6 +236,11 @@ async function main() {
     
     logger.info(`Processing ${filteredRepos.length} repositories after filtering`)
     
+    // NOTE: Organization-level rulesets require admin:org permission and are NOT used.
+    // Instead, org-level rulesets from settings.yml are applied as repo-level rulesets
+    // to each managed repository. This provides the same protection without requiring
+    // org admin permissions.
+    
     // Helper function to determine which suborg a repo belongs to
     function getSuborgForRepo(repoName) {
       const suborgConfig = deploymentConfig.subOrgConfig || {}
@@ -288,11 +298,12 @@ async function main() {
         
         if (repoConfig) {
           logger.debug(`Applying repo-specific config`)
-          // Repo-specific settings override everything
+          // Repo-specific settings are merged with inherited settings
+          // Arrays like rulesets are combined (org + suborg + repo)
           mergedSettings = {
             ...mergedSettings,
             ...repoConfig,
-            rulesets: repoConfig.rulesets || mergedSettings.rulesets,
+            rulesets: [...(mergedSettings.rulesets || []), ...(repoConfig.rulesets || [])],
             teams: repoConfig.teams || mergedSettings.teams,
             custom_properties: repoConfig.custom_properties || mergedSettings.custom_properties
           }
@@ -352,35 +363,46 @@ async function main() {
           logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
           results.success.push(repo.name)
         } else {
-          // Apply settings using real safe-settings Settings.sync()
+          // Apply settings using plugins directly
           logger.info(`Applying settings to: ${repo.name}`)
           
           try {
-            // Create mock context object that Settings expects
-            const context = {
-              payload: {
-                installation: {
-                  id: 1 // Dummy installation ID for token-based auth
-                }
-              },
-              octokit,
-              log: logger,
-              repo: () => ({
-                owner: GH_ORG,
-                repo: repo.name
-              })
+            const repoObj = { owner: GH_ORG, repo: repo.name }
+            const errors = []
+            const installationId = 1  // Dummy ID for token auth (not used for API calls)
+            
+            // Apply repository settings (description, features, etc.)
+            if (mergedSettings.repository) {
+              logger.debug('Applying repository settings...')
+              const repoPlugin = new RepositoryPlugin(false, octokit, repoObj, mergedSettings.repository, installationId, logger, errors)
+              await repoPlugin.sync()
             }
             
-            // Create config object with deployment settings
-            const config = {
-              ...deploymentConfig,
-              overridevalidators: [],
-              configvalidators: []
+            // Apply teams
+            if (mergedSettings.teams && mergedSettings.teams.length > 0) {
+              logger.debug(`Applying ${mergedSettings.teams.length} teams...`)
+              const teamsPlugin = new TeamsPlugin(false, octokit, repoObj, mergedSettings.teams, logger, errors)
+              await teamsPlugin.sync()
             }
             
-            // Call Settings.sync to actually apply the settings
-            const nop = false // Not a no-op, actually apply changes
-            await Settings.sync(nop, context, { owner: GH_ORG, repo: repo.name }, config, 'main')
+            // Apply rulesets (repo-level scope)
+            if (mergedSettings.rulesets && mergedSettings.rulesets.length > 0) {
+              logger.debug(`Applying ${mergedSettings.rulesets.length} rulesets...`)
+              const rulesetsPlugin = new RulesetsPlugin(false, octokit, repoObj, mergedSettings.rulesets, logger, errors, 'repo')
+              await rulesetsPlugin.sync()
+            }
+            
+            // Apply custom properties
+            if (mergedSettings.custom_properties && mergedSettings.custom_properties.length > 0) {
+              logger.debug(`Applying ${mergedSettings.custom_properties.length} custom properties...`)
+              const customPropsPlugin = new CustomPropertiesPlugin(false, octokit, repoObj, mergedSettings.custom_properties, logger, errors)
+              await customPropsPlugin.sync()
+            }
+            
+            if (errors.length > 0) {
+              logger.warn(`Completed with ${errors.length} warning(s)`)
+              errors.forEach(err => logger.warn(`  - ${err.msg || err}`))
+            }
             
             logger.info(`✅ Successfully applied settings to ${repo.name}`)
             results.success.push(repo.name)
