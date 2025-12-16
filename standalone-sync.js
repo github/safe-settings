@@ -160,41 +160,67 @@ async function main() {
       logger.info(`Loaded settings for ${Object.keys(repoSettings).length} repositories`)
     }
     
-    // Get list of repositories
+    // Get list of repositories (with pagination)
     logger.info('Fetching repositories...')
-    const { data: repos } = await octokit.repos.listForOrg({
-      org: GH_ORG,
-      type: 'all',
-      per_page: 100
-    })
+    let allRepos = []
+    let page = 1
+    let hasMore = true
     
-    logger.info(`Found ${repos.length} repositories in organization`)
+    while (hasMore) {
+      const { data: repos } = await octokit.repos.listForOrg({
+        org: GH_ORG,
+        type: 'all',
+        per_page: 100,
+        page: page
+      })
+      
+      allRepos = allRepos.concat(repos)
+      hasMore = repos.length === 100
+      page++
+      
+      if (hasMore) {
+        logger.debug(`Fetched page ${page - 1}, got ${repos.length} repos, fetching more...`)
+      }
+    }
+    
+    logger.info(`Found ${allRepos.length} repositories in organization`)
     
     // Filter repos based on deployment config
     const restrictedRepos = deploymentConfig.restrictedRepos || {}
-    const excludePatterns = restrictedRepos.exclude || ['admin', '.github', 'safe-settings']
-    const includePatterns = restrictedRepos.include || []
+    const excludeList = restrictedRepos.exclude || ['admin', '.github', 'safe-settings']
+    let includeList = restrictedRepos.include || []
     
-    const filteredRepos = repos.filter(repo => {
-      // Check exclude patterns
-      for (const pattern of excludePatterns) {
-        if (repo.name === pattern || new RegExp(pattern).test(repo.name)) {
-          logger.debug(`Excluding repo: ${repo.name} (matched exclude pattern: ${pattern})`)
-          return false
+    // If include list is empty, auto-generate from suborg configs and repo-specific configs
+    if (includeList.length === 0) {
+      const autoInclude = new Set()
+      
+      // Add all repos from suborg configs
+      const suborgConfig = deploymentConfig.subOrgConfig || {}
+      for (const [suborgName, config] of Object.entries(suborgConfig)) {
+        if (config.repos) {
+          config.repos.forEach(repo => autoInclude.add(repo))
+          logger.debug(`Added ${config.repos.length} repos from suborg: ${suborgName}`)
         }
       }
       
-      // Check include patterns (if specified)
-      if (includePatterns.length > 0) {
-        let included = false
-        for (const pattern of includePatterns) {
-          if (repo.name === pattern || new RegExp(pattern).test(repo.name)) {
-            included = true
-            break
-          }
-        }
-        if (!included) {
-          logger.debug(`Excluding repo: ${repo.name} (not in include patterns)`)
+      // Add all repos with explicit repo-specific configs
+      Object.keys(repoSettings).forEach(repo => autoInclude.add(repo))
+      
+      includeList = Array.from(autoInclude)
+      logger.debug(`Auto-generated include list: ${includeList.length} repos`)
+    }
+    
+    const filteredRepos = allRepos.filter(repo => {
+      // Check exclude list (exact match)
+      if (excludeList.includes(repo.name)) {
+        logger.debug(`Excluding repo: ${repo.name} (in exclude list)`)
+        return false
+      }
+      
+      // Check include list (if specified, must be exact match)
+      if (includeList.length > 0) {
+        if (!includeList.includes(repo.name)) {
+          logger.trace(`Excluding repo: ${repo.name} (not in include list)`)
           return false
         }
       }
@@ -209,27 +235,9 @@ async function main() {
       const suborgConfig = deploymentConfig.subOrgConfig || {}
       
       for (const [suborgName, config] of Object.entries(suborgConfig)) {
-        // Check include patterns
-        if (config.include) {
-          for (const pattern of config.include) {
-            const regex = new RegExp(pattern.replace(/\*/g, '.*'))
-            if (regex.test(repoName)) {
-              // Check exclude patterns
-              let excluded = false
-              if (config.exclude) {
-                for (const excludePattern of config.exclude) {
-                  const excludeRegex = new RegExp(excludePattern.replace(/\*/g, '.*'))
-                  if (excludeRegex.test(repoName)) {
-                    excluded = true
-                    break
-                  }
-                }
-              }
-              if (!excluded) {
-                return suborgName
-              }
-            }
-          }
+        // Check if repo is in the suborg's repo list
+        if (config.repos && config.repos.includes(repoName)) {
+          return suborgName
         }
       }
       
