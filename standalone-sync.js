@@ -12,6 +12,7 @@ const { Octokit } = require('@octokit/rest')
 const yaml = require('js-yaml')
 const fs = require('fs')
 const path = require('path')
+const Settings = require('./lib/settings')
 
 // Required environment variables
 const {
@@ -351,10 +352,42 @@ async function main() {
           logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
           results.success.push(repo.name)
         } else {
-          // Apply settings (you'll need to implement the actual API calls)
+          // Apply settings using real safe-settings Settings.sync()
           logger.info(`Applying settings to: ${repo.name}`)
-          // TODO: Implement actual settings application via API
-          results.success.push(repo.name)
+          
+          try {
+            // Create mock context object that Settings expects
+            const context = {
+              payload: {
+                installation: {
+                  id: 1 // Dummy installation ID for token-based auth
+                }
+              },
+              octokit,
+              log: logger,
+              repo: () => ({
+                owner: GH_ORG,
+                repo: repo.name
+              })
+            }
+            
+            // Create config object with deployment settings
+            const config = {
+              ...deploymentConfig,
+              overridevalidators: [],
+              configvalidators: []
+            }
+            
+            // Call Settings.sync to actually apply the settings
+            const nop = false // Not a no-op, actually apply changes
+            await Settings.sync(nop, context, { owner: GH_ORG, repo: repo.name }, config, 'main')
+            
+            logger.info(`✅ Successfully applied settings to ${repo.name}`)
+            results.success.push(repo.name)
+          } catch (error) {
+            logger.error(`❌ Failed to apply settings to ${repo.name}:`, error.message)
+            results.failed.push({ repo: repo.name, error: error.message })
+          }
         }
         
       } catch (error) {
