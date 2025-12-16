@@ -4,20 +4,20 @@
  * Standalone sync script for safe-settings
  * Runs without webhooks or GitHub App server
  * Designed to be run from GitHub Actions or command line
+ * 
+ * Uses simple token-based authentication (PAT or GitHub App token)
  */
 
 const { Octokit } = require('@octokit/rest')
-const { createAppAuth } = require('@octokit/auth-app')
 const yaml = require('js-yaml')
 const fs = require('fs')
 const path = require('path')
-const env = require('./lib/env')
 
 // Required environment variables
 const {
   GH_ORG,
-  APP_ID,
-  PRIVATE_KEY,
+  GITHUB_TOKEN,
+  GH_TOKEN,
   ADMIN_REPO = 'edge-devops-safe-settings',
   CONFIG_PATH = '.github',
   SETTINGS_FILE_PATH = 'settings.yml',
@@ -26,19 +26,21 @@ const {
   DRY_RUN = false
 } = process.env
 
+// Support both GITHUB_TOKEN and GH_TOKEN
+const TOKEN = GITHUB_TOKEN || GH_TOKEN
+
 // Validate required env vars
 if (!GH_ORG) {
   console.error('ERROR: GH_ORG environment variable is required')
   process.exit(1)
 }
 
-if (!APP_ID) {
-  console.error('ERROR: APP_ID environment variable is required')
-  process.exit(1)
-}
-
-if (!PRIVATE_KEY) {
-  console.error('ERROR: PRIVATE_KEY environment variable is required')
+if (!TOKEN) {
+  console.error('ERROR: GITHUB_TOKEN or GH_TOKEN environment variable is required')
+  console.error('You can use:')
+  console.error('  - GitHub Personal Access Token (PAT)')
+  console.error('  - GitHub App installation token')
+  console.error('  - GitHub Actions GITHUB_TOKEN')
   process.exit(1)
 }
 
@@ -67,32 +69,20 @@ async function main() {
     logger.info(`Config path: ${CONFIG_PATH}/${SETTINGS_FILE_PATH}`)
     logger.info(`Dry run: ${DRY_RUN === 'true' ? 'YES' : 'NO'}`)
     
-    // Create Octokit instance with App authentication
+    // Create Octokit instance with token authentication
     const octokit = new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId: APP_ID,
-        privateKey: PRIVATE_KEY.replace(/\\n/g, '\n')
-      }
+      auth: TOKEN
     })
     
-    // Get the installation ID for the organization
-    logger.debug('Fetching installation ID for organization...')
-    const { data: installation } = await octokit.apps.getOrgInstallation({
-      org: GH_ORG
-    })
-    
-    logger.info(`Installation ID: ${installation.id}`)
-    
-    // Create installation-authenticated octokit
-    const installationOctokit = new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId: APP_ID,
-        privateKey: PRIVATE_KEY.replace(/\\n/g, '\n'),
-        installationId: installation.id
-      }
-    })
+    // Test authentication
+    logger.debug('Testing authentication...')
+    try {
+      const { data: user } = await octokit.users.getAuthenticated()
+      logger.info(`Authenticated as: ${user.login}`)
+    } catch (error) {
+      logger.error('Authentication failed. Check your token.')
+      throw error
+    }
     
     // Load configuration files
     logger.info('Loading configuration files...')
@@ -140,7 +130,7 @@ async function main() {
     
     // Get list of repositories
     logger.info('Fetching repositories...')
-    const { data: repos } = await installationOctokit.repos.listForOrg({
+    const { data: repos } = await octokit.repos.listForOrg({
       org: GH_ORG,
       type: 'all',
       per_page: 100
