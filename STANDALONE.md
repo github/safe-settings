@@ -2,15 +2,50 @@
 
 This is a custom script added to run safe-settings without webhook triggers, designed specifically for GitHub Actions or CLI execution.
 
+## How It Works
+
+The `standalone-sync.js` script is a hybrid approach that:
+
+1. **Loads configuration from the filesystem** - Reads YAML configs from your local/checked-out admin repository
+2. **Uses the real safe-settings engine** - Imports and calls `Settings.sync()` from `lib/settings.js` to actually apply settings
+3. **Authenticates with a simple token** - Uses PAT or GitHub App token instead of full GitHub App authentication
+4. **Applies settings via GitHub API** - Makes real API calls to update teams, rulesets, properties, etc.
+
+This gives you the full power of safe-settings without needing a webhook server or GitHub App installation.
+
 ## Features
 
 - ✅ No webhook server required
 - ✅ Simple token-based authentication (PAT or GitHub App token)
-- ✅ Direct GitHub API access
+- ✅ Direct GitHub API access via real safe-settings Settings class
 - ✅ Reads configuration from file system
 - ✅ Supports dry-run mode
 - ✅ Organization and repository filtering
+- ✅ Suborg support with pattern matching
+- ✅ Auto-generation of include list from suborg configs
+- ✅ Pagination for large organizations (100+ repos)
 - ✅ Comprehensive logging
+
+## Implementation Details
+
+The script creates a mock context object that satisfies the Settings class requirements:
+
+```javascript
+const context = {
+  payload: { installation: { id: 1 } },  // Dummy ID for token auth
+  octokit,                                // Authenticated Octokit instance  
+  log: logger,                            // Logger instance
+  repo: () => ({ owner, repo })           // Repository info
+}
+```
+
+Then calls the real Settings.sync() method:
+
+```javascript
+await Settings.sync(nop, context, { owner, repo }, config, 'main')
+```
+
+This means all the safe-settings plugins and logic work exactly as designed!
 
 ## Usage
 
@@ -166,6 +201,40 @@ The script will:
 - Continue processing other repos if one fails
 - Report summary of successes and failures at the end
 - Exit with code `1` if any repositories failed
+
+## Expected Warnings
+
+When running the script, you may see some warnings that are **expected and safe to ignore**:
+
+### ConfigManager GitHub API Warnings
+
+```
+GET /repos/.../contents/.../.github - 404
+Error reading c:\git\...\edge-devops-safe-settings\.github directory
+```
+
+**Why:** The Settings class internally tries to reload configs from GitHub API, but we've already loaded them from the filesystem. These 404s don't affect operation - the settings are still applied correctly.
+
+### Check Run Errors
+
+```
+POST /repos/.../check-runs - 403
+You must authenticate via a GitHub App
+```
+
+**Why:** The Settings class tries to create GitHub check runs to report status. This requires GitHub App authentication, but we're using a simpler PAT. The actual settings application works fine without check runs.
+
+### What Matters
+
+Look for these indicators of success:
+- `✅ Successfully applied settings to <repo-name>`
+- `Successful: N` in the summary (should match total repos processed)
+- No entries under "Failed repositories"
+
+You can verify actual application by checking GitHub:
+- Teams added/updated
+- Custom properties set
+- Rulesets created/updated
 
 ## Next Steps
 
