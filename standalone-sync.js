@@ -211,7 +211,55 @@ async function main() {
         logger.debug(`Merged settings for ${repo.name}:`, JSON.stringify(mergedSettings, null, 2))
         
         if (DRY_RUN === 'true') {
-          logger.info(`[DRY RUN] Would apply settings to: ${repo.name}`)
+          logger.info(`\n[DRY RUN] Would apply the following settings to: ${repo.name}`)
+          logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+          
+          // Show repository settings
+          if (mergedSettings.repository) {
+            logger.info('  📋 Repository:')
+            if (mergedSettings.repository.description) {
+              logger.info(`     Description: "${mergedSettings.repository.description}"`)
+            }
+          }
+          
+          // Show teams
+          if (mergedSettings.teams && mergedSettings.teams.length > 0) {
+            logger.info(`  👥 Teams (${mergedSettings.teams.length}):`)
+            mergedSettings.teams.forEach(team => {
+              logger.info(`     - ${team.name}: ${team.permission}`)
+            })
+          }
+          
+          // Show rulesets
+          if (mergedSettings.rulesets && mergedSettings.rulesets.length > 0) {
+            logger.info(`  🛡️  Rulesets (${mergedSettings.rulesets.length}):`)
+            mergedSettings.rulesets.forEach(ruleset => {
+              logger.info(`     - ${ruleset.name} (${ruleset.enforcement})`)
+              if (ruleset.conditions?.ref_name?.include) {
+                logger.info(`       Applies to: ${ruleset.conditions.ref_name.include.join(', ')}`)
+              }
+              if (ruleset.rules) {
+                ruleset.rules.forEach(rule => {
+                  logger.info(`       Rule: ${rule.type}`)
+                  if (rule.type === 'required_status_checks' && rule.parameters?.required_status_checks) {
+                    rule.parameters.required_status_checks.forEach(check => {
+                      logger.info(`         - ${check.context}`)
+                    })
+                  }
+                })
+              }
+            })
+          }
+          
+          // Show custom properties
+          if (mergedSettings.custom_properties && mergedSettings.custom_properties.length > 0) {
+            logger.info(`  🏷️  Custom Properties (${mergedSettings.custom_properties.length}):`)
+            mergedSettings.custom_properties.forEach(prop => {
+              logger.info(`     - ${prop.name}: "${prop.value}"`)
+            })
+          }
+          
+          logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
           results.success.push(repo.name)
         } else {
           // Apply settings (you'll need to implement the actual API calls)
