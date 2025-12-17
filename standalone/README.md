@@ -1,10 +1,19 @@
-# Standalone Sync Script
+# Standalone Mode for Safe-Settings
 
-This is a custom script added to run safe-settings without webhook triggers, designed specifically for GitHub Actions or CLI execution.
+Standalone mode allows you to run safe-settings without a webhook server, making it perfect for GitHub Actions, scheduled jobs, or CLI execution.
+
+## 📁 Directory Structure
+
+```
+standalone/
+├── README.md           # This file - complete documentation
+├── CHANGES.md          # Changes from upstream (for maintainability)
+└── standalone-sync.js  # Main standalone script
+```
 
 ## How It Works
 
-The `standalone-sync.js` script is a hybrid approach that:
+The `standalone-sync.js` script provides a simplified deployment option that:
 
 1. **Loads configuration from the filesystem** - Reads YAML configs from your local/checked-out admin repository
 2. **Uses the real safe-settings engine** - Imports and calls `Settings.sync()` from `lib/settings.js` to actually apply settings

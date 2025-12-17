@@ -14,10 +14,10 @@ const fs = require('fs')
 const path = require('path')
 
 // Import plugins directly instead of using Settings orchestration
-const RepositoryPlugin = require('./lib/plugins/repository')
-const TeamsPlugin = require('./lib/plugins/teams')
-const RulesetsPlugin = require('./lib/plugins/rulesets')
-const CustomPropertiesPlugin = require('./lib/plugins/custom_properties')
+const RepositoryPlugin = require('../lib/plugins/repository')
+const TeamsPlugin = require('../lib/plugins/teams')
+const RulesetsPlugin = require('../lib/plugins/rulesets')
+const CustomPropertiesPlugin = require('../lib/plugins/custom_properties')
 
 // Required environment variables
 const {

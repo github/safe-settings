@@ -9,7 +9,7 @@
     "dev": "nodemon --inspect",
     "start": "probot run ./index.js",
     "full-sync": "node ./full-sync.js",
-    "standalone-sync": "node ./standalone-sync.js",
+    "standalone-sync": "node ./standalone/standalone-sync.js",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
     "lint:es": "eslint .",
     "lint:js": "standard",
