@@ -40,31 +40,6 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     }
   }
 
-  async function syncSubOrgSettings (nop, context, suborg, repo = context.repo(), ref) {
-    try {
-      deploymentConfig = await loadYamlFileSystem()
-      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-      const configManager = new ConfigManager(context, ref)
-      const runtimeConfig = await configManager.loadGlobalSettingsYaml()
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
-      robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
-      return Settings.syncSubOrgs(nop, context, suborg, repo, config, ref)
-    } catch (e) {
-      if (nop) {
-        let filename = env.SETTINGS_FILE_PATH
-        if (!deploymentConfig) {
-          filename = env.DEPLOYMENT_CONFIG_FILE_PATH
-          deploymentConfig = {}
-        }
-        const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
-        robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
-        Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
-      } else {
-        throw e
-      }
-    }
-  }
-
   async function syncSettings (nop, context, repo = context.repo(), ref) {
     try {
       deploymentConfig = await loadYamlFileSystem()
@@ -84,6 +59,31 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
         const nopcommand = new NopCommand(filename, repo, null, e, 'ERROR')
         robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
         Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
+      } else {
+        throw e
+      }
+    }
+  }
+
+  async function syncSelectedSettings (nop, context, repos, subOrgs, ref) {
+    try {
+      deploymentConfig = await loadYamlFileSystem()
+      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+      const configManager = new ConfigManager(context, ref)
+      const runtimeConfig = await configManager.loadGlobalSettingsYaml()
+      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
+      return Settings.syncSelectedRepos(nop, context, repos, subOrgs, config, ref)
+    } catch (e) {
+      if (nop) {
+        let filename = env.SETTINGS_FILE_PATH
+        if (!deploymentConfig) {
+          filename = env.DEPLOYMENT_CONFIG_FILE_PATH
+          deploymentConfig = {}
+        }
+        const nopcommand = new NopCommand(filename, context.repo(), null, e, 'ERROR')
+        robot.log.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        Settings.handleError(nop, context, context.repo(), deploymentConfig, ref, nopcommand)
       } else {
         throw e
       }
@@ -263,18 +263,17 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       return syncAllSettings(false, context)
     }
 
-    const repoChanges = getAllChangedRepoConfigs(payload, context.repo().owner)
-    if (repoChanges.length > 0) {
-      return Promise.all(repoChanges.map(repo => {
-        return syncSettings(false, context, repo)
-      }))
-    }
+    let repoChanges = getAllChangedRepoConfigs(payload, context.repo().owner)
 
-    const changes = getAllChangedSubOrgConfigs(payload)
-    if (changes.length) {
-      return Promise.all(changes.map(suborg => {
-        return syncSubOrgSettings(false, context, suborg)
-      }))
+    let subOrgChanges = getAllChangedSubOrgConfigs(payload)
+    repoChanges = repoChanges.filter((r, i, arr) => arr.findIndex(item => item.repo === r.repo) === i)
+
+    subOrgChanges = subOrgChanges.filter((s, i, arr) => arr.findIndex(item => item.repo === s.repo) === i)
+    robot.log.debug(`deduped repos ${JSON.stringify(repoChanges)}`)
+    robot.log.debug(`deduped subOrgs ${JSON.stringify(subOrgChanges)}`)
+
+    if (repoChanges.length > 0 || subOrgChanges.length > 0) {
+      return syncSelectedSettings(false, context, repoChanges, subOrgChanges)
     }
 
     robot.log.debug(`No changes in '${Settings.FILE_PATH}' detected, returning...`)
@@ -572,15 +571,10 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     robot.log.debug(`Updating check run ${JSON.stringify(params)}`)
     await context.octokit.checks.update(params)
 
-    // guarding against null value from upstream libary that is
-    // causing a 404 and the check to stall
-    // from issue: https://github.com/github/safe-settings/issues/185#issuecomment-1075240374
-    if (check_suite.before === '0000000000000000000000000000000000000000') {
-      check_suite.before = check_suite.pull_requests[0].base.sha
-    }
-    params = Object.assign(context.repo(), { basehead: `${check_suite.before}...${check_suite.after}` })
-    const changes = await context.octokit.repos.compareCommitsWithBasehead(params)
-    const files = changes.data.files.map(f => { return f.filename })
+    params = Object.assign(context.repo(), { pull_number: pull_request.number })
+
+    const changes = await context.octokit.pulls.listFiles(params)
+    const files = changes.data.map(f => { return f.filename })
 
     const settingsModified = files.includes(Settings.FILE_PATH)
 
@@ -590,17 +584,10 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     }
 
     const repoChanges = getChangedRepoConfigName(files, context.repo().owner)
-    if (repoChanges.length > 0) {
-      return Promise.all(repoChanges.map(repo => {
-        return syncSettings(true, context, repo, pull_request.head.ref)
-      }))
-    }
-
     const subOrgChanges = getChangedSubOrgConfigName(files)
-    if (subOrgChanges.length) {
-      return Promise.all(subOrgChanges.map(suborg => {
-        return syncSubOrgSettings(true, context, suborg, context.repo(), pull_request.head.ref)
-      }))
+
+    if (repoChanges.length > 0 || subOrgChanges.length > 0) {
+      return syncSelectedSettings(true, context, repoChanges, subOrgChanges, pull_request.head.ref)
     }
 
     // if no safe-settings changes detected, send a success to the check run
