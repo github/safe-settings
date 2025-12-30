@@ -20,7 +20,7 @@ jobs:
     outputs:
       release: ${{ steps.finalrelease.outputs.release }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup node
         uses: actions/setup-node@v6
         with:
@@ -75,7 +75,7 @@ jobs:
     needs: build
     steps:
       - name: Clone repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Prepare
         run: |
