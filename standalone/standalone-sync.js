@@ -16,6 +16,7 @@ const path = require('path')
 // Import plugins directly instead of using Settings orchestration
 const RepositoryPlugin = require('../lib/plugins/repository')
 const TeamsPlugin = require('../lib/plugins/teams')
+const CollaboratorsPlugin = require('../lib/plugins/collaborators')
 const RulesetsPlugin = require('../lib/plugins/rulesets')
 const CustomPropertiesPlugin = require('../lib/plugins/custom_properties')
 
@@ -435,6 +436,13 @@ async function main() {
               logger.debug(`Applying ${mergedSettings.teams.length} teams...`)
               const teamsPlugin = new TeamsPlugin(false, octokit, repoObj, mergedSettings.teams, logger, errors)
               await teamsPlugin.sync()
+            }
+            
+            // Apply collaborators
+            if (mergedSettings.collaborators !== undefined) {
+              logger.debug(`Applying collaborators (${mergedSettings.collaborators.length} users)...`)
+              const collaboratorsPlugin = new CollaboratorsPlugin(false, octokit, repoObj, mergedSettings.collaborators, logger, errors)
+              await collaboratorsPlugin.sync()
             }
             
             // Apply rulesets (repo-level scope)
