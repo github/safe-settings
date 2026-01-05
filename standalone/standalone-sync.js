@@ -84,10 +84,18 @@ async function main() {
     // Test authentication
     logger.debug('Testing authentication...')
     try {
-      const { data: user } = await octokit.users.getAuthenticated()
-      logger.info(`Authenticated as: ${user.login}`)
+      // Try GitHub App authentication first
+      try {
+        const { data: app } = await octokit.apps.getAuthenticated()
+        logger.info(`Authenticated as GitHub App: ${app.name}`)
+      } catch (appError) {
+        // If that fails, try user authentication (PAT)
+        const { data: user } = await octokit.users.getAuthenticated()
+        logger.info(`Authenticated as: ${user.login}`)
+      }
     } catch (error) {
       logger.error('Authentication failed. Check your token.')
+      logger.error(`Error: ${error.message}`)
       throw error
     }
     
