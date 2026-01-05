@@ -81,20 +81,14 @@ async function main() {
       auth: TOKEN
     })
     
-    // Test authentication
+    // Test authentication by trying to access the organization
+    // This works with PATs, GitHub App installation tokens, and Actions tokens
     logger.debug('Testing authentication...')
     try {
-      // Try GitHub App authentication first
-      try {
-        const { data: app } = await octokit.apps.getAuthenticated()
-        logger.info(`Authenticated as GitHub App: ${app.name}`)
-      } catch (appError) {
-        // If that fails, try user authentication (PAT)
-        const { data: user } = await octokit.users.getAuthenticated()
-        logger.info(`Authenticated as: ${user.login}`)
-      }
+      const { data: org } = await octokit.orgs.get({ org: GH_ORG })
+      logger.info(`Authenticated successfully. Access to organization: ${org.login}`)
     } catch (error) {
-      logger.error('Authentication failed. Check your token.')
+      logger.error('Authentication failed. Check your token and organization access.')
       logger.error(`Error: ${error.message}`)
       throw error
     }
