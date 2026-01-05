@@ -215,7 +215,8 @@ async function main() {
       Object.keys(repoSettings).forEach(repo => autoInclude.add(repo))
       
       includeList = Array.from(autoInclude)
-      logger.debug(`Auto-generated include list: ${includeList.length} repos`)
+      logger.info(`Auto-generated include list with ${includeList.length} repos`)
+      logger.debug(`Include list: ${includeList.join(', ')}`)
     }
     
     const filteredRepos = allRepos.filter(repo => {
@@ -237,6 +238,16 @@ async function main() {
     })
     
     logger.info(`Processing ${filteredRepos.length} repositories after filtering`)
+    
+    // Check if any repos in the include list weren't found
+    if (includeList.length > 0) {
+      const foundRepoNames = new Set(filteredRepos.map(r => r.name))
+      const missingRepos = includeList.filter(name => !foundRepoNames.has(name))
+      if (missingRepos.length > 0) {
+        logger.warn(`⚠️  ${missingRepos.length} repo(s) from config not found or not accessible:`)
+        missingRepos.forEach(name => logger.warn(`   - ${name}`))
+      }
+    }
     
     // NOTE: Organization-level rulesets require admin:org permission and are NOT used.
     // Instead, org-level rulesets from settings.yml are applied as repo-level rulesets
