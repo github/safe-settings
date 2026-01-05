@@ -9,6 +9,7 @@
     "dev": "nodemon --inspect",
     "start": "probot run ./index.js",
     "full-sync": "node ./full-sync.js",
+    "standalone-sync": "node ./standalone/standalone-sync.js",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
     "lint:es": "eslint .",
     "lint:js": "standard",
@@ -26,6 +27,7 @@
   "license": "ISC",
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^14.2.1",
+    "@octokit/rest": "^21.0.2",
     "@probot/adapter-aws-lambda-serverless": "^4.0.3",
     "deepmerge": "^4.3.1",
     "eta": "^3.5.0",

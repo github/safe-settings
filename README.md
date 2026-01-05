@@ -44,6 +44,7 @@ Choose your preferred deployment method:
 - **🌟 AWS Lambda (**: Use the [SafeSettings-Template](https://github.com/bheemreddy181/SafeSettings-Template) for production-ready deployment with Docker containers, GitHub Actions CI/CD, and comprehensive testing
 - **🐳 Docker**: Deploy using Docker containers locally or in your infrastructure
 - **☁️ Cloud Platforms**: Deploy to Heroku, Glitch, or Kubernetes
+- **⚡ [Standalone mode, can be used from Actions →](standalone/README.md)** (no webhooks, token-based)
 
 👉 **[View all deployment options →](docs/deploy.md)**
 
@@ -571,10 +572,12 @@ You can pass environment variables; the easiest way to do it is via a `.env` fil
 
 2. Add the settings for the `org`, `suborgs`, and `repos`. Sample files can be found [here](docs/sample-settings).
 
-3. __[Deploy and install the app](docs/deploy.md)__.  Alternatively, the __[GitHub Actions Guide](docs/github-action.md)__ describes how to run `safe-settings` with GitHub Actions.
+3. **Deploy the app**:
+   - **Standalone mode** (easiest): See [standalone/README.md](standalone/README.md)
+   - **GitHub App with webhooks**: See [deployment guide](docs/deploy.md)
+   - **GitHub Actions**: See [GitHub Actions guide](docs/github-action.md)
 
-
-
+> **Note**: This fork includes a [standalone mode](standalone/README.md) for running safe-settings without webhooks using token-based authentication.
 
 ## License
 
