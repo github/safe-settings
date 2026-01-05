@@ -87,6 +87,19 @@ async function main() {
     try {
       const { data: org } = await octokit.orgs.get({ org: GH_ORG })
       logger.info(`Authenticated successfully. Access to organization: ${org.login}`)
+      
+      // Test if we can list teams (requires Organization permissions: Members: Read)
+      try {
+        const { data: teams } = await octokit.teams.list({ org: GH_ORG, per_page: 5 })
+        logger.debug(`App can see ${teams.length > 0 ? teams.length + ' teams (showing first 5)' : 'no teams'}`)
+        if (teams.length > 0) {
+          teams.forEach(t => logger.debug(`  - Team: ${t.name} (slug: ${t.slug})`))
+        }
+      } catch (teamError) {
+        if (teamError.status === 403 || teamError.status === 401) {
+          logger.warn('⚠️  App lacks "Organization permissions: Members: Read" - cannot verify teams exist')
+        }
+      }
     } catch (error) {
       logger.error('Authentication failed. Check your token and organization access.')
       logger.error(`Error: ${error.message}`)
