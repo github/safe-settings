@@ -45,6 +45,26 @@ envFrom: []
 #     name: app-env
 
 env: []
+# - name: CRON
+#   value: '*/5 * * * *'
+# - name: APP_ID
+#   valueFrom:
+#     secretKeyRef:
+#       name: github_app_secret
+#       key: app_id
+#       optional: false
+# - name: PRIVATE_KEY
+#   valueFrom:
+#     secretKeyRef:
+#       name: github_app_secret
+#       key: private_key
+#       optional: false
+# - name: WEBHOOK_SECRET
+#   valueFrom:
+#     secretKeyRef:
+#       name: github_app_secret
+#       key: webhook_secret
+#       optional: false
 
 service:
   type: ClusterIP
