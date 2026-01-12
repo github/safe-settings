@@ -9,7 +9,7 @@ A Helm chart for Kubernetes
 | affinity | object | `{}` |  |
 | autoscaling.enabled | bool | `false` |  |
 | autoscaling.maxReplicas | int | `10` |  |
-| autoscaling.minReplicas | int | `2` |  |
+| autoscaling.minReplicas | int | `1` |  |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | deploymentConfig.configvalidators[0].error | string | `"`Admin cannot be assigned to collaborators`\n"` |  |
 | deploymentConfig.configvalidators[0].plugin | string | `"collaborators"` |  |
@@ -44,7 +44,7 @@ A Helm chart for Kubernetes
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
-| replicaCount | int | `2` |  |
+| replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
 | securityContext.allowPrivilegeEscalation | bool | `false` |  |
 | securityContext.capabilities.drop[0] | string | `"ALL"` |  |
