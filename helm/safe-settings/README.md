@@ -17,7 +17,7 @@ A Helm chart for Kubernetes
 | deploymentConfig.restrictedRepos.exclude[1] | string | `"^\\.github$"` |  |
 | deploymentConfig.restrictedRepos.exclude[2] | string | `"^safe-settings$"` |  |
 | deploymentConfig.restrictedRepos.exclude[3] | string | `".*-test"` |  |
-| deploymentConfig.restrictedRepos.include[0] | string | `"^test$"` |  |
+| deploymentConfig.restrictedRepos.include | list | [] |  |
 | env | list | `[]` |  |
 | envFrom | list | `[]` |  |
 | extraObjects | list | `[]` | Add dynamic manifests via values. Example: extraObjects: - kind: ConfigMap   apiVersion: v1   metadata:     name: extra-cm-{{ .Release.Name }}   data: |     extra.yml: "does-my-install-need-extra-info: true" |
