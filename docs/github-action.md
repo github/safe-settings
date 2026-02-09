@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Version/tag of github/safe-settings repo to use:
-      SAFE_SETTINGS_VERSION: 2.1.13
+      SAFE_SETTINGS_VERSION: 2.1.17
 
       # Path on GHA runner box where safe-settings code downloaded to:
       SAFE_SETTINGS_CODE_DIR: ${{ github.workspace }}/.safe-settings-code
