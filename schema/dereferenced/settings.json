@@ -39,7 +39,17 @@
               "properties": {
                 "advanced_security": {
                   "type": "object",
-                  "description": "Use the `status` property to enable or disable GitHub Advanced Security for this repository. For more information, see \"[About GitHub Advanced Security](/github/getting-started-with-github/learning-about-github/about-github-advanced-security).\"",
+                  "description": "Use the `status` property to enable or disable GitHub Advanced Security for this repository.\nFor more information, see \"[About GitHub Advanced\nSecurity](/github/getting-started-with-github/learning-about-github/about-github-advanced-security).\"\n\nFor standalone Code Scanning or Secret Protection products, this parameter cannot be used.",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Can be `enabled` or `disabled`."
+                    }
+                  }
+                },
+                "code_security": {
+                  "type": "object",
+                  "description": "Use the `status` property to enable or disable GitHub Code Security for this repository.",
                   "properties": {
                     "status": {
                       "type": "string",
@@ -60,6 +70,16 @@
                 "secret_scanning_push_protection": {
                   "type": "object",
                   "description": "Use the `status` property to enable or disable secret scanning push protection for this repository. For more information, see \"[Protecting pushes with secret scanning](/code-security/secret-scanning/protecting-pushes-with-secret-scanning).\"",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Can be `enabled` or `disabled`."
+                    }
+                  }
+                },
+                "secret_scanning_ai_detection": {
+                  "type": "object",
+                  "description": "Use the `status` property to enable or disable secret scanning AI detection for this repository. For more information, see \"[Responsible detection of generic secrets with AI](https://docs.github.com/code-security/secret-scanning/using-advanced-secret-scanning-and-push-protection-features/generic-secret-detection/responsible-ai-generic-secrets).\"",
                   "properties": {
                     "status": {
                       "type": "string",
@@ -135,7 +155,7 @@
             },
             "use_squash_pr_title_as_default": {
               "type": "boolean",
-              "description": "Either `true` to allow squash-merge commits to use pull request title, or `false` to use commit message. **This property has been deprecated. Please use `squash_merge_commit_title` instead.",
+              "description": "Either `true` to allow squash-merge commits to use pull request title, or `false` to use commit message. **This property is closing down. Please use `squash_merge_commit_title` instead.",
               "default": false,
               "deprecated": true
             },
@@ -338,7 +358,7 @@
           },
           "maintainers": {
             "type": "array",
-            "description": "List GitHub IDs for organization members who will become team maintainers.",
+            "description": "List GitHub usernames for organization members who will become team maintainers.",
             "items": {
               "type": "string"
             }
@@ -368,7 +388,7 @@
           },
           "permission": {
             "type": "string",
-            "description": "**Deprecated**. The permission that new repositories will be added to the team with when none is specified.",
+            "description": "**Closing down notice**. The permission that new repositories will be added to the team with when none is specified.",
             "enum": [
               "pull",
               "push"
@@ -409,7 +429,7 @@
                   "contexts": {
                     "type": "array",
                     "deprecated": true,
-                    "description": "**Deprecated**: The list of status checks to require in order to merge into this branch. If any of these checks have recently been set by a particular GitHub App, they will be required to come from that app in future for the branch to merge. Use `checks` instead of `contexts` for more fine-grained control.",
+                    "description": "**Closing down notice**: The list of status checks to require in order to merge into this branch. If any of these checks have recently been set by a particular GitHub App, they will be required to come from that app in future for the branch to merge. Use `checks` instead of `contexts` for more fine-grained control.",
                     "items": {
                       "type": "string"
                     }
@@ -663,7 +683,8 @@
             "enum": [
               "branch",
               "tag",
-              "push"
+              "push",
+              "repository"
             ],
             "default": "branch"
           },
@@ -690,7 +711,7 @@
                 "actor_id": {
                   "type": "integer",
                   "nullable": true,
-                  "description": "The ID of the actor that can bypass a ruleset. If `actor_type` is `OrganizationAdmin`, this should be `1`. If `actor_type` is `DeployKey`, this should be null. `OrganizationAdmin` is not applicable for personal repositories."
+                  "description": "The ID of the actor that can bypass a ruleset. Required for `Integration`, `RepositoryRole`, and `Team` actor types. If `actor_type` is `OrganizationAdmin`, `actor_id` is ignored. If `actor_type` is `DeployKey`, this should be null. `OrganizationAdmin` is not applicable for personal repositories."
                 },
                 "actor_type": {
                   "type": "string",
@@ -705,10 +726,11 @@
                 },
                 "bypass_mode": {
                   "type": "string",
-                  "description": "When the specified actor can bypass the ruleset. `pull_request` means that an actor can only bypass rules on pull requests. `pull_request` is not applicable for the `DeployKey` actor type. Also, `pull_request` is only applicable to branch rulesets.",
+                  "description": "When the specified actor can bypass the ruleset. `pull_request` means that an actor can only bypass rules on pull requests. `pull_request` is not applicable for the `DeployKey` actor type. Also, `pull_request` is only applicable to branch rulesets. When `bypass_mode` is `exempt`, rules will not be run for that actor and a bypass audit entry will not be created.",
                   "enum": [
                     "always",
-                    "pull_request"
+                    "pull_request",
+                    "exempt"
                   ],
                   "default": "always"
                 }
@@ -718,7 +740,7 @@
           "conditions": {
             "title": "Organization ruleset conditions",
             "type": "object",
-            "description": "Conditions for an organization ruleset.\nThe branch and tag rulesets conditions object should contain both `repository_name` and `ref_name` properties, or both `repository_id` and `ref_name` properties, or both `repository_property` and `ref_name` properties.\nThe push rulesets conditions object does not require the `ref_name` property.",
+            "description": "Conditions for an organization ruleset.\nThe branch and tag rulesets conditions object should contain both `repository_name` and `ref_name` properties, or both `repository_id` and `ref_name` properties, or both `repository_property` and `ref_name` properties.\nThe push rulesets conditions object does not require the `ref_name` property.\nFor repository policy rulesets, the conditions object should only contain the `repository_name`, the `repository_id`, or the `repository_property`.",
             "oneOf": [
               {
                 "type": "object",
@@ -1044,83 +1066,6 @@
                   }
                 },
                 {
-                  "title": "merge_queue",
-                  "description": "Merges must be performed via a merge queue.",
-                  "type": "object",
-                  "required": [
-                    "type"
-                  ],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "merge_queue"
-                      ]
-                    },
-                    "parameters": {
-                      "type": "object",
-                      "properties": {
-                        "check_response_timeout_minutes": {
-                          "type": "integer",
-                          "description": "Maximum time for a required status check to report a conclusion. After this much time has elapsed, checks that have not reported a conclusion will be assumed to have failed",
-                          "minimum": 1,
-                          "maximum": 360
-                        },
-                        "grouping_strategy": {
-                          "type": "string",
-                          "description": "When set to ALLGREEN, the merge commit created by merge queue for each PR in the group must pass all required checks to merge. When set to HEADGREEN, only the commit at the head of the merge group, i.e. the commit containing changes from all of the PRs in the group, must pass its required checks to merge.",
-                          "enum": [
-                            "ALLGREEN",
-                            "HEADGREEN"
-                          ]
-                        },
-                        "max_entries_to_build": {
-                          "type": "integer",
-                          "description": "Limit the number of queued pull requests requesting checks and workflow runs at the same time.",
-                          "minimum": 0,
-                          "maximum": 100
-                        },
-                        "max_entries_to_merge": {
-                          "type": "integer",
-                          "description": "The maximum number of PRs that will be merged together in a group.",
-                          "minimum": 0,
-                          "maximum": 100
-                        },
-                        "merge_method": {
-                          "type": "string",
-                          "description": "Method to use when merging changes from queued pull requests.",
-                          "enum": [
-                            "MERGE",
-                            "SQUASH",
-                            "REBASE"
-                          ]
-                        },
-                        "min_entries_to_merge": {
-                          "type": "integer",
-                          "description": "The minimum number of PRs that will be merged together in a group.",
-                          "minimum": 0,
-                          "maximum": 100
-                        },
-                        "min_entries_to_merge_wait_minutes": {
-                          "type": "integer",
-                          "description": "The time merge queue should wait after the first PR is added to the queue for the minimum group size to be met. After this time has elapsed, the minimum group size will be ignored and a smaller group will be merged.",
-                          "minimum": 0,
-                          "maximum": 360
-                        }
-                      },
-                      "required": [
-                        "check_response_timeout_minutes",
-                        "grouping_strategy",
-                        "max_entries_to_build",
-                        "max_entries_to_merge",
-                        "merge_method",
-                        "min_entries_to_merge",
-                        "min_entries_to_merge_wait_minutes"
-                      ]
-                    }
-                  }
-                },
-                {
                   "title": "required_deployments",
                   "description": "Choose which environments must be successfully deployed to before refs can be pushed into a ref that matches this rule.",
                   "type": "object",
@@ -1184,6 +1129,18 @@
                     "parameters": {
                       "type": "object",
                       "properties": {
+                        "allowed_merge_methods": {
+                          "type": "array",
+                          "description": "Array of allowed merge methods. Allowed values include `merge`, `squash`, and `rebase`. At least one option must be enabled.",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "merge",
+                              "squash",
+                              "rebase"
+                            ]
+                          }
+                        },
                         "dismiss_stale_reviews_on_push": {
                           "type": "boolean",
                           "description": "New, reviewable commits pushed will dismiss previous pull request review approvals."
@@ -1205,6 +1162,55 @@
                         "required_review_thread_resolution": {
                           "type": "boolean",
                           "description": "All conversations on code must be resolved before a pull request can be merged."
+                        },
+                        "required_reviewers": {
+                          "type": "array",
+                          "description": "> [!NOTE]\n> `required_reviewers` is in beta and subject to change.\n\nA collection of reviewers and associated file patterns. Each reviewer has a list of file patterns which determine the files that reviewer is required to review.",
+                          "items": {
+                            "title": "RequiredReviewerConfiguration",
+                            "description": "A reviewing team, and file patterns describing which files they must approve changes to.",
+                            "type": "object",
+                            "properties": {
+                              "file_patterns": {
+                                "type": "array",
+                                "description": "Array of file patterns. Pull requests which change matching files must be approved by the specified team. File patterns use fnmatch syntax.",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "minimum_approvals": {
+                                "type": "integer",
+                                "description": "Minimum number of approvals required from the specified team. If set to zero, the team will be added to the pull request but approval is optional."
+                              },
+                              "reviewer": {
+                                "title": "Reviewer",
+                                "description": "A required reviewing team",
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "description": "ID of the reviewer which must review changes to matching files."
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "description": "The type of the reviewer",
+                                    "enum": [
+                                      "Team"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "file_patterns",
+                              "minimum_approvals",
+                              "reviewer"
+                            ]
+                          }
                         }
                       },
                       "required": [
@@ -1307,7 +1313,7 @@
                       "properties": {
                         "name": {
                           "type": "string",
-                          "description": "How this rule will appear to users."
+                          "description": "How this rule appears when configuring it."
                         },
                         "negate": {
                           "type": "boolean",
@@ -1354,7 +1360,7 @@
                       "properties": {
                         "name": {
                           "type": "string",
-                          "description": "How this rule will appear to users."
+                          "description": "How this rule appears when configuring it."
                         },
                         "negate": {
                           "type": "boolean",
@@ -1401,7 +1407,7 @@
                       "properties": {
                         "name": {
                           "type": "string",
-                          "description": "How this rule will appear to users."
+                          "description": "How this rule appears when configuring it."
                         },
                         "negate": {
                           "type": "boolean",
@@ -1448,7 +1454,7 @@
                       "properties": {
                         "name": {
                           "type": "string",
-                          "description": "How this rule will appear to users."
+                          "description": "How this rule appears when configuring it."
                         },
                         "negate": {
                           "type": "boolean",
@@ -1495,7 +1501,7 @@
                       "properties": {
                         "name": {
                           "type": "string",
-                          "description": "How this rule will appear to users."
+                          "description": "How this rule appears when configuring it."
                         },
                         "negate": {
                           "type": "boolean",
@@ -1525,7 +1531,7 @@
                 },
                 {
                   "title": "file_path_restriction",
-                  "description": "Prevent commits that include changes in specified file paths from being pushed to the commit graph.",
+                  "description": "Prevent commits that include changes in specified file and folder paths from being pushed to the commit graph. This includes absolute paths that contain file names.",
                   "type": "object",
                   "required": [
                     "type"
@@ -1556,7 +1562,7 @@
                 },
                 {
                   "title": "max_file_path_length",
-                  "description": "Prevent commits that include file paths that exceed a specified character limit from being pushed to the commit graph.",
+                  "description": "Prevent commits that include file paths that exceed the specified character limit from being pushed to the commit graph.",
                   "type": "object",
                   "required": [
                     "type"
@@ -1573,9 +1579,9 @@
                       "properties": {
                         "max_file_path_length": {
                           "type": "integer",
-                          "description": "The maximum amount of characters allowed in file paths",
+                          "description": "The maximum amount of characters allowed in file paths.",
                           "minimum": 1,
-                          "maximum": 256
+                          "maximum": 32767
                         }
                       },
                       "required": [
@@ -1617,7 +1623,7 @@
                 },
                 {
                   "title": "max_file_size",
-                  "description": "Prevent commits that exceed a specified file size limit from being pushed to the commit.",
+                  "description": "Prevent commits with individual files that exceed the specified limit from being pushed to the commit graph.",
                   "type": "object",
                   "required": [
                     "type"
@@ -1766,6 +1772,35 @@
                       "required": [
                         "code_scanning_tools"
                       ]
+                    }
+                  }
+                },
+                {
+                  "title": "copilot_code_review",
+                  "description": "Request Copilot code review for new pull requests automatically if the author has access to Copilot code review and their premium requests quota has not reached the limit.",
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "copilot_code_review"
+                      ]
+                    },
+                    "parameters": {
+                      "type": "object",
+                      "properties": {
+                        "review_draft_pull_requests": {
+                          "type": "boolean",
+                          "description": "Copilot automatically reviews draft pull requests before they are marked as ready for review."
+                        },
+                        "review_on_push": {
+                          "type": "boolean",
+                          "description": "Copilot automatically reviews each new push to the pull request."
+                        }
+                      }
                     }
                   }
                 }
