@@ -4,3 +4,11 @@ repository:
   allow_squash_merge: true
   allow_merge_commit: false
   allow_rebase_merge: true
+
+branches:
+  - name: default
+    protection:
+      allow_force_pushes: false
+      bypass_force_push_allowances:
+        teams:
+          - core
