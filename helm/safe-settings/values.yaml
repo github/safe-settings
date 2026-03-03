@@ -135,7 +135,7 @@ deploymentConfig:
   overridevalidators: []
     # - plugin: branches
     #   error: |
-    #     `Branch protection required_approving_review_count cannot be overidden to a lower value`
+    #     `Branch protection required_approving_review_count cannot be overridden to a lower value`
     #   script: |
     #     console.log(`baseConfig ${JSON.stringify(baseconfig)}`)
     #     console.log(`overrideConfig ${JSON.stringify(overrideconfig)}`)
