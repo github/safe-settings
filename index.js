@@ -9,17 +9,16 @@ const env = require('./lib/env')
 const { getProxyForUrl } = require('proxy-from-env')
 const { setGlobalDispatcher, ProxyAgent } = require('undici')
 
+const baseUrl = env.GHE_HOST ? `${env.GHE_PROTOCOL || 'https'}://${env.GHE_HOST}` : 'https://api.github.com'
+const proxyAddress = getProxyForUrl(baseUrl)
+if (proxyAddress) {
+  setGlobalDispatcher(new ProxyAgent(proxyAddress))
+}
+
 let deploymentConfig
 
 module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) => {
   let appSlug = 'safe-settings'
-
-  const baseUrl = env.GHE_HOST ? `${env.GHE_PROTOCOL || 'https'}://${env.GHE_HOST}` : 'https://api.github.com'
-  const proxyAddress = getProxyForUrl(baseUrl)
-  if (proxyAddress) {
-    setGlobalDispatcher(new ProxyAgent(proxyAddress))
-  }
-
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
     try {
       deploymentConfig = await loadYamlFileSystem()
