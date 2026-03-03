@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const { Octokit } = require('@octokit/core')
+class Octokit {}
 const Settings = require('../../../lib/settings')
 const yaml = require('js-yaml')
 // jest.mock('../../../lib/settings', () => {
