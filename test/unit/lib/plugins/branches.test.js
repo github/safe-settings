@@ -65,6 +65,7 @@ describe('Branches', () => {
           required_pull_request_reviews: {
             require_code_owner_reviews: true
           },
+          restrictions: null,
           headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
         })
       })
@@ -188,8 +189,64 @@ describe('Branches', () => {
               strict: true,
               contexts: []
             },
+            // When override processing clears {{EXTERNALLY_DEFINED}} contexts,
+            // enforce_admins defaults to null since config doesn't specify it
+            enforce_admins: null,
+            restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
           })
+        })
+      })
+    })
+
+    describe('when existing protection has restrictions', () => {
+      it('preserves restrictions from GitHub when config omits them', () => {
+        github.repos.getBranchProtection = jest.fn().mockResolvedValue({
+          data: {
+            enforce_admins: { enabled: true },
+            required_status_checks: {
+              strict: false,
+              contexts: ['ci-check'],
+              checks: []
+            },
+            restrictions: {
+              url: 'https://api.github.com/...',
+              users: [{ login: 'user1' }, { login: 'user2' }],
+              teams: [{ slug: 'team-a' }],
+              apps: [{ slug: 'app-bot' }]
+            }
+          }
+        })
+
+        // Config only specifies enforce_admins, omits restrictions
+        const plugin = configure([{
+          name: 'main',
+          protection: {
+            enforce_admins: false
+          }
+        }])
+
+        return plugin.sync().then(() => {
+          expect(github.repos.updateBranchProtection).toHaveBeenCalledWith(
+            expect.objectContaining({
+              owner: 'bkeepers',
+              repo: 'test',
+              branch: 'main',
+              enforce_admins: false,
+              // Existing restrictions should be preserved from GitHub
+              restrictions: {
+                users: ['user1', 'user2'],
+                teams: ['team-a'],
+                apps: ['app-bot']
+              },
+              // Existing required_status_checks should be preserved from GitHub
+              required_status_checks: {
+                strict: false,
+                contexts: ['ci-check'],
+                checks: []
+              }
+            })
+          )
         })
       })
     })
@@ -227,6 +284,8 @@ describe('Branches', () => {
               strict: true,
               contexts: ['check-1', 'check-2']
             },
+            enforce_admins: null,
+            restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
           })
         })
@@ -265,6 +324,8 @@ describe('Branches', () => {
             repo: 'test',
             branch: 'other',
             enforce_admins: false,
+            required_status_checks: null,
+            restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
           })
         })
