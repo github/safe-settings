@@ -181,7 +181,7 @@ describe('Branches', () => {
         )
 
         return plugin.sync().then(() => {
-          expect(github.repos.updateBranchProtection).toHaveBeenCalledWith({
+          expect(github.repos.updateBranchProtection).toHaveBeenCalledWith(expect.objectContaining({
             owner: 'bkeepers',
             repo: 'test',
             branch: 'main',
@@ -189,12 +189,11 @@ describe('Branches', () => {
               strict: true,
               contexts: []
             },
-            // When override processing clears {{EXTERNALLY_DEFINED}} contexts,
-            // enforce_admins defaults to null since config doesn't specify it
-            enforce_admins: null,
+            // Existing enforce_admins should be preserved from GitHub
+            enforce_admins: false,
             restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
-          })
+          }))
         })
       })
     })
@@ -249,6 +248,35 @@ describe('Branches', () => {
           )
         })
       })
+
+      it('normalizes restrictions and defaults missing arrays when preserving from GitHub', () => {
+        github.repos.getBranchProtection = jest.fn().mockResolvedValue({
+          data: {
+            enforce_admins: { enabled: true },
+            restrictions: {
+              url: 'https://api.github.com/...',
+              users: [{ login: 'user1' }]
+            }
+          }
+        })
+
+        const plugin = configure([{
+          name: 'main',
+          protection: {
+            enforce_admins: false
+          }
+        }])
+
+        return plugin.sync().then(() => {
+          const payload = github.repos.updateBranchProtection.mock.calls[0][0]
+          expect(payload.restrictions).toEqual({
+            users: ['user1'],
+            teams: [],
+            apps: []
+          })
+          expect(payload.restrictions.url).toBeUndefined()
+        })
+      })
     })
 
     describe('when {{EXTERNALLY_DEFINED}} is present in "required_status_checks" and status checks exist in GitHub', () => {
@@ -256,10 +284,8 @@ describe('Branches', () => {
         github.repos.getBranchProtection = jest.fn().mockResolvedValue({
           data: {
             enforce_admins: { enabled: false },
-            protection: {
-              required_status_checks: {
-                contexts: ['check-1', 'check-2']
-              }
+            required_status_checks: {
+              contexts: ['check-1', 'check-2']
             }
           }
         })
@@ -276,7 +302,7 @@ describe('Branches', () => {
         )
 
         return plugin.sync().then(() => {
-          expect(github.repos.updateBranchProtection).toHaveBeenCalledWith({
+          expect(github.repos.updateBranchProtection).toHaveBeenCalledWith(expect.objectContaining({
             owner: 'bkeepers',
             repo: 'test',
             branch: 'main',
@@ -284,10 +310,10 @@ describe('Branches', () => {
               strict: true,
               contexts: ['check-1', 'check-2']
             },
-            enforce_admins: null,
+            enforce_admins: false,
             restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
-          })
+          }))
         })
       })
     })
