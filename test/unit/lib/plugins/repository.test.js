@@ -2,14 +2,16 @@ const Repository = require('../../../../lib/plugins/repository')
 
 describe('Repository', () => {
   const github = {
-    repos: {
-      get: jest.fn().mockResolvedValue({
-        data: {
-          topics: []
-        }
-      }),
-      update: jest.fn().mockResolvedValue(),
-      replaceAllTopics: jest.fn().mockResolvedValue()
+    rest: {
+      repos: {
+        get: jest.fn().mockResolvedValue({
+          data: {
+            topics: []
+          }
+        }),
+        update: jest.fn().mockResolvedValue(),
+        replaceAllTopics: jest.fn().mockResolvedValue()
+      }
     }
   }
   const log = jest.fn()
@@ -34,7 +36,7 @@ describe('Repository', () => {
         topics: []
       })
       return plugin.sync().then(() => {
-        expect(github.repos.update).toHaveBeenCalledWith({
+        expect(github.rest.repos.update).toHaveBeenCalledWith({
           owner: 'bkeepers',
           repo: 'test',
           name: 'test',
@@ -49,7 +51,7 @@ describe('Repository', () => {
         name: 'new-name'
       })
       return plugin.sync().then(() => {
-        expect(github.repos.update).toHaveBeenCalledWith({
+        expect(github.rest.repos.update).toHaveBeenCalledWith({
           owner: 'bkeepers',
           repo: 'test',
           name: 'new-name',
@@ -64,7 +66,7 @@ describe('Repository', () => {
       })
 
       return plugin.sync().then(() => {
-        expect(github.repos.replaceAllTopics).toHaveBeenCalledWith({
+        expect(github.rest.repos.replaceAllTopics).toHaveBeenCalledWith({
           owner: 'bkeepers',
           repo: 'test',
           names: ['foo', 'bar'],

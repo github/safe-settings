@@ -199,7 +199,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
   async function createCheckRun (context, pull_request, head_sha, head_branch) {
     const { payload } = context
     // robot.log.debug(`Check suite was requested! for ${context.repo()} ${pull_request.number} ${head_sha} ${head_branch}`)
-    const res = await context.octokit.checks.create({
+    const res = await context.octokit.rest.checks.create({
       owner: payload.repository.owner.login,
       repo: payload.repository.name,
       name: 'Safe-setting validator',
@@ -211,13 +211,13 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
   async function info () {
     const github = await robot.auth()
     const installations = await github.paginate(
-      github.apps.listInstallations.endpoint.merge({ per_page: 100 })
+      github.rest.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
     robot.log.debug(`installations: ${JSON.stringify(installations)}`)
     if (installations.length > 0) {
       const installation = installations[0]
       const github = await robot.auth(installation.id)
-      const app = await github.apps.getAuthenticated()
+      const app = await github.rest.apps.getAuthenticated()
       appSlug = app.data.slug
       robot.log.debug(`Validated the app is configured properly = \n${JSON.stringify(app.data, null, 2)}`)
     }
@@ -228,7 +228,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     const github = await robot.auth()
 
     const installations = await github.paginate(
-      github.apps.listInstallations.endpoint.merge({ per_page: 100 })
+      github.rest.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
 
     if (installations.length > 0) {
@@ -577,11 +577,11 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       output: { title: 'Starting NOP', summary: 'initiating...' }
     }
     robot.log.debug(`Updating check run ${JSON.stringify(params)}`)
-    await context.octokit.checks.update(params)
+    await context.octokit.rest.checks.update(params)
 
     params = Object.assign(context.repo(), { pull_number: pull_request.number })
 
-    const changes = await context.octokit.pulls.listFiles(params)
+    const changes = await context.octokit.rest.pulls.listFiles(params)
     const files = changes.data.map(f => { return f.filename })
 
     const settingsModified = files.includes(Settings.FILE_PATH)
@@ -609,7 +609,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       output: { title: 'No Safe-settings changes detected', summary: 'No changes detected' }
     }
     robot.log.debug(`Completing check run ${JSON.stringify(params)}`)
-    await context.octokit.checks.update(params)
+    await context.octokit.rest.checks.update(params)
   })
 
   robot.on('repository.created', async context => {

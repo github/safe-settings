@@ -68,6 +68,9 @@
   },
   "jest": {
     "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup.js"
+    ],
     "reporters": [
       "default",
       "jest-junit"

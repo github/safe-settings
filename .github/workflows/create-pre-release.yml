@@ -71,9 +71,10 @@ jobs:
       - name: Run Functional Tests
         id: functionaltest
         run: |
-          docker run --env APP_ID=${{ secrets.APP_ID }} --env PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --env WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }} -d -p 3000:3000 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main-enterprise
+          CONTAINER_ID=$(docker run --env APP_ID=${{ secrets.APP_ID }} --env PRIVATE_KEY=${{ secrets.PRIVATE_KEY }} --env WEBHOOK_SECRET=${{ secrets.WEBHOOK_SECRET }} --env NODE_ENV=development -d -p 3000:3000 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main-enterprise)
           sleep 10
-          curl http://localhost:3000
+          docker logs $CONTAINER_ID || true
+          curl --fail --retry 5 --retry-delay 3 --retry-connrefused http://localhost:3000
       - run: echo "${{ github.ref }}"
       - name: Tag a final release 
         id: prerelease

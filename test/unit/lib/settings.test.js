@@ -52,8 +52,10 @@ repository:
   topics:
   - frontend
      `).toString('base64');
-    mockOctokit.repos = {
-      getContent: jest.fn().mockResolvedValue({ data: { content } })
+    mockOctokit.rest = {
+      repos: {
+        getContent: jest.fn().mockResolvedValue({ data: { content } })
+      }
     }
 
     mockOctokit.request = {
@@ -310,8 +312,10 @@ repository:
       Settings.fileCache = {};
       stubContext = {
         octokit: {
-          repos: {
-            getContent: jest.fn()
+          rest: {
+            repos: {
+              getContent: jest.fn()
+            }
           },
           request: jest.fn(),
           paginate: jest.fn()
@@ -334,7 +338,7 @@ repository:
       // Given
       const filePath = 'path/to/file.yml';
       const content = Buffer.from('key: value').toString('base64');
-      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockResolvedValue({
         data: { content },
         headers: { etag: 'etag123' }
       });
@@ -355,14 +359,14 @@ repository:
       const filePath = 'path/to/file.yml';
       const content = Buffer.from('key: value').toString('base64');
       Settings.fileCache[`${mockRepo.owner}/${filePath}`] = { etag: 'etag123', data: { content } };
-      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue({ status: 304 });
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockRejectedValue({ status: 304 });
 
       // When
       const result = await settings.loadYaml(filePath);
 
       // Then
       expect(result).toEqual({ key: 'value' });
-      expect(settings.github.repos.getContent).toHaveBeenCalledWith(
+      expect(settings.github.rest.repos.getContent).toHaveBeenCalledWith(
         expect.objectContaining({ headers: { 'If-None-Match': 'etag123' } })
       );
     });
@@ -373,7 +377,7 @@ repository:
       const content = Buffer.from('key: value').toString('base64');
       const wrongContent = Buffer.from('wrong: content').toString('base64');
       Settings.fileCache['another-org/path/to/file.yml'] = { etag: 'etag123', data: { wrongContent } };
-      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockResolvedValue({
         data: { content },
         headers: { etag: 'etag123' }
       });
@@ -388,7 +392,7 @@ repository:
     it('should return null when the file path is a folder', async () => {
       // Given
       const filePath = 'path/to/folder';
-      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockResolvedValue({
         data: []
       });
 
@@ -402,7 +406,7 @@ repository:
     it('should return null when the file is a symlink or submodule', async () => {
       // Given
       const filePath = 'path/to/symlink';
-      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockResolvedValue({
         data: { content: null }
       });
 
@@ -416,7 +420,7 @@ repository:
     it('should handle 404 errors gracefully and return null', async () => {
       // Given
       const filePath = 'path/to/nonexistent.yml';
-      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue({ status: 404 });
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockRejectedValue({ status: 404 });
 
       // When
       const result = await settings.loadYaml(filePath);
@@ -428,7 +432,7 @@ repository:
     it('should throw an error for non-404 exceptions when not in nop mode', async () => {
       // Given
       const filePath = 'path/to/error.yml';
-      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
 
       // When / Then
       await expect(settings.loadYaml(filePath)).rejects.toThrow('Unexpected error');
@@ -438,7 +442,7 @@ repository:
       // Given
       const filePath = 'path/to/error.yml';
       settings.nop = true;
-      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
       jest.spyOn(settings, 'appendToResults');
 
       // When
