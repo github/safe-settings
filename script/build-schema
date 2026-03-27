@@ -1,13 +1,31 @@
 #!/usr/bin/env node
 
 const $RefParser = require('@apidevtools/json-schema-ref-parser')
-const fs = require('node:fs/promises');
+const fs = require('node:fs/promises')
+const path = require('node:path')
+
+const schemas = [
+  { src: 'schema/settings.json', dest: 'schema/dereferenced/settings.json' },
+  { src: 'schema/suborgs.json', dest: 'schema/dereferenced/suborgs.json' },
+  { src: 'schema/repos.json', dest: 'schema/dereferenced/repos.json' }
+];
 
 (async () => {
-  const schema = await fs.readFile('schema/settings.json', 'utf-8').then(JSON.parse)
-
-  await $RefParser.dereference(schema)
-
   await fs.mkdir('schema/dereferenced', { recursive: true })
-  await fs.writeFile('schema/dereferenced/settings.json', JSON.stringify(schema, null, 2))
+
+  let hasErrors = false
+  for (const { src, dest } of schemas) {
+    try {
+      const dereferenced = await $RefParser.dereference(path.resolve(src))
+      await fs.writeFile(dest, JSON.stringify(dereferenced, null, 2))
+      console.log(`Dereferenced ${src} → ${dest}`)
+    } catch (err) {
+      console.error(`Error dereferencing ${src}: ${err.message}`)
+      hasErrors = true
+    }
+  }
+
+  if (hasErrors) {
+    process.exit(1)
+  }
 })().catch(console.error)

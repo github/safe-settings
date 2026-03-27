@@ -96,6 +96,57 @@
                       "description": "Can be `enabled` or `disabled`."
                     }
                   }
+                },
+                "secret_scanning_delegated_alert_dismissal": {
+                  "type": "object",
+                  "description": "Use the `status` property to enable or disable secret scanning delegated alert dismissal for this repository.",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Can be `enabled` or `disabled`."
+                    }
+                  }
+                },
+                "secret_scanning_delegated_bypass": {
+                  "type": "object",
+                  "description": "Use the `status` property to enable or disable secret scanning delegated bypass for this repository.",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Can be `enabled` or `disabled`."
+                    }
+                  }
+                },
+                "secret_scanning_delegated_bypass_options": {
+                  "type": "object",
+                  "description": "Feature options for secret scanning delegated bypass.\nThis object is only honored when `security_and_analysis.secret_scanning_delegated_bypass.status` is set to `enabled`.\nYou can send this object in the same request as `secret_scanning_delegated_bypass`, or update just the options in a separate request.",
+                  "properties": {
+                    "reviewers": {
+                      "type": "array",
+                      "description": "The bypass reviewers for secret scanning delegated bypass.\nIf you omit this field, the existing set of reviewers is unchanged.",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "reviewer_id",
+                          "reviewer_type"
+                        ],
+                        "properties": {
+                          "reviewer_id": {
+                            "type": "integer",
+                            "description": "The ID of the team or role selected as a bypass reviewer"
+                          },
+                          "reviewer_type": {
+                            "type": "string",
+                            "description": "The type of the bypass reviewer",
+                            "enum": [
+                              "TEAM",
+                              "ROLE"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -155,7 +206,7 @@
             },
             "use_squash_pr_title_as_default": {
               "type": "boolean",
-              "description": "Either `true` to allow squash-merge commits to use pull request title, or `false` to use commit message. **This property is closing down. Please use `squash_merge_commit_title` instead.**",
+              "description": "Either `true` to allow squash-merge commits to use pull request title, or `false` to use commit message. **This property is closing down. Please use `squash_merge_commit_title` instead.",
               "default": false,
               "deprecated": true
             },
@@ -385,15 +436,6 @@
               "notifications_enabled",
               "notifications_disabled"
             ]
-          },
-          "permission": {
-            "type": "string",
-            "description": "**Closing down notice**. The permission that new repositories will be added to the team with when none is specified.",
-            "enum": [
-              "pull",
-              "push"
-            ],
-            "default": "pull"
           },
           "parent_team_id": {
             "type": "integer",
