@@ -15,9 +15,11 @@ describe('CustomProperties', () => {
   beforeEach(() => {
     github = {
       paginate: jest.fn(),
-      repos: {
-        getCustomPropertiesValues: jest.fn(),
-        createOrUpdateCustomPropertiesValues: jest.fn()
+      rest: {
+        repos: {
+          getCustomPropertiesValues: jest.fn(),
+          createOrUpdateCustomPropertiesValues: jest.fn()
+        }
       }
     }
 
@@ -42,7 +44,7 @@ describe('CustomProperties', () => {
       const result = await plugin.find()
 
       expect(github.paginate).toHaveBeenCalledWith(
-        github.repos.getCustomPropertiesValues,
+        github.rest.repos.getCustomPropertiesValues,
         {
           owner,
           repo,
@@ -75,14 +77,14 @@ describe('CustomProperties', () => {
 
       return plugin.sync().then(() => {
         expect(github.paginate).toHaveBeenCalledWith(
-          github.repos.getCustomPropertiesValues,
+          github.rest.repos.getCustomPropertiesValues,
           {
             owner,
             repo,
             per_page: 100
           }
         )
-        expect(github.repos.createOrUpdateCustomPropertiesValues).not.toHaveBeenCalledWith({
+        expect(github.rest.repos.createOrUpdateCustomPropertiesValues).not.toHaveBeenCalledWith({
           owner,
           repo,
           properties: [
@@ -92,7 +94,7 @@ describe('CustomProperties', () => {
             }
           ]
         })
-        expect(github.repos.createOrUpdateCustomPropertiesValues).toHaveBeenCalledWith({
+        expect(github.rest.repos.createOrUpdateCustomPropertiesValues).toHaveBeenCalledWith({
           owner,
           repo,
           properties: [
@@ -102,7 +104,7 @@ describe('CustomProperties', () => {
             }
           ]
         })
-        expect(github.repos.createOrUpdateCustomPropertiesValues).toHaveBeenCalledWith({
+        expect(github.rest.repos.createOrUpdateCustomPropertiesValues).toHaveBeenCalledWith({
           owner,
           repo,
           properties: [
@@ -112,7 +114,7 @@ describe('CustomProperties', () => {
             }
           ]
         })
-        expect(github.repos.createOrUpdateCustomPropertiesValues).toHaveBeenCalledWith({
+        expect(github.rest.repos.createOrUpdateCustomPropertiesValues).toHaveBeenCalledWith({
           owner,
           repo,
           properties: [
@@ -127,7 +129,7 @@ describe('CustomProperties', () => {
       // const plugin = configure([{ name: 'Test', value: 'test' }])
       // await plugin.update({ name: 'test', value: 'old' }, { name: 'test', value: 'test' })
 
-      // expect(github.repos.createOrUpdateCustomPropertiesValues).toHaveBeenCalledWith({
+      // expect(github.rest.repos.createOrUpdateCustomPropertiesValues).toHaveBeenCalledWith({
       //   owner,
       //   repo,
       //   properties: [

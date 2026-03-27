@@ -31,10 +31,10 @@
     "eta": "^3.5.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
-    "minimatch": "^10.0.1",
+    "minimatch": "^10.2.1",
     "node-cron": "^4.2.1",
     "octokit": "^5.0.2",
-    "probot": "^13.4.4",
+    "probot": "^14.2.4",
     "proxy-from-env": "^1.1.0",
     "undici": "^7.7.0"
   },
@@ -64,10 +64,13 @@
     ]
   },
   "engines": {
-    "node": ">= 16.0.0"
+    "node": ">= 22.0.0"
   },
   "jest": {
     "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup.js"
+    ],
     "reporters": [
       "default",
       "jest-junit"
