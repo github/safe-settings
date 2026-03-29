@@ -35,7 +35,7 @@
     "node-cron": "^4.2.1",
     "octokit": "^5.0.2",
     "probot": "^14.2.4",
-    "proxy-from-env": "^1.1.0",
+    "proxy-from-env": "^2.1.0",
     "undici": "^7.7.0"
   },
   "devDependencies": {
