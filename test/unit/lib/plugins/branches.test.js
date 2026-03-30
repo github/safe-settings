@@ -203,7 +203,7 @@ describe('Branches', () => {
 
     describe('when existing protection has restrictions', () => {
       it('preserves restrictions from GitHub when config omits them', () => {
-        github.repos.getBranchProtection = jest.fn().mockResolvedValue({
+        github.rest.repos.getBranchProtection = jest.fn().mockResolvedValue({
           data: {
             enforce_admins: { enabled: true },
             required_status_checks: {
@@ -229,7 +229,7 @@ describe('Branches', () => {
         }])
 
         return plugin.sync().then(() => {
-          expect(github.repos.updateBranchProtection).toHaveBeenCalledWith(
+          expect(github.rest.repos.updateBranchProtection).toHaveBeenCalledWith(
             expect.objectContaining({
               owner: 'bkeepers',
               repo: 'test',
@@ -253,7 +253,7 @@ describe('Branches', () => {
       })
 
       it('normalizes restrictions and defaults missing arrays when preserving from GitHub', () => {
-        github.repos.getBranchProtection = jest.fn().mockResolvedValue({
+        github.rest.repos.getBranchProtection = jest.fn().mockResolvedValue({
           data: {
             enforce_admins: { enabled: true },
             restrictions: {
@@ -271,7 +271,7 @@ describe('Branches', () => {
         }])
 
         return plugin.sync().then(() => {
-          const payload = github.repos.updateBranchProtection.mock.calls[0][0]
+          const payload = github.rest.repos.updateBranchProtection.mock.calls[0][0]
           expect(payload.restrictions).toEqual({
             users: ['user1'],
             teams: [],
