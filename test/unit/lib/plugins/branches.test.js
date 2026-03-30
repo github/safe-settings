@@ -67,6 +67,7 @@ describe('Branches', () => {
           required_pull_request_reviews: {
             require_code_owner_reviews: true
           },
+          restrictions: null,
           headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
         })
       })
@@ -190,6 +191,8 @@ describe('Branches', () => {
               strict: true,
               contexts: []
             },
+            enforce_admins: null,
+            restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
           })
         })
@@ -229,6 +232,8 @@ describe('Branches', () => {
               strict: true,
               contexts: ['check-1', 'check-2']
             },
+            enforce_admins: null,
+            restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
           })
         })
@@ -267,6 +272,8 @@ describe('Branches', () => {
             repo: 'test',
             branch: 'other',
             enforce_admins: false,
+            required_status_checks: null,
+            restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
           })
         })
