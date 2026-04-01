@@ -14,9 +14,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # [Optional] Uncomment if you want to install more global node modules
 # RUN su node -c "npm install -g <your-package-list-here>"
 
-# Update npm
-RUN npm install -g npm
-# Intall aws cli
+# Install aws cli
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" && \
   unzip awscliv2.zip && \
   sudo ./aws/install && \
