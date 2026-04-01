@@ -11,7 +11,6 @@ async function performFullSync (appFn, nop) {
       target: 'pino-pretty',
       options: {
         colorize: true,
-        translateTime: 'HH:mm:ss.l',
         ignore: 'pid,hostname',
         messageFormat: '{msg}',
         customColors: 'info:blue,warn:yellow,error:red',
