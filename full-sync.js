@@ -4,6 +4,7 @@ const { createProbot } = require('probot')
 
 async function performFullSync (appFn, nop) {
   const probot = createProbot()
+  await probot.load(() => {})
   probot.log.info(`Starting full sync with NOP=${nop}`)
 
   try {
