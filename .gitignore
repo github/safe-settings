@@ -11,6 +11,8 @@
 auto-save-list
 tramp
 .\#*
+.github/safe-settings/**
+safe-settings/**
 
 # Org-mode
 .org-id-locations
