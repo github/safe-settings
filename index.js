@@ -418,7 +418,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
           // Check if a config file already exists for the renamed repo name
           await context.octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
             owner: payload.repository.owner.login,
-            repo: env.ADMIN_REPO, 
+            repo: env.ADMIN_REPO,
             path: newPath,
             headers: {
               'X-GitHub-Api-Version': '2026-03-10'
