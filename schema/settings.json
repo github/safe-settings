@@ -119,7 +119,7 @@
               }
             },
             "force_create": {
-              "description": "Force create the repository even if it already exists",
+              "description": "Force create the repository",
               "type": "boolean"
             },
             "template": {
