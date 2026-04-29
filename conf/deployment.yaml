@@ -1,0 +1,50 @@
+#Copyright (C) 2022 TomTom NV. All rights reserved.
+
+restrictedRepos:
+  # You can exclude certain repos from safe-settings processing
+  #  If no file is specified, then the following repositories - 'admin', '.github', 'safe-settings' are exempted by default
+  exclude:
+    - "^.github$"
+    - "^fork(ed)*-.*$"
+    - "^hackathon-.*$"
+    - "^personal-.*$"
+    - "^safe-settings$"
+    - "^ttlab-.*$"
+    - ".*-fork(ed)*$"
+    - ".*-personal$"
+    - ".*-test$"
+    - ".*-trial$"
+  # Alternatively you can only include certain repos
+  #include: ['test']
+
+configvalidators:
+  - plugin: collaborators
+    error: |
+      `Admin cannot be assigned to collaborators`
+    script: |
+      console.log(`validator.collaborators: baseConfig ${JSON.stringify(baseconfig)}`)
+      if (baseconfig) {
+        return baseconfig.permission != 'admin'
+      }
+      return true
+overridevalidators:
+  - plugin: branches
+    error: |
+      `Branch protection required_approving_review_count cannot be set to zero`
+    script: |
+      console.log(`overridevalidators.branches: baseConfig ${JSON.stringify(baseconfig)}`)
+      console.log(`overridevalidators.branches: overrideConfig ${JSON.stringify(overrideconfig)}`)
+      if (overrideconfig?.protection?.required_pull_request_reviews?.required_approving_review_count) {
+        return overrideconfig.protection.required_pull_request_reviews.required_approving_review_count >= 1
+      }
+      return true
+  - plugin: repository
+    error: |
+      `Repository visibility cannot be overriden to public`
+    script: |
+      console.log(`validator.repository: baseConfig ${JSON.stringify(baseconfig)}`)
+      console.log(`validator.repository: overrideConfig ${JSON.stringify(overrideconfig)}`)
+      if (overrideconfig?.visibility) {
+        return overrideconfig.visibility != 'public'
+      }
+      return true

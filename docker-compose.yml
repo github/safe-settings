@@ -1,17 +1,158 @@
-version: '3.4'
+version: "3.4"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "200m"
+    max-file: "10"
+
+x-labels: &default-labels
+  application: "github-safe-settings-probot"
+  autoheal: true
+  env: ${ENV}
+  gh_org: ${GH_ORG}
+
+x-probot-enviornment: &probot-environment
+  NODE_ENV: production
+  LOG_LEVEL: "${LOG_LEVEL}"
+  LOG_LEVEL_IN_STRING: "true"
+
+x-probot-healthcheck: &probot-healthcheck
+  interval: "10s"
+  timeout: "10s"
+
+x-probot-labels: &probot-labels
+  <<: *default-labels
+  com.scalyr.config.log.attributes.parser: json
+  traefik.enable: true
+
+networks:
+  probot:
+    external: false
 
 services:
-  probot:
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - probot
+    logging: *default-logging
+    labels: *default-labels
+
+  probot_cron:
     image: safe-settings
     build: .
     environment:
-      NODE_ENV: production
-      APP_ID: ${APP_ID}
+      <<: *probot-environment
+      CRON: "${CRON}"
       GH_ORG: ${GH_ORG}
-      WEBHOOK_PROXY_URL: ${WEBHOOK_PROXY_URL}
-      PRIVATE_KEY: ${PRIVATE_KEY}
+      APP_ID: ${PROBOT_CRON_APP_ID}
+      PRIVATE_KEY: ${PROBOT_CRON_PRIVATE_KEY}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+      WEBHOOK_PROXY_URL: ${WEBHOOK_PROXY_URL}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      NODE_OPTIONS: "--max-old-space-size=8192"
+    expose:
+      - 3000
     ports:
       - 3000:3000
+    volumes:
+      - ${PWD}/conf/deployment.yml:/opt/safe-settings/deployment-settings.yml
+    labels:
+      <<: *probot-labels
+      traefik.port: 3000
+      traefik.http.routers.probot_cron.entrypoints: web
+      traefik.http.routers.probot_cron.rule: "PathPrefix(`/`) && !HeadersRegexp(`X-GitHub-Event`, `.*`)"
+    healthcheck:
+      <<: *probot-healthcheck
+      test: "wget --no-verbose --tries=1 --spider http://probot_cron:3000/ || exit 1"
+    networks:
+      - probot
+    logging: *default-logging
+    restart: always
+    profiles:
+      - cron
+
+  probot_event:
+    image: safe-settings
+    build: .
+    environment:
+      <<: *probot-environment
+      CRON: "${CRON}"
+      GH_ORG: ${GH_ORG}
+      APP_ID: ${PROBOT_EVENT_APP_ID}
+      PRIVATE_KEY: ${PROBOT_EVENT_PRIVATE_KEY}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+      WEBHOOK_PROXY_URL: ${WEBHOOK_PROXY_URL}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+    expose:
+      - 3000
+    ports:
+      - 4000:3000
+    volumes:
+      - ${PWD}/conf/deployment.yml:/opt/safe-settings/deployment-settings.yml
+    labels:
+      <<: *probot-labels
+      traefik.port: 4000
+      traefik.http.routers.probot_event.entrypoints: web
+      traefik.http.routers.probot_event.rule: "PathPrefix(`/`)"
+    healthcheck:
+      <<: *probot-healthcheck
+      test: "wget --no-verbose --tries=1 --spider http://probot_event:3000/ || exit 1"
+    networks:
+      - probot
+    logging: *default-logging
+    restart: always
+
+  proxy:
+    image: traefik:v3.0
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--api.debug=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=safe-settings_probot"
+      - "--entrypoints.web.address=:80"
+      - "--ping=true"
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels: *default-labels
+    healthcheck:
+      test: "traefik healthcheck --ping || exit 1"
+      interval: "10s"
+      timeout: "5s"
+    networks:
+      - probot
+    logging: *default-logging
+    restart: always
+
+  scalyr:
+    image: scalyr/scalyr-agent-docker-json:2.2.4-alpine
+    depends_on:
+      - proxy
+    environment:
+      SCALYR_API_KEY: "${SCALYR_API_KEY}"
+      SCALYR_SERVER: "https://upload.eu.scalyr.com"
+      SCALYR_LABELS_AS_ATTRIBUTES: "true"
+    volumes:
+      - /var/run/docker.sock:/var/scalyr/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    labels: *default-labels
+    healthcheck:
+      test: "/usr/sbin/scalyr-agent-2 status || exit 1"
+      interval: "60s"
+      timeout: "30s"
+    networks:
+      - probot
+    logging: *default-logging
+    restart: always
