@@ -1,0 +1,49 @@
+
+> safe-settings@2.1.18-tomtom-rc.1 start
+> probot run ./index.js
+
+{"level":40,"time":1777483284216,"pid":25,"hostname":"2d3b90f4ae28","name":"probot","name":"probot","msg":"\"repository_ruleset\" is not a known webhook name (https://developer.github.com/v3/activity/events/types/)"}
+{"level":30,"time":1777483284217,"pid":25,"hostname":"2d3b90f4ae28","name":"probot","name":"server","msg":"Running Probot v13.4.4 (Node.js: v20.20.2)"}
+{"level":30,"time":1777483284219,"pid":25,"hostname":"2d3b90f4ae28","name":"probot","name":"server","msg":"Listening on http://localhost:3000"}
+/opt/safe-settings/node_modules/@octokit/request/dist-node/index.js:125
+      const error = new import_request_error.RequestError(toErrorMessage(data), status, {
+                    ^
+...
+    },
+    data: {
+      message: 'Integration not found',
+      documentation_url: 'https://docs.github.com/rest',
+      status: '404'
+    }
+  },
+  request: {
+    method: 'GET',
+    url: 'https://api.github.com/app/installations?per_page=100',
+    headers: {
+      accept: 'application/vnd.github.v3+json',
+      'user-agent': 'probot/13.4.4 octokit-core.js/5.2.0 Node.js/20.20.2 (linux; arm64)',
+      authorization: 'bearer [REDACTED]'
+    },
+    request: { hook: [Function: bound bound register] }
+  }
+}
+
+Node.js v20.20.2
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.13.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.13.0
+npm notice To update run: npm install -g npm@11.13.0
+npm notice
+
+==== SMOKE TEST INTERPRETATION ====
+- HTTP server bound successfully on port 3000 ("Listening on http://localhost:3000").
+- Process subsequently crashed on the first scheduled GET /app/installations
+  call because APP_ID=1 is bogus and GitHub returned 404 "Integration not
+  found", producing an unhandled promise rejection.
+- This matches the case SESSION-1.md anticipated: "As long as the process
+  starts and the HTTP server binds, that's enough for this stage; [auth]
+  validation will succeed in the real deployment with the real KeyVault
+  secret."
+- /probot HTTP probe returned 000 because the process exited before curl
+  could connect — NOT because the HTTP server failed to bind.
+- Container starts cleanly: yes (image is good).
