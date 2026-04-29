@@ -1,0 +1,9 @@
+<!-- Copyright (C) 2026 TomTom NV. All rights reserved. -->
+
+# Decisions for evaluated fork commits
+
+| Commit  | Topic                                  | Decision    | Reason |
+|---------|----------------------------------------|-------------|--------|
+| 5cf5bd3 | autolinks `url_template` change detection | **ported** as commit `cf1d8d8` on `main-tomtom-v2` | Upstream 2.1.18's `lib/mergeDeep.js:100` still skips any field whose name contains the substring `url`, including the legitimate `url_template` field on autolinks. Verified with a direct `compareDeep` repro before porting. Tests from the original commit also ported. |
+| e3d3502 | branches required attributes           | **dropped** — upstream already correct | Upstream 2.1.18 reworked `lib/plugins/branches.js` to use `MergeDeep.compareDeep` plus an `Overrides.removeOverrides('contexts', …)` mechanism (the "Enhanced branch protection application with overrides handling" mentioned in the 2.1.17 release notes). All 9 active branches unit tests pass on upstream. The fork's `useCurrentBranchProtectionIfNotOverriddenOrDisable` helper does not exist in upstream and is no longer needed. |
+| e6fb3cc | disable rulesets plugin                | **dropped, replaced** by a deployment-targeted disable on `main-tomtom-v2` (commit `50c2ffd`) | Upstream's rulesets plugin is stable (improved in 2.1.17/2.1.18). However, TomTom currently routes ruleset configs through `github-as-code` (a separate TypeScript app), so safe-settings must not also write rulesets while both apps coexist. Since upstream has no built-in `plugins.<x>.enabled` toggle (option 7.3a was not feasible), we used PLAN.md option 7.3b: comment out `rulesets: require('./plugins/rulesets')` in `Settings.PLUGINS` and add a defensive guard in `updateOrg()`. The plugin file itself is left untouched and can be re-enabled by uncommenting one line once `github-as-code` is retired. |
