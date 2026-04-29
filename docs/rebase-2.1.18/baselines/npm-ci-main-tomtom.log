@@ -1,0 +1,24 @@
+npm warn Unknown user config "{". This will stop working in the next major version of npm.
+npm warn Unknown user config " [ {" ("errors" : [ {). This will stop working in the next major version of npm.
+npm warn Unknown user config " 401," ("status" : 401,). This will stop working in the next major version of npm.
+npm warn Unknown user config " "Authentication is required"" ("message" : "Authentication is required"). This will stop working in the next major version of npm.
+npm warn Unknown user config "} ]". This will stop working in the next major version of npm.
+npm warn Unknown user config "}". This will stop working in the next major version of npm.
+npm warn deprecated @types/pino-std-serializers@4.0.0: This is a stub types definition. pino-std-serializers provides its own type definitions, so you do not need this installed.
+npm warn deprecated @types/pino-pretty@5.0.0: This is a stub types definition. pino-pretty provides its own type definitions, so you do not need this installed.
+npm warn deprecated superagent@8.1.2: Please upgrade to v9.0.0+ as we have fixed a public vulnerability with formidable dependency. Note that v9.0.0+ requires Node.js v14.18.0+. See https://github.com/ladjs/superagent/pull/1800 for insight. This project is supported and maintained by the team at Forward Email @ https://forwardemail.net
+
+added 1038 packages, and audited 1039 packages in 12s
+
+153 packages are looking for funding
+  run `npm fund` for details
+
+50 vulnerabilities (7 low, 29 moderate, 12 high, 2 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.

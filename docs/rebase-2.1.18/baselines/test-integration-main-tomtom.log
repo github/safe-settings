@@ -1,0 +1,206 @@
+npm warn Unknown user config "{". This will stop working in the next major version of npm.
+npm warn Unknown user config " [ {" ("errors" : [ {). This will stop working in the next major version of npm.
+npm warn Unknown user config " 401," ("status" : 401,). This will stop working in the next major version of npm.
+npm warn Unknown user config " "Authentication is required"" ("message" : "Authentication is required"). This will stop working in the next major version of npm.
+npm warn Unknown user config "} ]". This will stop working in the next major version of npm.
+npm warn Unknown user config "}". This will stop working in the next major version of npm.
+
+> safe-settings@0.1.0-rc.26 test:integration
+> jest --roots=lib --roots=test/integration
+
+FAIL test/integration/plugins/collaborators.test.js
+  ● collaborators plugin › syncs collaborators
+
+    [@octokit/auth-app] appId option is required
+
+      17 |
+      18 | function loadInstance () {
+    > 19 |   const probot = createProbot({ id: 1, cert: 'test', githubToken: 'test' })
+         |                  ^
+      20 |   probot.load(settingsBot)
+      21 |
+      22 |   return probot
+
+      at Object.createAppAuth (node_modules/octokit-auth-probot/node_modules/@octokit/auth-app/dist-node/index.js:426:11)
+      at createAppAuth (node_modules/octokit-auth-probot/dist-src/get-state.js:19:19)
+      at getState (node_modules/octokit-auth-probot/dist-src/index.js:5:19)
+      at new authStrategy (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:69:26)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new Probot (node_modules/probot/src/probot.ts:77:21)
+      at createProbot (node_modules/probot/src/create-probot.ts:73:10)
+      at createProbot (test/integration/common.js:19:18)
+      at Object.loadInstance (test/integration/plugins/collaborators.test.js:12:14)
+
+FAIL test/integration/plugins/milestones.test.js
+  ● milestones plugin › syncs milestones
+
+    [@octokit/auth-app] appId option is required
+
+      17 |
+      18 | function loadInstance () {
+    > 19 |   const probot = createProbot({ id: 1, cert: 'test', githubToken: 'test' })
+         |                  ^
+      20 |   probot.load(settingsBot)
+      21 |
+      22 |   return probot
+
+      at Object.createAppAuth (node_modules/octokit-auth-probot/node_modules/@octokit/auth-app/dist-node/index.js:426:11)
+      at createAppAuth (node_modules/octokit-auth-probot/dist-src/get-state.js:19:19)
+      at getState (node_modules/octokit-auth-probot/dist-src/index.js:5:19)
+      at new authStrategy (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:69:26)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new Probot (node_modules/probot/src/probot.ts:77:21)
+      at createProbot (node_modules/probot/src/create-probot.ts:73:10)
+      at createProbot (test/integration/common.js:19:18)
+      at Object.loadInstance (test/integration/plugins/milestones.test.js:12:14)
+
+FAIL test/integration/plugins/teams.test.js
+  ● teams plugin › syncs teams
+
+    [@octokit/auth-app] appId option is required
+
+      17 |
+      18 | function loadInstance () {
+    > 19 |   const probot = createProbot({ id: 1, cert: 'test', githubToken: 'test' })
+         |                  ^
+      20 |   probot.load(settingsBot)
+      21 |
+      22 |   return probot
+
+      at Object.createAppAuth (node_modules/octokit-auth-probot/node_modules/@octokit/auth-app/dist-node/index.js:426:11)
+      at createAppAuth (node_modules/octokit-auth-probot/dist-src/get-state.js:19:19)
+      at getState (node_modules/octokit-auth-probot/dist-src/index.js:5:19)
+      at new authStrategy (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:69:26)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new Probot (node_modules/probot/src/probot.ts:77:21)
+      at createProbot (node_modules/probot/src/create-probot.ts:73:10)
+      at createProbot (test/integration/common.js:19:18)
+      at Object.loadInstance (test/integration/plugins/teams.test.js:13:14)
+
+FAIL test/integration/triggers/push.test.js
+  ● push trigger › does not apply configuration when not on the default branch
+
+    [@octokit/auth-app] appId option is required
+
+      17 |
+      18 | function loadInstance () {
+    > 19 |   const probot = createProbot({ id: 1, cert: 'test', githubToken: 'test' })
+         |                  ^
+      20 |   probot.load(settingsBot)
+      21 |
+      22 |   return probot
+
+      at Object.createAppAuth (node_modules/octokit-auth-probot/node_modules/@octokit/auth-app/dist-node/index.js:426:11)
+      at createAppAuth (node_modules/octokit-auth-probot/dist-src/get-state.js:19:19)
+      at getState (node_modules/octokit-auth-probot/dist-src/index.js:5:19)
+      at new authStrategy (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:69:26)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new Probot (node_modules/probot/src/probot.ts:77:21)
+      at createProbot (node_modules/probot/src/create-probot.ts:73:10)
+      at createProbot (test/integration/common.js:19:18)
+      at Object.loadInstance (test/integration/triggers/push.test.js:9:14)
+
+FAIL test/integration/triggers/repository-created.test.js
+  ● repository.created trigger › does not apply configuration when the repository does not have a settings.yml
+
+    [@octokit/auth-app] appId option is required
+
+      17 |
+      18 | function loadInstance () {
+    > 19 |   const probot = createProbot({ id: 1, cert: 'test', githubToken: 'test' })
+         |                  ^
+      20 |   probot.load(settingsBot)
+      21 |
+      22 |   return probot
+
+      at Object.createAppAuth (node_modules/octokit-auth-probot/node_modules/@octokit/auth-app/dist-node/index.js:426:11)
+      at createAppAuth (node_modules/octokit-auth-probot/dist-src/get-state.js:19:19)
+      at getState (node_modules/octokit-auth-probot/dist-src/index.js:5:19)
+      at new authStrategy (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:69:26)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new Probot (node_modules/probot/src/probot.ts:77:21)
+      at createProbot (node_modules/probot/src/create-probot.ts:73:10)
+      at createProbot (test/integration/common.js:19:18)
+      at Object.loadInstance (test/integration/triggers/repository-created.test.js:10:14)
+
+FAIL test/integration/triggers/repository-edited.test.js
+  ● repository.edited trigger › does not apply configuration when the default branch was not changed
+
+    [@octokit/auth-app] appId option is required
+
+      17 |
+      18 | function loadInstance () {
+    > 19 |   const probot = createProbot({ id: 1, cert: 'test', githubToken: 'test' })
+         |                  ^
+      20 |   probot.load(settingsBot)
+      21 |
+      22 |   return probot
+
+      at Object.createAppAuth (node_modules/octokit-auth-probot/node_modules/@octokit/auth-app/dist-node/index.js:426:11)
+      at createAppAuth (node_modules/octokit-auth-probot/dist-src/get-state.js:19:19)
+      at getState (node_modules/octokit-auth-probot/dist-src/index.js:5:19)
+      at new authStrategy (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:69:26)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new Probot (node_modules/probot/src/probot.ts:77:21)
+      at createProbot (node_modules/probot/src/create-probot.ts:73:10)
+      at createProbot (test/integration/common.js:19:18)
+      at Object.loadInstance (test/integration/triggers/repository-edited.test.js:11:14)
+
+  ● repository.edited trigger › does not apply configuration when the repository does not have a settings.yml
+
+    [@octokit/auth-app] appId option is required
+
+      17 |
+      18 | function loadInstance () {
+    > 19 |   const probot = createProbot({ id: 1, cert: 'test', githubToken: 'test' })
+         |                  ^
+      20 |   probot.load(settingsBot)
+      21 |
+      22 |   return probot
+
+      at Object.createAppAuth (node_modules/octokit-auth-probot/node_modules/@octokit/auth-app/dist-node/index.js:426:11)
+      at createAppAuth (node_modules/octokit-auth-probot/dist-src/get-state.js:19:19)
+      at getState (node_modules/octokit-auth-probot/dist-src/index.js:5:19)
+      at new authStrategy (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:69:26)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new Probot (node_modules/probot/src/probot.ts:77:21)
+      at createProbot (node_modules/probot/src/create-probot.ts:73:10)
+      at createProbot (test/integration/common.js:19:18)
+      at Object.loadInstance (test/integration/triggers/repository-edited.test.js:11:14)
+
+FAIL test/integration/plugins/repository.test.js
+  ● repository plugin › syncs repo settings
+
+    [@octokit/auth-app] appId option is required
+
+      17 |
+      18 | function loadInstance () {
+    > 19 |   const probot = createProbot({ id: 1, cert: 'test', githubToken: 'test' })
+         |                  ^
+      20 |   probot.load(settingsBot)
+      21 |
+      22 |   return probot
+
+      at Object.createAppAuth (node_modules/octokit-auth-probot/node_modules/@octokit/auth-app/dist-node/index.js:426:11)
+      at createAppAuth (node_modules/octokit-auth-probot/dist-src/get-state.js:19:19)
+      at getState (node_modules/octokit-auth-probot/dist-src/index.js:5:19)
+      at new authStrategy (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:69:26)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new OctokitWithDefaults (node_modules/probot/node_modules/@octokit/core/dist-src/index.js:96:21)
+      at new Probot (node_modules/probot/src/probot.ts:77:21)
+      at createProbot (node_modules/probot/src/create-probot.ts:73:10)
+      at createProbot (test/integration/common.js:19:18)
+      at Object.loadInstance (test/integration/plugins/repository.test.js:12:14)
+
+Test Suites: 7 failed, 7 total
+Tests:       8 failed, 8 total
+Snapshots:   0 total
+Time:        1.647 s
+Ran all test suites.

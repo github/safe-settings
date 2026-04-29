@@ -1,0 +1,1793 @@
+npm warn Unknown user config "{". This will stop working in the next major version of npm.
+npm warn Unknown user config " [ {" ("errors" : [ {). This will stop working in the next major version of npm.
+npm warn Unknown user config " 401," ("status" : 401,). This will stop working in the next major version of npm.
+npm warn Unknown user config " "Authentication is required"" ("message" : "Authentication is required"). This will stop working in the next major version of npm.
+npm warn Unknown user config "} ]". This will stop working in the next major version of npm.
+npm warn Unknown user config "}". This will stop working in the next major version of npm.
+
+> safe-settings@2.1.18-tomtom-rc.1 test:unit
+> jest --roots=lib --roots=test/unit
+
+PASS test/unit/lib/plugins/environments.test.js
+PASS test/unit/lib/settings.test.js
+  ● Console
+
+    console.log
+      Skipping excluded repo foo in restrictedRepos.exclude
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Skipping excluded repo my-repo-test in restrictedRepos.exclude
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Skipping excluded repo personal-repo in restrictedRepos.exclude
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Allowing my-repo-test-data not in restrictedRepos.exclude [foo,*-test,personal-*]
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Allowing personalization-repo not in restrictedRepos.exclude [foo,*-test,personal-*]
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Allowing foo in restrictedRepos.include [foo,*-test,personal-*]
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Allowing my-repo-test in restrictedRepos.include [foo,*-test,personal-*]
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Allowing personal-repo in restrictedRepos.include [foo,*-test,personal-*]
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Skipping repo my-repo-test-data not in restrictedRepos.include
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      Skipping repo personalization-repo not in restrictedRepos.include
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      my-repo not in restricted repos
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+       In getSubOrgConfigMap {"owner":"test","repo":"test-repo"}
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      data = {"suborgrepos":["new-repo"],"suborgproperties":[{"EDP":true},{"do_no_delete":true}],"teams":[{"name":"core","permission":"bypass"},{"name":"docss","permission":"pull"},{"name":"docs","permission":"pull"}],"validator":{"pattern":"[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*"},"repository":{"topics":["frontend"]}}
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+       In getSubOrgConfigMap {"owner":"test","repo":"test-repo"}
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      data = {"suborgrepos":["new-repo"],"suborgproperties":[{"EDP":true},{"do_no_delete":true}],"teams":[{"name":"core","permission":"bypass"},{"name":"docss","permission":"pull"},{"name":"docs","permission":"pull"}],"validator":{"pattern":"[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*"},"repository":{"topics":["frontend"]}}
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+    console.log
+      data = {"suborgrepos":["new-repo"],"suborgproperties":[{"EDP":true},{"do_no_delete":true}],"teams":[{"name":"core","permission":"bypass"},{"name":"docss","permission":"pull"},{"name":"docs","permission":"pull"}],"validator":{"pattern":"[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+.*"},"repository":{"topics":["frontend"]}}
+
+      at Object.log (test/unit/lib/settings.test.js:74:19)
+
+PASS test/unit/lib/mergeDeep.test.js
+  ● Console
+
+    console.log
+      source {
+        "repository": {
+          "name": "test",
+          "org": "decyjphr-org",
+          "force_create": false,
+          "description": "description of test repository",
+          "homepage": "https://newhome.github.io/",
+          "topics": [
+            "red"
+          ],
+          "auto_init": true,
+          "has_issues": true,
+          "has_projects": true,
+          "has_wiki": false,
+          "has_downloads": true,
+          "allow_squash_merge": true,
+          "allow_merge_commit": false,
+          "allow_rebase_merge": false,
+          "default_branch": "develop"
+        },
+        "labels": [
+          {
+            "name": "green",
+            "color": "#B60205",
+            "description": "An issue sswithss the system"
+          }
+        ],
+        "validator": {
+          "pattern": "[a-zA-Z0-9_-]+"
+        },
+        "collaborators": [
+          {
+            "username": "regpaco",
+            "permission": "pull"
+          }
+        ],
+        "branches": [
+          {
+            "name": "feature1",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 5,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": false,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:194:13)
+
+    console.log
+      target {
+        "repository": {
+          "name": "test",
+          "description": "description of the repos",
+          "topics": [
+            "uber",
+            "newone"
+          ]
+        },
+        "branches": [
+          {
+            "name": "default",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": true,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:195:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "repository": {
+            "org": "decyjphr-org",
+            "name": "test",
+            "homepage": "https://newhome.github.io/",
+            "topics": [
+              "red"
+            ],
+            "auto_init": true,
+            "has_issues": true,
+            "has_projects": true,
+            "has_downloads": true,
+            "allow_squash_merge": true,
+            "default_branch": "develop"
+          },
+          "labels": [
+            {
+              "name": "green",
+              "color": "#B60205",
+              "description": "An issue sswithss the system"
+            }
+          ],
+          "validator": {
+            "pattern": "[a-zA-Z0-9_-]+"
+          },
+          "collaborators": [
+            {
+              "username": "regpaco",
+              "permission": "pull"
+            }
+          ],
+          "branches": [
+            {
+              "name": "feature1",
+              "protection": {
+                "required_pull_request_reviews": {
+                  "required_approving_review_count": 5,
+                  "dismiss_stale_reviews": true,
+                  "require_code_owner_reviews": true,
+                  "dismissal_restrictions": {
+                    "users": [],
+                    "teams": []
+                  }
+                },
+                "required_status_checks": {
+                  "strict": true,
+                  "contexts": []
+                },
+                "enforce_admins": false,
+                "restrictions": {
+                  "apps": [],
+                  "users": [],
+                  "teams": []
+                }
+              }
+            }
+          ]
+        },
+        "modifications": {
+          "repository": {
+            "description": "description of test repository",
+            "name": "test"
+          }
+        },
+        "deletions": {
+          "repository": {
+            "topics": [
+              "uber",
+              "newone"
+            ]
+          },
+          "branches": [
+            {
+              "name": "default",
+              "protection": {
+                "required_pull_request_reviews": {
+                  "required_approving_review_count": 2,
+                  "dismiss_stale_reviews": true,
+                  "require_code_owner_reviews": true,
+                  "dismissal_restrictions": {
+                    "users": [],
+                    "teams": []
+                  }
+                },
+                "required_status_checks": {
+                  "strict": true,
+                  "contexts": []
+                },
+                "enforce_admins": true,
+                "restrictions": {
+                  "apps": [],
+                  "users": [],
+                  "teams": []
+                }
+              }
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:196:13)
+
+    console.log
+      target = {
+        "repository": {
+          "name": "test",
+          "description": "description of the repos",
+          "topics": [
+            "uber",
+            "newone"
+          ]
+        },
+        "branches": [
+          {
+            "name": "default",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": true,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:200:13)
+
+    console.log
+      overrideConfig = {
+        "repository": {
+          "name": "test",
+          "description": "description of test repository",
+          "topics": [
+            "uber",
+            "newone",
+            "red"
+          ],
+          "org": "decyjphr-org",
+          "force_create": false,
+          "homepage": "https://newhome.github.io/",
+          "auto_init": true,
+          "has_issues": true,
+          "has_projects": true,
+          "has_wiki": false,
+          "has_downloads": true,
+          "allow_squash_merge": true,
+          "allow_merge_commit": false,
+          "allow_rebase_merge": false,
+          "default_branch": "develop"
+        },
+        "branches": [
+          {
+            "name": "default",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": true,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          },
+          {
+            "name": "feature1",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 5,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": false,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ],
+        "labels": [
+          {
+            "name": "green",
+            "color": "#B60205",
+            "description": "An issue sswithss the system"
+          }
+        ],
+        "validator": {
+          "pattern": "[a-zA-Z0-9_-]+"
+        },
+        "collaborators": [
+          {
+            "username": "regpaco",
+            "permission": "pull"
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:203:13)
+
+    console.log
+      new diffs {
+        "additions": {},
+        "modifications": {},
+        "deletions": {
+          "repository": {
+            "topics": [
+              "uber",
+              "newone"
+            ]
+          },
+          "branches": [
+            {
+              "name": "default",
+              "protection": {
+                "required_pull_request_reviews": {
+                  "required_approving_review_count": 2,
+                  "dismiss_stale_reviews": true,
+                  "require_code_owner_reviews": true,
+                  "dismissal_restrictions": {
+                    "users": [],
+                    "teams": []
+                  }
+                },
+                "required_status_checks": {
+                  "strict": true,
+                  "contexts": []
+                },
+                "enforce_admins": true,
+                "restrictions": {
+                  "apps": [],
+                  "users": [],
+                  "teams": []
+                }
+              }
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:206:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "protection": {
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 2,
+              "dismiss_stale_reviews": false,
+              "require_code_owner_reviews": true,
+              "dismissal_restrictions": {}
+            },
+            "required_status_checks": {
+              "strict": true,
+              "contexts": []
+            },
+            "enforce_admins": false
+          }
+        },
+        "modifications": {},
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:256:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "protection": {
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 2,
+              "dismiss_stale_reviews": false,
+              "require_code_owner_reviews": true,
+              "dismissal_restrictions": {}
+            },
+            "required_status_checks": {
+              "strict": true,
+              "contexts": []
+            },
+            "enforce_admins": false
+          }
+        },
+        "modifications": {},
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:305:13)
+
+    console.log
+      source {
+        "branches": [
+          {
+            "name": "master",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": false,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {}
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": false
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:427:13)
+
+    console.log
+      target {
+        "branches": [
+          {
+            "name": "master",
+            "protection": {
+              "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection",
+              "required_status_checks": {
+                "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks",
+                "strict": true,
+                "contexts": [],
+                "contexts_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks/contexts",
+                "checks": []
+              },
+              "restrictions": {
+                "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions",
+                "users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/users",
+                "teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/teams",
+                "apps_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/apps",
+                "users": [],
+                "teams": [],
+                "apps": []
+              },
+              "required_pull_request_reviews": {
+                "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_pull_request_reviews",
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "required_approving_review_count": 2,
+                "dismissal_restrictions": {
+                  "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions",
+                  "users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/users",
+                  "teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/teams",
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_signatures": false,
+              "enforce_admins": false,
+              "required_linear_history": false,
+              "allow_force_pushes": {
+                "enabled": false
+              },
+              "allow_deletions": false,
+              "required_conversation_resolution": false
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:428:13)
+
+    console.log
+      diffs {
+        "additions": {},
+        "modifications": {
+          "branches": [
+            {
+              "protection": {
+                "required_pull_request_reviews": {
+                  "dismiss_stale_reviews": false
+                }
+              },
+              "name": "master"
+            }
+          ]
+        },
+        "deletions": {},
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:429:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "colors": [
+            {
+              "name": "newone",
+              "color": "red"
+            },
+            {
+              "name": "uber",
+              "color": "yellow"
+            }
+          ]
+        },
+        "modifications": {
+          "colors": [
+            {
+              "color": "green",
+              "name": "blue"
+            }
+          ]
+        },
+        "deletions": {
+          "colors": [
+            {
+              "name": "blu",
+              "color": "blu"
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:544:13)
+
+    console.log
+      overrideConfig = {
+        "colors": [
+          {
+            "name": "blue",
+            "color": "green",
+            "anotherArray": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "name": "blu",
+            "color": "blu"
+          },
+          {
+            "name": "newone",
+            "color": "red"
+          },
+          {
+            "name": "uber",
+            "color": "yellow"
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:549:13)
+
+    console.log
+      new diffs {
+        "additions": {},
+        "modifications": {},
+        "deletions": {
+          "colors": [
+            {
+              "name": "blu",
+              "color": "blu"
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:551:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "entries": [
+            "blue",
+            "green",
+            "newone",
+            "uber",
+            "yellow"
+          ]
+        },
+        "modifications": {},
+        "deletions": {
+          "entries": [
+            "blu"
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:577:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "entries": [
+            {
+              "key_prefix": "ASDF-",
+              "url_template": "https://jira.company.com/browse/ASDF-<num>"
+            },
+            {
+              "key_prefix": "BOLIGRAFO-",
+              "url_template": "https://jira.company.com/browse/BOLIGRAFO-<num>"
+            }
+          ]
+        },
+        "modifications": {},
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:824:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "entries": [
+            {
+              "key_prefix": "BOLIGRAFO-",
+              "url_template": "https://jira.company.com/browse/BOLIGRAFO-<num>"
+            }
+          ]
+        },
+        "modifications": {},
+        "deletions": {
+          "entries": [
+            {
+              "key_prefix": "BOLSIGRAFO-",
+              "url_template": "https://jira.company.com/browse/BOLIGRAFO-<num>"
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:872:13)
+
+    console.log
+      diffs {
+        "additions": {},
+        "modifications": {
+          "entries": [
+            {
+              "url_template": "https://jiranew.company.com/browse/ASDF-<num>",
+              "key_prefix": "ASDF-"
+            }
+          ]
+        },
+        "deletions": {},
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:910:13)
+
+    console.log
+      source {
+        "teams": [
+          "developers"
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:964:13)
+
+    console.log
+      target {
+        "teams": [
+          {
+            "name": "developers"
+          },
+          {
+            "name": "marketing"
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:965:13)
+
+    console.log
+      result {
+        "additions": {},
+        "modifications": {},
+        "deletions": {
+          "teams": [
+            {
+              "name": "marketing"
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:966:13)
+
+    console.log
+      diffs {
+        "additions": {},
+        "modifications": {},
+        "deletions": [
+          {
+            "username": "iksathrr",
+            "pendinginvite": false,
+            "permission": "admin"
+          }
+        ],
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1119:13)
+
+    console.log
+      source [
+        {
+          "name": "demo",
+          "target": "branch",
+          "enforcement": "disabled",
+          "bypass_actors": [
+            {
+              "actor_id": 1,
+              "actor_type": "OrganizationAdmin",
+              "bypass_mode": "pull_request"
+            }
+          ],
+          "conditions": {
+            "ref_name": {
+              "include": [
+                "~DEFAULT_BRANCH"
+              ],
+              "exclude": [
+                "refs/heads/oldmaster"
+              ]
+            },
+            "repository_name": {
+              "include": [
+                "test*"
+              ],
+              "exclude": [
+                "test",
+                "test1"
+              ],
+              "protected": true
+            }
+          },
+          "rules": [
+            {
+              "type": "creation"
+            },
+            {
+              "type": "update"
+            },
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "required_linear_history"
+            },
+            {
+              "type": "required_signatures"
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "required_status_checks": [
+                  {
+                    "context": "Required Status Check 3",
+                    "integration_id": 5678
+                  },
+                  {
+                    "context": "Required Status Check 4",
+                    "integration_id": 5678
+                  }
+                ]
+              }
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "dismiss_stale_reviews_on_push": true,
+                "require_code_owner_review": true,
+                "require_last_push_approval": true,
+                "required_approving_review_count": 10,
+                "required_review_thread_resolution": true
+              }
+            },
+            {
+              "type": "commit_message_pattern",
+              "parameters": {
+                "name": "test commit_message_pattern",
+                "negate": true,
+                "operator": "starts_with",
+                "pattern": "skip*"
+              }
+            },
+            {
+              "type": "commit_author_email_pattern",
+              "parameters": {
+                "name": "test commit_author_email_pattern",
+                "negate": false,
+                "operator": "regex",
+                "pattern": "^.*@example.com$"
+              }
+            },
+            {
+              "type": "committer_email_pattern",
+              "parameters": {
+                "name": "test committer_email_pattern",
+                "negate": false,
+                "operator": "regex",
+                "pattern": "^.*@example.com$"
+              }
+            },
+            {
+              "type": "branch_name_pattern",
+              "parameters": {
+                "name": "test branch_name_pattern",
+                "negate": false,
+                "operator": "regex",
+                "pattern": ".*/.*"
+              }
+            }
+          ]
+        }
+      ]
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1607:13)
+
+    console.log
+      target [
+        {
+          "id": 68617,
+          "name": "demo",
+          "target": "branch",
+          "source_type": "Organization",
+          "source": "decyjphr-scale-test",
+          "enforcement": "disabled",
+          "conditions": {
+            "ref_name": {
+              "exclude": [
+                "refs/heads/oldmaster"
+              ],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            },
+            "repository_name": {
+              "exclude": [
+                "test",
+                "test1"
+              ],
+              "include": [
+                "test*"
+              ],
+              "protected": true
+            }
+          },
+          "rules": [
+            {
+              "type": "creation"
+            },
+            {
+              "type": "update"
+            },
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "required_linear_history"
+            },
+            {
+              "type": "required_signatures"
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "required_status_checks": [
+                  {
+                    "context": "Required Status Check 1",
+                    "integration_id": 1234
+                  },
+                  {
+                    "context": "Required Status Check 2",
+                    "integration_id": 1234
+                  }
+                ]
+              }
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "require_code_owner_review": true,
+                "require_last_push_approval": true,
+                "dismiss_stale_reviews_on_push": true,
+                "required_approving_review_count": 10,
+                "required_review_thread_resolution": true
+              }
+            },
+            {
+              "type": "commit_message_pattern",
+              "parameters": {
+                "name": "test commit_message_pattern",
+                "negate": true,
+                "pattern": "skip*",
+                "operator": "starts_with"
+              }
+            },
+            {
+              "type": "commit_author_email_pattern",
+              "parameters": {
+                "name": "test commit_author_email_pattern",
+                "negate": false,
+                "pattern": "^.*@example.com$",
+                "operator": "regex"
+              }
+            },
+            {
+              "type": "committer_email_pattern",
+              "parameters": {
+                "name": "test committer_email_pattern",
+                "negate": false,
+                "pattern": "^.*@example.com$",
+                "operator": "regex"
+              }
+            },
+            {
+              "type": "branch_name_pattern",
+              "parameters": {
+                "name": "test branch_name_pattern",
+                "negate": false,
+                "pattern": ".*/.*",
+                "operator": "regex"
+              }
+            }
+          ],
+          "node_id": "RRS_lACkVXNlcs4GH_FizgABDAk",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/orgs/decyjphr-scale-test/rulesets/68617"
+            },
+            "html": {
+              "href": "https://github.com/organizations/decyjphr-scale-test/settings/rules/68617"
+            }
+          },
+          "created_at": "2023-08-11T15:55:49.071Z",
+          "updated_at": "2023-08-11T15:55:49.139Z",
+          "bypass_actors": [
+            {
+              "actor_id": 1,
+              "actor_type": "OrganizationAdmin",
+              "bypass_mode": "pull_request"
+            }
+          ]
+        }
+      ]
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1608:13)
+
+    console.log
+      diffs {
+        "additions": {},
+        "modifications": [
+          {
+            "rules": [
+              {
+                "parameters": {
+                  "required_status_checks": [
+                    {
+                      "context": "Required Status Check 3",
+                      "integration_id": 5678
+                    },
+                    {
+                      "context": "Required Status Check 4",
+                      "integration_id": 5678
+                    }
+                  ]
+                },
+                "type": "required_status_checks"
+              }
+            ],
+            "name": "demo"
+          }
+        ],
+        "deletions": [
+          {
+            "rules": [
+              {
+                "parameters": {
+                  "required_status_checks": [
+                    {
+                      "context": "Required Status Check 1",
+                      "integration_id": 1234
+                    },
+                    {
+                      "context": "Required Status Check 2",
+                      "integration_id": 1234
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1609:13)
+
+    console.log
+      source {
+        "environments": [
+          {
+            "name": "production",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com"
+              },
+              {
+                "name": "SECOND_VARIABLE",
+                "value": "My_SECOND_VARIABLE"
+              }
+            ]
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1659:13)
+
+    console.log
+      target {
+        "environments": [
+          {
+            "name": "production",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com"
+              }
+            ]
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1660:13)
+
+    console.log
+      diffs {
+        "additions": {},
+        "modifications": {
+          "environments": [
+            {
+              "variables": [
+                {
+                  "name": "SECOND_VARIABLE",
+                  "value": "My_SECOND_VARIABLE"
+                }
+              ],
+              "name": "production"
+            }
+          ]
+        },
+        "deletions": {},
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1661:13)
+
+    console.log
+      target = {
+        "environments": [
+          {
+            "name": "production",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com"
+              }
+            ]
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1667:13)
+
+    console.log
+      overrideConfig = {
+        "environments": [
+          {
+            "name": "production",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com"
+              },
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com"
+              },
+              {
+                "name": "SECOND_VARIABLE",
+                "value": "My_SECOND_VARIABLE"
+              }
+            ]
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1670:13)
+
+    console.log
+      new diffs {
+        "additions": {},
+        "modifications": {},
+        "deletions": {
+          "environments": [
+            {
+              "variables": [
+                {
+                  "name": "SECOND_VARIABLE",
+                  "value": "My_SECOND_VARIABLE"
+                }
+              ]
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1673:13)
+
+    console.log
+      source {
+        "environments": [
+          {
+            "name": "production",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com.changed.value"
+              },
+              {
+                "name": "SECOND_VARIABLE",
+                "value": "My_SECOND_VARIABLE"
+              }
+            ]
+          },
+          {
+            "name": "development",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME_DEVL",
+                "value": "https://foo-devl.com"
+              },
+              {
+                "name": "SECOND_VARIABLE_DEVL",
+                "value": "My_SECOND_VARIABLE_DEVL"
+              }
+            ]
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1749:13)
+
+    console.log
+      target {
+        "environments": [
+          {
+            "name": "production",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com"
+              }
+            ]
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1750:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "environments": [
+            {
+              "name": "development",
+              "variables": [
+                {
+                  "name": "ROUTE53_HOSTNAME_DEVL",
+                  "value": "https://foo-devl.com"
+                },
+                {
+                  "name": "SECOND_VARIABLE_DEVL",
+                  "value": "My_SECOND_VARIABLE_DEVL"
+                }
+              ]
+            }
+          ]
+        },
+        "modifications": {
+          "environments": [
+            {
+              "variables": [
+                {
+                  "value": "https://foo-prod.com.changed.value",
+                  "name": "ROUTE53_HOSTNAME"
+                },
+                {
+                  "name": "SECOND_VARIABLE",
+                  "value": "My_SECOND_VARIABLE"
+                }
+              ],
+              "name": "production"
+            }
+          ]
+        },
+        "deletions": {},
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1751:13)
+
+    console.log
+      target = {
+        "environments": [
+          {
+            "name": "production",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com"
+              }
+            ]
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1757:13)
+
+    console.log
+      overrideConfig = {
+        "environments": [
+          {
+            "name": "production",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com"
+              },
+              {
+                "name": "ROUTE53_HOSTNAME",
+                "value": "https://foo-prod.com.changed.value"
+              },
+              {
+                "name": "SECOND_VARIABLE",
+                "value": "My_SECOND_VARIABLE"
+              }
+            ]
+          },
+          {
+            "name": "development",
+            "variables": [
+              {
+                "name": "ROUTE53_HOSTNAME_DEVL",
+                "value": "https://foo-devl.com"
+              },
+              {
+                "name": "SECOND_VARIABLE_DEVL",
+                "value": "My_SECOND_VARIABLE_DEVL"
+              }
+            ]
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1760:13)
+
+    console.log
+      new diffs {
+        "additions": {},
+        "modifications": {},
+        "deletions": {
+          "environments": [
+            {
+              "name": "development",
+              "variables": [
+                {
+                  "name": "ROUTE53_HOSTNAME_DEVL",
+                  "value": "https://foo-devl.com"
+                },
+                {
+                  "name": "SECOND_VARIABLE_DEVL",
+                  "value": "My_SECOND_VARIABLE_DEVL"
+                }
+              ]
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1763:13)
+
+    console.log
+      source {
+        "branches": [
+          {
+            "name": "feature1",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 5,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": false,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1905:13)
+
+    console.log
+      target {
+        "branches": [
+          {
+            "name": "default",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": true,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1906:13)
+
+    console.log
+      diffs {
+        "additions": {
+          "branches": [
+            {
+              "name": "feature1",
+              "protection": {
+                "required_pull_request_reviews": {
+                  "required_approving_review_count": 5,
+                  "dismiss_stale_reviews": true,
+                  "require_code_owner_reviews": true,
+                  "dismissal_restrictions": {
+                    "users": [],
+                    "teams": []
+                  }
+                },
+                "required_status_checks": {
+                  "strict": true,
+                  "contexts": []
+                },
+                "enforce_admins": false,
+                "restrictions": {
+                  "apps": [],
+                  "users": [],
+                  "teams": []
+                }
+              }
+            }
+          ]
+        },
+        "modifications": {},
+        "deletions": {
+          "branches": [
+            {
+              "name": "default",
+              "protection": {
+                "required_pull_request_reviews": {
+                  "required_approving_review_count": 2,
+                  "dismiss_stale_reviews": true,
+                  "require_code_owner_reviews": true,
+                  "dismissal_restrictions": {
+                    "users": [],
+                    "teams": []
+                  }
+                },
+                "required_status_checks": {
+                  "strict": true,
+                  "contexts": []
+                },
+                "enforce_admins": true,
+                "restrictions": {
+                  "apps": [],
+                  "users": [],
+                  "teams": []
+                }
+              }
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1907:13)
+
+    console.log
+      target = {
+        "branches": [
+          {
+            "name": "default",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": true,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1913:13)
+
+    console.log
+      overrideConfig = {
+        "branches": [
+          {
+            "name": "default",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": true,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          },
+          {
+            "name": "feature1",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 5,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": false,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1916:13)
+
+    console.log
+      new diffs {
+        "additions": {},
+        "modifications": {},
+        "deletions": {
+          "branches": [
+            {
+              "name": "feature1",
+              "protection": {
+                "required_pull_request_reviews": {
+                  "required_approving_review_count": 5,
+                  "dismiss_stale_reviews": true,
+                  "require_code_owner_reviews": true,
+                  "dismissal_restrictions": {
+                    "users": [],
+                    "teams": []
+                  }
+                },
+                "required_status_checks": {
+                  "strict": true,
+                  "contexts": []
+                },
+                "enforce_admins": false,
+                "restrictions": {
+                  "apps": [],
+                  "users": [],
+                  "teams": []
+                }
+              }
+            }
+          ]
+        },
+        "hasChanges": true
+      }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1919:13)
+
+PASS test/unit/lib/plugins/teams.test.js
+  ● Console
+
+    console.error
+      Unexpected error when fetching for security manager teams org bkeepers = TypeError: this.github.request.endpoint is not a function
+
+      47 |         this.log.debug(`${this.repo.owner} Org does not have Security manager teams set up ${e}`)
+      48 |       } else {
+    > 49 |         this.log.error(
+         |                  ^
+      50 |         `Unexpected error when fetching for security manager teams org ${this.repo.owner} = ${e}`
+      51 |         )
+      52 |       }
+
+      at Teams.error [as checkSecurityManager] (lib/plugins/teams.js:49:18)
+      at checkSecurityManager (lib/plugins/teams.js:11:19)
+      at Object.<anonymous> (test/unit/lib/plugins/teams.test.js:61:7)
+
+PASS test/unit/lib/plugins/variables.test.js
+  ● Console
+
+    console.debug
+      Finding repo vars for bkeepers/test
+
+      at Variables.debug [as find] (lib/plugins/variables.js:23:14)
+
+    console.debug
+       [
+        {
+          "name": "DELETE_me",
+          "value": "test"
+        }
+      ] 
+      
+       [
+        {
+          "name": "TEST",
+          "value": "test"
+        }
+      ]
+
+      at debug (lib/plugins/diffable.js:69:18)
+
+    console.debug
+      Results of comparing Variables diffable target [{"name":"DELETE_me","value":"test"}] with source [{"name":"TEST","value":"test"}] is {"msg":"Changes found","additions":[{"name":"TEST","value":"test"}],"modifications":{},"deletions":[{"name":"DELETE_me","value":"test"}]}
+
+      at debug (lib/plugins/diffable.js:74:18)
+
+    console.debug
+      Removing a repo var with the params {"name":"DELETE_me","value":"test"}
+
+      at Variables.debug [as remove] (lib/plugins/variables.js:182:14)
+          at Array.forEach (<anonymous>)
+
+    console.debug
+      Adding a repo var with the params {"name":"TEST","value":"test"}
+
+      at Variables.debug [as add] (lib/plugins/variables.js:157:14)
+          at Array.forEach (<anonymous>)
+
+PASS test/unit/lib/plugins/rulesets.test.js
+PASS test/unit/lib/plugins/branches.test.js
+PASS test/unit/lib/validator.test.js
+  ● Console
+
+    console.log
+      {}
+
+      at Object.log (test/unit/lib/validator.test.js:64:15)
+
+    console.log
+      Repo override validator, baseconfig [object Object] overrideconfig [object Object]
+
+      at Object.log (test/unit/lib/validator.test.js:72:15)
+
+    console.log
+      Repo override validator, baseconfig [object Object] overrideconfig [object Object]
+
+      at Object.log (test/unit/lib/validator.test.js:127:15)
+
+    console.log
+      Repo config validator, baseconfig [object Object]
+
+      at Object.log (test/unit/lib/validator.test.js:132:15)
+
+PASS test/unit/lib/plugins/autolinks.test.js
+PASS test/unit/lib/plugins/labels.test.js
+PASS test/unit/lib/plugins/custom_properties.test.js
+PASS test/unit/lib/plugins/collaborators.test.js
+PASS test/unit/lib/plugins/archive.test.js
+PASS test/unit/lib/mergeArrayBy.test.js
+PASS test/unit/lib/plugins/repository.test.js
+PASS test/unit/lib/env.test.js
+
+Test Suites: 2 skipped, 16 passed, 16 of 18 total
+Tests:       14 skipped, 113 passed, 127 total
+Snapshots:   0 total
+Time:        1.294 s
+Ran all test suites.

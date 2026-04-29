@@ -1,0 +1,33 @@
+npm warn Unknown user config "{". This will stop working in the next major version of npm.
+npm warn Unknown user config " [ {" ("errors" : [ {). This will stop working in the next major version of npm.
+npm warn Unknown user config " 401," ("status" : 401,). This will stop working in the next major version of npm.
+npm warn Unknown user config " "Authentication is required"" ("message" : "Authentication is required"). This will stop working in the next major version of npm.
+npm warn Unknown user config "} ]". This will stop working in the next major version of npm.
+npm warn Unknown user config "}". This will stop working in the next major version of npm.
+safe-settings@0.1.0-rc.26 /Users/razniews/git/tomtom-forks/safe-settings
+├── @eslint/eslintrc@2.1.4
+├── @probot/adapter-aws-lambda-serverless@3.0.4
+├── @travi/any@2.1.10
+├── check-engine@1.12.0
+├── deepmerge@4.3.1
+├── eslint-config-standard@17.1.0
+├── eslint-plugin-import@2.29.1
+├── eslint-plugin-node@11.1.0
+├── eslint-plugin-promise@6.1.1
+├── eslint@8.57.0
+├── eta@3.4.0
+├── http-status-codes@2.3.0
+├── jest-junit@16.0.0
+├── jest-when@3.6.0
+├── jest@29.7.0
+├── js-yaml@4.1.0
+├── lockfile-lint@4.13.2
+├── nock@13.5.4
+├── node-cron@3.0.3
+├── nodemon@2.0.22
+├── npm-run-all@4.1.5
+├── octokit@3.2.0
+├── probot@12.3.4
+├── smee-client@1.2.5
+└── standard@17.1.0
+

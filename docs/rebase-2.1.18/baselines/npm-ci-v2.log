@@ -1,0 +1,21 @@
+npm warn Unknown user config "{". This will stop working in the next major version of npm.
+npm warn Unknown user config " [ {" ("errors" : [ {). This will stop working in the next major version of npm.
+npm warn Unknown user config " 401," ("status" : 401,). This will stop working in the next major version of npm.
+npm warn Unknown user config " "Authentication is required"" ("message" : "Authentication is required"). This will stop working in the next major version of npm.
+npm warn Unknown user config "} ]". This will stop working in the next major version of npm.
+npm warn Unknown user config "}". This will stop working in the next major version of npm.
+
+added 1115 packages, and audited 1116 packages in 5s
+
+172 packages are looking for funding
+  run `npm fund` for details
+
+17 vulnerabilities (1 low, 7 moderate, 9 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.

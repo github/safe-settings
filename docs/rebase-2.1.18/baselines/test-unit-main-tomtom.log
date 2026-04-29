@@ -1,0 +1,913 @@
+npm warn Unknown user config "{". This will stop working in the next major version of npm.
+npm warn Unknown user config " [ {" ("errors" : [ {). This will stop working in the next major version of npm.
+npm warn Unknown user config " 401," ("status" : 401,). This will stop working in the next major version of npm.
+npm warn Unknown user config " "Authentication is required"" ("message" : "Authentication is required"). This will stop working in the next major version of npm.
+npm warn Unknown user config "} ]". This will stop working in the next major version of npm.
+npm warn Unknown user config "}". This will stop working in the next major version of npm.
+
+> safe-settings@0.1.0-rc.26 test:unit
+> jest --roots=lib --roots=test/unit --verbose=true
+
+PASS test/unit/lib/plugins/custom_properties.test.js
+  CustomProperties
+    sync
+      ✓ syncs custom properties (8 ms)
+      ✓ add custom properties (1 ms)
+      ✓ remove custom properties
+      ✓ update custom properties (1 ms)
+
+PASS test/unit/lib/plugins/labels.test.js
+  Labels
+    sync
+      ✓ syncs labels (7 ms)
+      ✓ does not delete excluded labels (1 ms)
+
+PASS test/unit/lib/plugins/autolinks.test.js
+  Autolinks
+    sync
+      ✓ syncs autolinks (14 ms)
+
+PASS test/unit/lib/plugins/environments.test.js
+  Environments
+    ✓ sync (66 ms)
+
+PASS test/unit/lib/plugins/branches.test.js
+  Branches
+    sync
+      ✓ syncs branch protection settings (10 ms)
+      when required_status_checks not present
+        ✓ should add required_status_checks and other required fields (2 ms)
+      when the "protection" config is empty object
+        ✓ removes branch protection (1 ms)
+      when the "protection" config is set to `null`
+        ✓ removes branch protection
+      when the "protection" config is set to an empty array
+        ✓ removes branch protection
+      when the "protection" config is set to `false`
+        ✓ removes branch protection (1 ms)
+      when the "protection" key is not present
+        ✓ makes no change to branch protection
+      when multiple branches are configured
+        ✓ updates them each appropriately (6 ms)
+      when branch protections not available
+        ✓ should update branch protections with all required attributes (2 ms)
+    return values
+      ○ skipped returns updateBranchProtection Promise
+      ○ skipped returns deleteBranchProtection Promise
+
+  console.log
+    source {
+      "repository": {
+        "name": "test",
+        "org": "decyjphr-org",
+        "force_create": false,
+        "description": "description of test repository",
+        "homepage": "https://newhome.github.io/",
+        "topics": [
+          "red"
+        ],
+        "auto_init": true,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_downloads": true,
+        "allow_squash_merge": true,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": false,
+        "default_branch": "develop"
+      },
+      "labels": [
+        {
+          "name": "green",
+          "color": "#B60205",
+          "description": "An issue sswithss the system"
+        }
+      ],
+      "validator": {
+        "pattern": "[a-zA-Z0-9_-]+"
+      },
+      "collaborators": [
+        {
+          "username": "regpaco",
+          "permission": "pull"
+        }
+      ],
+      "branches": [
+        {
+          "name": "feature1",
+          "protection": {
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 5,
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": true,
+              "dismissal_restrictions": {
+                "users": [],
+                "teams": []
+              }
+            },
+            "required_status_checks": {
+              "strict": true,
+              "contexts": []
+            },
+            "enforce_admins": false,
+            "restrictions": {
+              "apps": [],
+              "users": [],
+              "teams": []
+            }
+          }
+        }
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:194:13)
+
+  console.log
+    target {
+      "repository": {
+        "name": "test",
+        "description": "description of the repos",
+        "topics": [
+          "uber",
+          "newone"
+        ]
+      },
+      "branches": [
+        {
+          "name": "default",
+          "protection": {
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 2,
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": true,
+              "dismissal_restrictions": {
+                "users": [],
+                "teams": []
+              }
+            },
+            "required_status_checks": {
+              "strict": true,
+              "contexts": []
+            },
+            "enforce_admins": true,
+            "restrictions": {
+              "apps": [],
+              "users": [],
+              "teams": []
+            }
+          }
+        }
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:195:13)
+
+  console.log
+    diffs {
+      "additions": {
+        "repository": {
+          "org": "decyjphr-org",
+          "name": "test",
+          "homepage": "https://newhome.github.io/",
+          "topics": [
+            "red"
+          ],
+          "auto_init": true,
+          "has_issues": true,
+          "has_projects": true,
+          "has_downloads": true,
+          "allow_squash_merge": true,
+          "default_branch": "develop"
+        },
+        "labels": [
+          {
+            "name": "green",
+            "color": "#B60205",
+            "description": "An issue sswithss the system"
+          }
+        ],
+        "validator": {
+          "pattern": "[a-zA-Z0-9_-]+"
+        },
+        "collaborators": [
+          {
+            "username": "regpaco",
+            "permission": "pull"
+          }
+        ],
+        "branches": [
+          {
+            "name": "feature1",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 5,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": false,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      },
+      "modifications": {
+        "repository": {
+          "description": "description of test repository",
+          "name": "test"
+        }
+      },
+      "deletions": {
+        "repository": {
+          "topics": [
+            "uber",
+            "newone"
+          ]
+        },
+        "branches": [
+          {
+            "name": "default",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": true,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      },
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:196:13)
+
+  console.log
+    target = {
+      "repository": {
+        "name": "test",
+        "description": "description of the repos",
+        "topics": [
+          "uber",
+          "newone"
+        ]
+      },
+      "branches": [
+        {
+          "name": "default",
+          "protection": {
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 2,
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": true,
+              "dismissal_restrictions": {
+                "users": [],
+                "teams": []
+              }
+            },
+            "required_status_checks": {
+              "strict": true,
+              "contexts": []
+            },
+            "enforce_admins": true,
+            "restrictions": {
+              "apps": [],
+              "users": [],
+              "teams": []
+            }
+          }
+        }
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:200:13)
+
+  console.log
+    overrideConfig = {
+      "repository": {
+        "name": "test",
+        "description": "description of test repository",
+        "topics": [
+          "uber",
+          "newone",
+          "red"
+        ],
+        "org": "decyjphr-org",
+        "force_create": false,
+        "homepage": "https://newhome.github.io/",
+        "auto_init": true,
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": false,
+        "has_downloads": true,
+        "allow_squash_merge": true,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": false,
+        "default_branch": "develop"
+      },
+      "branches": [
+        {
+          "name": "default",
+          "protection": {
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 2,
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": true,
+              "dismissal_restrictions": {
+                "users": [],
+                "teams": []
+              }
+            },
+            "required_status_checks": {
+              "strict": true,
+              "contexts": []
+            },
+            "enforce_admins": true,
+            "restrictions": {
+              "apps": [],
+              "users": [],
+              "teams": []
+            }
+          }
+        },
+        {
+          "name": "feature1",
+          "protection": {
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 5,
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": true,
+              "dismissal_restrictions": {
+                "users": [],
+                "teams": []
+              }
+            },
+            "required_status_checks": {
+              "strict": true,
+              "contexts": []
+            },
+            "enforce_admins": false,
+            "restrictions": {
+              "apps": [],
+              "users": [],
+              "teams": []
+            }
+          }
+        }
+      ],
+      "labels": [
+        {
+          "name": "green",
+          "color": "#B60205",
+          "description": "An issue sswithss the system"
+        }
+      ],
+      "validator": {
+        "pattern": "[a-zA-Z0-9_-]+"
+      },
+      "collaborators": [
+        {
+          "username": "regpaco",
+          "permission": "pull"
+        }
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:203:13)
+
+  console.log
+    new diffs {
+      "additions": {},
+      "modifications": {},
+      "deletions": {
+        "repository": {
+          "topics": [
+            "uber",
+            "newone"
+          ]
+        },
+        "branches": [
+          {
+            "name": "default",
+            "protection": {
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 2,
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "dismissal_restrictions": {
+                  "users": [],
+                  "teams": []
+                }
+              },
+              "required_status_checks": {
+                "strict": true,
+                "contexts": []
+              },
+              "enforce_admins": true,
+              "restrictions": {
+                "apps": [],
+                "users": [],
+                "teams": []
+              }
+            }
+          }
+        ]
+      },
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:206:13)
+
+  console.log
+    diffs {
+      "additions": {
+        "protection": {
+          "required_pull_request_reviews": {
+            "required_approving_review_count": 2,
+            "dismiss_stale_reviews": false,
+            "require_code_owner_reviews": true,
+            "dismissal_restrictions": {}
+          },
+          "required_status_checks": {
+            "strict": true,
+            "contexts": []
+          },
+          "enforce_admins": false
+        }
+      },
+      "modifications": {},
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:257:15)
+
+  console.log
+    diffs {
+      "additions": {
+        "protection": {
+          "required_pull_request_reviews": {
+            "required_approving_review_count": 2,
+            "dismiss_stale_reviews": false,
+            "require_code_owner_reviews": true,
+            "dismissal_restrictions": {}
+          },
+          "required_status_checks": {
+            "strict": true,
+            "contexts": []
+          },
+          "enforce_admins": false
+        }
+      },
+      "modifications": {},
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:306:15)
+
+  console.log
+    source {
+      "branches": [
+        {
+          "name": "master",
+          "protection": {
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 2,
+              "dismiss_stale_reviews": false,
+              "require_code_owner_reviews": true,
+              "dismissal_restrictions": {}
+            },
+            "required_status_checks": {
+              "strict": true,
+              "contexts": []
+            },
+            "enforce_admins": false
+          }
+        }
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:428:13)
+
+  console.log
+    target {
+      "branches": [
+        {
+          "name": "master",
+          "protection": {
+            "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection",
+            "required_status_checks": {
+              "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks",
+              "strict": true,
+              "contexts": [],
+              "contexts_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_status_checks/contexts",
+              "checks": []
+            },
+            "restrictions": {
+              "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions",
+              "users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/users",
+              "teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/teams",
+              "apps_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/restrictions/apps",
+              "users": [],
+              "teams": [],
+              "apps": []
+            },
+            "required_pull_request_reviews": {
+              "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/required_pull_request_reviews",
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": true,
+              "required_approving_review_count": 2,
+              "dismissal_restrictions": {
+                "url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions",
+                "users_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/users",
+                "teams_url": "https://api.github.com/repos/decyjphr-org/test/branches/develop/protection/dismissal_restrictions/teams",
+                "users": [],
+                "teams": []
+              }
+            },
+            "required_signatures": false,
+            "enforce_admins": false,
+            "required_linear_history": false,
+            "allow_force_pushes": {
+              "enabled": false
+            },
+            "allow_deletions": false,
+            "required_conversation_resolution": false
+          }
+        }
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:429:13)
+
+  console.log
+    diffs {
+      "additions": {},
+      "modifications": {
+        "branches": [
+          {
+            "protection": {
+              "required_pull_request_reviews": {
+                "dismiss_stale_reviews": false
+              }
+            },
+            "name": "master"
+          }
+        ]
+      },
+      "deletions": {},
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:430:13)
+
+  console.log
+    diffs {
+      "additions": {
+        "colors": [
+          {
+            "name": "newone",
+            "color": "red"
+          },
+          {
+            "name": "uber",
+            "color": "yellow"
+          }
+        ]
+      },
+      "modifications": {
+        "colors": [
+          {
+            "color": "green",
+            "name": "blue"
+          }
+        ]
+      },
+      "deletions": {
+        "colors": [
+          {
+            "name": "blu",
+            "color": "blu"
+          }
+        ]
+      },
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:547:13)
+
+  console.log
+    {}
+
+      at Object.log (test/unit/lib/validator.test.js:64:15)
+
+PASS test/unit/lib/plugins/collaborators.test.js
+  Collaborators
+    sync
+      ✓ syncs collaborators (1 ms)
+
+PASS test/unit/lib/plugins/repository.test.js
+  Repository
+    sync
+      ✓ syncs topics (1 ms)
+      ○ skipped syncs repository settings
+      ○ skipped handles renames
+
+  console.log
+    Repo override validator, baseconfig [object Object] overrideconfig [object Object]
+
+      at Object.log (test/unit/lib/validator.test.js:72:15)
+
+  console.log
+    Repo override validator, baseconfig [object Object] overrideconfig [object Object]
+
+      at Object.log (test/unit/lib/validator.test.js:127:15)
+
+  console.log
+    Repo config validator, baseconfig [object Object]
+
+      at Object.log (test/unit/lib/validator.test.js:132:15)
+
+PASS test/unit/lib/validator.test.js
+  Validator Tests
+    ✓ Branch override validator test (79 ms)
+    ✓ Repository override validator test (35 ms)
+    ✓ Repository config validator test (3 ms)
+
+  console.log
+    overrideConfig = {
+      "colors": [
+        {
+          "name": "blue",
+          "color": "green",
+          "anotherArray": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "name": "blu",
+          "color": "blu"
+        },
+        {
+          "name": "newone",
+          "color": "red"
+        },
+        {
+          "name": "uber",
+          "color": "yellow"
+        }
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:553:13)
+
+  console.log
+    new diffs {
+      "additions": {},
+      "modifications": {},
+      "deletions": {
+        "colors": [
+          {
+            "name": "blu",
+            "color": "blu"
+          }
+        ]
+      },
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:555:13)
+
+  console.log
+    diffs {
+      "additions": {
+        "entries": [
+          "blue",
+          "green",
+          "newone",
+          "uber",
+          "yellow"
+        ]
+      },
+      "modifications": {},
+      "deletions": {
+        "entries": [
+          "blu"
+        ]
+      },
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:582:13)
+
+  console.log
+    diffs {
+      "additions": {
+        "entries": [
+          {
+            "key_prefix": "ASDF-",
+            "url_template": "https://jira.company.com/browse/ASDF-<num>"
+          },
+          {
+            "key_prefix": "BOLIGRAFO-",
+            "url_template": "https://jira.company.com/browse/BOLIGRAFO-<num>"
+          }
+        ]
+      },
+      "modifications": {},
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:832:13)
+
+  console.log
+    diffs {
+      "additions": {
+        "entries": [
+          {
+            "key_prefix": "BOLIGRAFO-",
+            "url_template": "https://jira.company.com/browse/BOLIGRAFO-<num>"
+          }
+        ]
+      },
+      "modifications": {},
+      "deletions": {
+        "entries": [
+          {
+            "key_prefix": "BOLSIGRAFO-",
+            "url_template": "https://jira.company.com/browse/BOLIGRAFO-<num>"
+          }
+        ]
+      },
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:879:13)
+
+  console.log
+    diffs {
+      "additions": {},
+      "modifications": {
+        "entries": [
+          {
+            "url_template": "https://jiranew.company.com/browse/ASDF-<num>",
+            "key_prefix": "ASDF-"
+          }
+        ]
+      },
+      "deletions": {},
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:917:13)
+
+PASS test/unit/lib/env.test.js
+  env
+    load default values without override
+      ✓ loads default ADMIN_REPO if not passed
+      ✓ loads default CONFIG_PATH if not passed (1 ms)
+      ✓ loads default SETTINGS_FILE_PATH if not passed
+      ✓ loads default DEPLOYMENT_CONFIG_FILE if not passed
+      ✓ loads default CREATE_PR_COMMENT if not passed
+    load override values
+      ✓ loads override values if passed
+
+  console.log
+    source {
+      "teams": [
+        "developers"
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:971:13)
+
+  console.log
+    target {
+      "teams": [
+        {
+          "name": "developers"
+        },
+        {
+          "name": "marketing"
+        }
+      ]
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:972:13)
+
+  console.log
+    result {
+      "additions": {},
+      "modifications": {},
+      "deletions": {
+        "teams": [
+          {
+            "name": "marketing"
+          }
+        ]
+      },
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:973:13)
+
+  console.log
+    diffs {
+      "additions": {},
+      "modifications": {},
+      "deletions": [
+        {
+          "username": "iksathrr",
+          "pendinginvite": false,
+          "permission": "admin"
+        }
+      ],
+      "hasChanges": true
+    }
+
+      at Object.log (test/unit/lib/mergeDeep.test.js:1127:13)
+
+PASS test/unit/lib/mergeDeep.test.js
+  MergeDeep Test
+    ✓ CompareDeep extensive test (38 ms)
+    ✓ CompareDeep Undefined target Works (1 ms)
+    ✓ CompareDeep Empty target Works (1 ms)
+    ✓ CompareDeep Test when target is from the api (2 ms)
+    ✓ Merge labels with ignorable extra info Works (1 ms)
+    ✓ Merge labels 
+    ✓ Compare nested arrays deep (69 ms)
+    ✓ Merge array of topics (1 ms)
+    ✓ Merge branch protections with context sub arrays (1 ms)
+    ✓ Simple compare (1 ms)
+    ✓ Repo test
+    ✓ Autolinks test (1 ms)
+    ✓ Autolinks different prefixes test (1 ms)
+    ✓ Autolinks different url template (1 ms)
+    ✓ CompareDeep does not mutate source object
+    ✓ CompareDeep produces correct result for arrays of named objects (10 ms)
+    ✓ CompareDeep result has changes when source is empty and target is not (1 ms)
+    ✓ CompareDeep result has no change when source and target match
+    ✓ CompareDeep finds modifications on top-level arrays with different ordering
+    ✓ CompareDeep does not report changes for matching empty targets
+    ✓ Compare array as toplevel object (1 ms)
+    ✓ Ruleset Compare Works when no changes
+
+PASS test/unit/lib/plugins/teams.test.js
+  Teams
+    sync
+      ✓ syncs teams (6 ms)
+
+PASS test/unit/lib/mergeArrayBy.test.js
+  mergeArrayByName
+    ✓ works (1 ms)
+    ✓ works in a realistic scenario (2 ms)
+
+PASS test/unit/lib/settings.test.js
+  Settings Tests
+    restrictedRepos
+      restrictedRepos not defined
+        ✓ Allow repositories being configured (34 ms)
+        ✓ Do not allow default excluded repositories being configured (1 ms)
+        ✓ Throws TypeError if restrictedRepos not defined (15 ms)
+        ✓ Throws TypeError if restrictedRepos is null
+        ✓ Allowing all repositories if restrictedRepos is empty (1 ms)
+      restrictedRepos.exclude defined
+        ✓ Skipping excluded repository from being configured
+        ✓ Skipping excluded repositories matching regex in restrictedRepos.exclude
+        ✓ Allowing repositories not matching regex in restrictedRepos.exclude (1 ms)
+      restrictedRepos.include defined
+        ✓ Allowing repository from being configured (1 ms)
+        ✓ Allowing repositories matching regex in restrictedRepos.include (1 ms)
+        ✓ Skipping repositories not matching regex in restrictedRepos.include
+
+Test Suites: 2 skipped, 13 passed, 13 of 15 total
+Tests:       14 skipped, 64 passed, 78 total
+Snapshots:   0 total
+Time:        1.564 s
+Ran all test suites.
