@@ -32,7 +32,8 @@ describe('Autolinks', () => {
         { key_prefix: 'SAME_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: true },
         { key_prefix: 'NEW_ALPHA-UNDEFINED-', url_template: 'https://test/<num>' },
         { key_prefix: 'NEW_ALPHA-FALSE-', url_template: 'https://test/<num>', is_alphanumeric: false },
-        { key_prefix: 'NEW_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: true }
+        { key_prefix: 'NEW_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: true },
+        { key_prefix: 'NEW_URL_NEW_ALPHA-', url_template: 'https://new-url/<num>', is_alphanumeric: true }
       ])
 
       github.repos.listAutolinks.mockResolvedValueOnce({
@@ -45,7 +46,8 @@ describe('Autolinks', () => {
           { id: '6', key_prefix: 'SAME_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: true },
           { id: '7', key_prefix: 'NEW_ALPHA-UNDEFINED-', url_template: 'https://test/<num>', is_alphanumeric: false },
           { id: '8', key_prefix: 'NEW_ALPHA-FALSE-', url_template: 'https://test/<num>', is_alphanumeric: true },
-          { id: '9', key_prefix: 'NEW_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: false }
+          { id: '9', key_prefix: 'NEW_ALPHA-TRUE-', url_template: 'https://test/<num>', is_alphanumeric: false },
+          { id: '10', key_prefix: 'NEW_URL_NEW_ALPHA-', url_template: 'https://current-url/<num>', is_alphanumeric: false }
         ]
       })
 
@@ -139,8 +141,19 @@ describe('Autolinks', () => {
           ...repo
         })
 
-        expect(github.repos.deleteAutolink).toHaveBeenCalledTimes(5)
-        expect(github.repos.createAutolink).toHaveBeenCalledTimes(5)
+        expect(github.repos.deleteAutolink).toHaveBeenCalledWith({
+          autolink_id: '10',
+          ...repo
+        })
+        expect(github.repos.createAutolink).toHaveBeenCalledWith({
+          key_prefix: 'NEW_URL_NEW_ALPHA-',
+          url_template: 'https://new-url/<num>',
+          is_alphanumeric: true,
+          ...repo
+        })
+
+        expect(github.repos.deleteAutolink).toHaveBeenCalledTimes(6)
+        expect(github.repos.createAutolink).toHaveBeenCalledTimes(6)
       })
     })
   })

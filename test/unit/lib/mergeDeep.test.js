@@ -836,7 +836,7 @@ entries:
     const target = YAML.load(`
     entries:
     - key_prefix: ASDF-
-      url_template: https://jiranew.company.com/browse/ASDF-<num>
+      url_template: https://jira.company.com/browse/ASDF-<num>
     - key_prefix: BOLSIGRAFO-
       url_template: https://jira.company.com/browse/BOLIGRAFO-<num>
       `)
@@ -857,6 +857,44 @@ entries:
           url_template: 'https://jira.company.com/browse/BOLIGRAFO-<num>'
         }]
       },
+      hasChanges: true
+    }
+    const ignorableFields = []
+    const mockReturnGitHubContext = jest.fn().mockReturnValue({
+      request: () => {}
+    })
+    const mergeDeep = new MergeDeep(
+      log,
+      mockReturnGitHubContext,
+      ignorableFields
+    )
+    const merged = mergeDeep.compareDeep(target, source)
+    console.log(`diffs ${JSON.stringify(merged, null, 2)}`)
+    expect(merged).toEqual(expected)
+  })
+
+  it('Autolinks different url template', () => {
+    const source = YAML.load(`
+entries:
+- key_prefix: ASDF-
+  url_template: https://jiranew.company.com/browse/ASDF-<num>
+  `)
+    const target = YAML.load(`
+    entries:
+    - key_prefix: ASDF-
+      url_template: https://jira.company.com/browse/ASDF-<num>
+      `)
+    const expected = {
+      additions: {},
+      modifications: {
+        entries: [
+          {
+            key_prefix: 'ASDF-',
+            url_template: 'https://jiranew.company.com/browse/ASDF-<num>'
+          }
+        ]
+      },
+      deletions: {},
       hasChanges: true
     }
     const ignorableFields = []
