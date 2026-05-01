@@ -4,34 +4,32 @@
  * Standalone sync script for safe-settings
  * Runs without webhooks or GitHub App server
  * Designed to be run from GitHub Actions or command line
- * 
- * Uses simple token-based authentication (PAT or GitHub App token)
+ *
+ * This is a thin adapter over the core Settings class that overrides:
+ * 1. Config loading - reads from filesystem instead of GitHub API
+ * 2. Repo listing - uses repos.listForOrg instead of /installation/repositories
+ * 3. Result handling - prints to stdout instead of creating check runs
+ *
+ * All merging, plugin orchestration, suborg logic, and validation
+ * is inherited from the core Settings class.
  */
 
 const { Octokit } = require('@octokit/rest')
 const yaml = require('js-yaml')
 const fs = require('fs')
 const path = require('path')
-
-// Import plugins directly instead of using Settings orchestration
-const RepositoryPlugin = require('../lib/plugins/repository')
-const TeamsPlugin = require('../lib/plugins/teams')
-const CollaboratorsPlugin = require('../lib/plugins/collaborators')
-const RulesetsPlugin = require('../lib/plugins/rulesets')
-const CustomPropertiesPlugin = require('../lib/plugins/custom_properties')
+const Settings = require('../lib/settings')
+const env = require('../lib/env')
 
 // Required environment variables
 const {
   GH_ORG,
   GITHUB_TOKEN,
   GH_TOKEN,
-  ADMIN_REPO = 'edge-devops-safe-settings',
-  CONFIG_PATH = '.github',
-  SETTINGS_FILE_PATH = 'settings.yml',
-  DEPLOYMENT_CONFIG_FILE = 'deployment-settings.yml',
-  LOG_LEVEL = 'info',
-  DRY_RUN = false
+  LOG_LEVEL = 'info'
 } = process.env
+
+const DRY_RUN = process.env.DRY_RUN === 'true'
 
 // Support both GITHUB_TOKEN and GH_TOKEN
 const TOKEN = GITHUB_TOKEN || GH_TOKEN
@@ -51,452 +49,281 @@ if (!TOKEN) {
   process.exit(1)
 }
 
-// Simple logger
+// Simple logger that matches the interface expected by Settings
 const logLevels = { error: 0, warn: 1, info: 2, debug: 3, trace: 4 }
 const logger = {
   levels: logLevels,
   currentLevel: logLevels[LOG_LEVEL] ?? 2,
-  
+
   log (level, ...args) {
     if (this.levels[level] <= this.currentLevel) {
       console[level === 'error' ? 'error' : 'log'](`[${level.toUpperCase()}]`, ...args)
     }
   },
-  
-  error: function(...args) { this.log('error', ...args) },
-  warn: function(...args) { this.log('warn', ...args) },
-  info: function(...args) { this.log('info', ...args) },
-  debug: function(...args) { this.log('debug', ...args) },
-  trace: function(...args) { this.log('trace', ...args) }
+
+  error (...args) { this.log('error', ...args) },
+  warn (...args) { this.log('warn', ...args) },
+  info (...args) { this.log('info', ...args) },
+  debug (...args) { this.log('debug', ...args) },
+  trace (...args) { this.log('trace', ...args) }
 }
 
-async function main() {
-  try {
-    logger.info(`Starting standalone sync for organization: ${GH_ORG}`)
-    logger.info(`Admin repo: ${ADMIN_REPO}`)
-    logger.info(`Config path: ${CONFIG_PATH}/${SETTINGS_FILE_PATH}`)
-    logger.info(`Dry run: ${DRY_RUN === 'true' ? 'YES' : 'NO'}`)
-    
-    // Create Octokit instance with token authentication
-    const octokit = new Octokit({
-      auth: TOKEN
+/**
+ * Resolve the base path where config files live on the filesystem.
+ * Supports GitHub Actions layout (../admin-repo/<CONFIG_PATH>) and local testing.
+ */
+function resolveConfigBasePath () {
+  const CONFIG_PATH = env.CONFIG_PATH
+
+  if (path.isAbsolute(CONFIG_PATH)) {
+    return CONFIG_PATH
+  }
+
+  // GitHub Actions: config is checked out to ../admin-repo/
+  const actionsPath = path.join(process.cwd(), '..', 'admin-repo', CONFIG_PATH)
+  if (fs.existsSync(actionsPath)) {
+    return actionsPath
+  }
+
+  // Local testing: relative to cwd
+  return path.resolve(CONFIG_PATH)
+}
+
+/**
+ * Subclass of Settings that reads configs from the local filesystem
+ * and lists repos via the org API (no GitHub App required).
+ */
+class StandaloneSettings extends Settings {
+  constructor (nop, context, repo, config, ref) {
+    super(nop, context, repo, config, ref)
+    this.configBasePath = resolveConfigBasePath()
+    this.log.debug(`Config base path: ${this.configBasePath}`)
+  }
+
+  // --- Filesystem overrides (replace GitHub API config loading) ---
+
+  /**
+   * Load a YAML file from the local filesystem instead of GitHub API.
+   * The filePath parameter mirrors what the parent class would pass to
+   * octokit.repos.getContent (e.g. ".github/repos/my-repo.yml").
+   */
+  async loadYaml (filePath) {
+    try {
+      // filePath comes in as CONFIG_PATH-relative (e.g. ".github/settings.yml")
+      // Strip the CONFIG_PATH prefix if present since configBasePath already includes it
+      const configPrefix = env.CONFIG_PATH + '/'
+      const relativePath = filePath.startsWith(configPrefix)
+        ? filePath.slice(configPrefix.length)
+        : filePath
+
+      const localPath = path.join(this.configBasePath, relativePath)
+      this.log.debug(`Loading YAML from filesystem: ${localPath}`)
+
+      if (!fs.existsSync(localPath)) {
+        return null
+      }
+      return yaml.load(fs.readFileSync(localPath, 'utf8')) || {}
+    } catch (e) {
+      this.log.error(`Error loading YAML file ${filePath}: ${e.message}`)
+      return null
+    }
+  }
+
+  /**
+   * Override to list repo config files from the local filesystem
+   * instead of using the GitHub Tree API.
+   */
+  async getRepoConfigMap () {
+    const reposDir = path.join(this.configBasePath, 'repos')
+    if (!fs.existsSync(reposDir)) {
+      this.log.debug('No repos directory found locally')
+      return []
+    }
+
+    const files = fs.readdirSync(reposDir)
+      .filter(f => f.endsWith('.yml') || f.endsWith('.yaml'))
+
+    this.log.debug(`Found ${files.length} repo config files locally`)
+    return files.map(f => ({
+      name: f,
+      path: path.posix.join(env.CONFIG_PATH, 'repos', f)
+    }))
+  }
+
+  /**
+   * Override to list suborg config files from the local filesystem.
+   */
+  async getSubOrgConfigMap () {
+    const suborgsDir = path.join(this.configBasePath, 'suborgs')
+    if (!fs.existsSync(suborgsDir)) {
+      this.log.debug('No suborgs directory found locally')
+      return []
+    }
+
+    const files = fs.readdirSync(suborgsDir)
+      .filter(f => f.endsWith('.yml') || f.endsWith('.yaml'))
+
+    this.log.debug(`Found ${files.length} suborg config files locally`)
+    return files.map(f => ({
+      name: f,
+      path: path.posix.join(env.CONFIG_PATH, 'suborgs', f)
+    }))
+  }
+
+  // --- Repo listing override (use org API instead of /installation/repositories) ---
+
+  async eachRepositoryRepos (github, log) {
+    log.debug('Fetching repositories via org API (standalone mode)')
+    const repos = await github.paginate(github.rest.repos.listForOrg, {
+      org: GH_ORG,
+      type: 'all',
+      per_page: 100
     })
-    
-    // Test authentication by trying to access the organization
-    // This works with PATs, GitHub App installation tokens, and Actions tokens
+    log.info(`Found ${repos.length} repositories in organization`)
+
+    return Promise.all(repos.map(repository => {
+      return this.checkAndProcessRepo(repository.owner.login, repository.name)
+    }))
+  }
+
+  // --- Result handling override (print to stdout instead of creating check runs) ---
+
+  async createCheckRun () {
+    // In standalone mode, skip check run creation — results are printed to stdout
+    this.log.debug('Standalone mode: skipping check run creation')
+  }
+
+  async handleResults () {
+    if (!this.nop) {
+      // In non-nop mode, just print a summary
+      if (this.errors.length > 0) {
+        this.log.error(`Sync completed with ${this.errors.length} error(s):`)
+        this.errors.forEach(err => {
+          this.log.error(`  - [${err.repo || 'unknown'}] ${err.msg || err.error || JSON.stringify(err)}`)
+        })
+      }
+      return
+    }
+
+    // In nop (dry-run) mode, print what would change
+    const stats = { changes: 0, errors: 0 }
+
+    this.results.forEach(res => {
+      if (!res) return
+      if (res.type === 'ERROR') {
+        stats.errors++
+        this.log.error(`Error: [${res.plugin}] ${res.repo} - ${res.action?.msg || res.action}`)
+      } else if (!(res.action?.additions === null && res.action?.deletions === null && res.action?.modifications === null)) {
+        stats.changes++
+        const additions = res.action?.additions ? JSON.stringify(res.action.additions) : ''
+        const deletions = res.action?.deletions ? JSON.stringify(res.action.deletions) : ''
+        const modifications = res.action?.modifications ? JSON.stringify(res.action.modifications) : ''
+        this.log.info(`[${res.plugin}] ${res.repo}:`)
+        if (additions) this.log.info(`  + ${additions}`)
+        if (deletions) this.log.info(`  - ${deletions}`)
+        if (modifications) this.log.info(`  ~ ${modifications}`)
+      }
+    })
+
+    this.log.info('\n========== DRY-RUN SUMMARY ==========')
+    this.log.info(`Changes detected: ${stats.changes}`)
+    this.log.info(`Errors: ${stats.errors}`)
+
+    if (stats.errors > 0) {
+      this.log.error('Dry-run completed with errors')
+    } else if (stats.changes > 0) {
+      this.log.info('Dry-run completed successfully — changes would be applied')
+    } else {
+      this.log.info('Dry-run completed — no changes needed')
+    }
+  }
+}
+
+// --- Main entry point ---
+
+async function main () {
+  try {
+    const nop = DRY_RUN
+    logger.info(`Starting standalone sync for organization: ${GH_ORG}`)
+    logger.info(`Admin repo: ${env.ADMIN_REPO}`)
+    logger.info(`Config path: ${env.CONFIG_PATH}/${env.SETTINGS_FILE_PATH}`)
+    logger.info(`Dry run: ${nop ? 'YES' : 'NO'}`)
+
+    // Create Octokit instance with token authentication
+    const octokit = new Octokit({ auth: TOKEN })
+
+    // Test authentication
     logger.debug('Testing authentication...')
     try {
-      const { data: org } = await octokit.orgs.get({ org: GH_ORG })
-      logger.info(`Authenticated successfully. Access to organization: ${org.login}`)
-      
-      // Test if we can list teams (requires Organization permissions: Members: Read)
-      try {
-        const { data: teams } = await octokit.teams.list({ org: GH_ORG, per_page: 5 })
-        logger.debug(`App can see ${teams.length > 0 ? teams.length + ' teams (showing first 5)' : 'no teams'}`)
-        if (teams.length > 0) {
-          teams.forEach(t => logger.debug(`  - Team: ${t.name} (slug: ${t.slug})`))
-        }
-      } catch (teamError) {
-        if (teamError.status === 403 || teamError.status === 401) {
-          logger.warn('⚠️  App lacks "Organization permissions: Members: Read" - cannot verify teams exist')
-        }
-      }
+      const { data: org } = await octokit.rest.orgs.get({ org: GH_ORG })
+      logger.info(`Authenticated successfully. Organization: ${org.login}`)
     } catch (error) {
       logger.error('Authentication failed. Check your token and organization access.')
       logger.error(`Error: ${error.message}`)
-      throw error
+      process.exit(1)
     }
-    
-    // Load configuration files
-    logger.info('Loading configuration files...')
-    
-    // Support both local testing and GitHub Actions paths
-    // Local: CONFIG_PATH can be absolute or relative to cwd
-    // GitHub Actions: CONFIG_PATH is in ../admin-repo/ directory
-    let configPath
-    if (path.isAbsolute(CONFIG_PATH)) {
-      configPath = CONFIG_PATH
-    } else if (fs.existsSync(path.join(process.cwd(), '..', 'admin-repo', CONFIG_PATH))) {
-      // GitHub Actions structure
-      configPath = path.join(process.cwd(), '..', 'admin-repo', CONFIG_PATH)
-    } else {
-      // Local testing - relative to current directory
-      configPath = path.resolve(CONFIG_PATH)
-    }
-    
-    // Load deployment settings
-    let deploymentConfig = {}
-    const deploymentConfigPath = path.join(configPath, DEPLOYMENT_CONFIG_FILE)
+
+    // Load deployment config from filesystem
+    const configBasePath = resolveConfigBasePath()
+    const deploymentConfigPath = path.join(configBasePath, env.DEPLOYMENT_CONFIG_FILE_PATH)
+    let deploymentConfig = { restrictedRepos: ['admin', '.github', 'safe-settings'] }
+
     if (fs.existsSync(deploymentConfigPath)) {
       logger.debug(`Loading deployment config from: ${deploymentConfigPath}`)
-      deploymentConfig = yaml.load(fs.readFileSync(deploymentConfigPath, 'utf8'))
-      logger.debug('Deployment config loaded:', JSON.stringify(deploymentConfig, null, 2))
+      deploymentConfig = yaml.load(fs.readFileSync(deploymentConfigPath, 'utf8')) || deploymentConfig
     } else {
-      logger.warn(`Deployment config not found at: ${deploymentConfigPath}`)
+      logger.debug(`No deployment config at: ${deploymentConfigPath}, using defaults`)
     }
-    
-    // Load organization settings
-    const settingsPath = path.join(configPath, SETTINGS_FILE_PATH)
+
+    // Load the main settings.yml (org-level config)
+    const settingsPath = path.join(configBasePath, env.SETTINGS_FILE_PATH)
     if (!fs.existsSync(settingsPath)) {
       logger.error(`Settings file not found at: ${settingsPath}`)
       process.exit(1)
     }
-    
-    logger.debug(`Loading settings from: ${settingsPath}`)
-    const orgSettings = yaml.load(fs.readFileSync(settingsPath, 'utf8'))
-    logger.info('Organization settings loaded')
-    
-    // Load suborg settings
-    const suborgsPath = path.join(configPath, 'suborgs')
-    const suborgSettings = {}
-    
-    if (fs.existsSync(suborgsPath)) {
-      logger.debug(`Loading suborg settings from: ${suborgsPath}`)
-      const suborgFiles = fs.readdirSync(suborgsPath).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'))
-      
-      for (const file of suborgFiles) {
-        const suborgName = path.basename(file, path.extname(file))
-        const suborgConfigPath = path.join(suborgsPath, file)
-        suborgSettings[suborgName] = yaml.load(fs.readFileSync(suborgConfigPath, 'utf8'))
-        logger.debug(`Loaded settings for suborg: ${suborgName}`)
-      }
-      
-      logger.info(`Loaded settings for ${Object.keys(suborgSettings).length} sub-organizations`)
+    const runtimeConfig = yaml.load(fs.readFileSync(settingsPath, 'utf8')) || {}
+
+    // Merge deployment config with runtime config (mirrors what index.js does)
+    const config = Object.assign({}, deploymentConfig, runtimeConfig)
+
+    // Build the mock context that Settings expects
+    const context = {
+      payload: { installation: { id: 1 } },
+      octokit,
+      log: logger,
+      repo: () => ({ owner: GH_ORG, repo: env.ADMIN_REPO })
     }
-    
-    // Load repo-specific settings
-    const reposPath = path.join(configPath, 'repos')
-    const repoSettings = {}
-    
-    if (fs.existsSync(reposPath)) {
-      logger.debug(`Loading repo settings from: ${reposPath}`)
-      const repoFiles = fs.readdirSync(reposPath).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'))
-      
-      for (const file of repoFiles) {
-        const repoName = path.basename(file, path.extname(file))
-        const repoConfigPath = path.join(reposPath, file)
-        repoSettings[repoName] = yaml.load(fs.readFileSync(repoConfigPath, 'utf8'))
-        logger.debug(`Loaded settings for repo: ${repoName}`)
-      }
-      
-      logger.info(`Loaded settings for ${Object.keys(repoSettings).length} repositories`)
-    }
-    
-    // Get list of repositories (with pagination)
-    logger.info('Fetching repositories...')
-    let allRepos = []
-    let page = 1
-    let hasMore = true
-    
-    while (hasMore) {
-      const { data: repos } = await octokit.repos.listForOrg({
-        org: GH_ORG,
-        type: 'all',
-        per_page: 100,
-        page: page
-      })
-      
-      allRepos = allRepos.concat(repos)
-      hasMore = repos.length === 100
-      page++
-      
-      if (hasMore) {
-        logger.debug(`Fetched page ${page - 1}, got ${repos.length} repos, fetching more...`)
-      }
-    }
-    
-    logger.info(`Found ${allRepos.length} repositories in organization`)
-    
-    // Filter repos based on deployment config
-    const restrictedRepos = deploymentConfig.restrictedRepos || {}
-    const excludeList = restrictedRepos.exclude || ['admin', '.github', 'safe-settings']
-    let includeList = restrictedRepos.include || []
-    
-    // If include list is empty, auto-generate from suborg configs and repo-specific configs
-    if (includeList.length === 0) {
-      const autoInclude = new Set()
-      
-      // Add all repos from suborg configs
-      const suborgConfig = deploymentConfig.subOrgConfig || {}
-      for (const [suborgName, config] of Object.entries(suborgConfig)) {
-        if (config.repos) {
-          config.repos.forEach(repo => autoInclude.add(repo))
-          logger.debug(`Added ${config.repos.length} repos from suborg: ${suborgName}`)
-        }
-      }
-      
-      // Add all repos with explicit repo-specific configs
-      Object.keys(repoSettings).forEach(repo => autoInclude.add(repo))
-      
-      includeList = Array.from(autoInclude)
-      logger.info(`Auto-generated include list with ${includeList.length} repos`)
-      logger.debug(`Include list: ${includeList.join(', ')}`)
-    }
-    
-    const filteredRepos = allRepos.filter(repo => {
-      // Check exclude list (exact match)
-      if (excludeList.includes(repo.name)) {
-        logger.debug(`Excluding repo: ${repo.name} (in exclude list)`)
-        return false
-      }
-      
-      // Check include list (if specified, must be exact match)
-      if (includeList.length > 0) {
-        if (!includeList.includes(repo.name)) {
-          logger.trace(`Excluding repo: ${repo.name} (not in include list)`)
-          return false
-        }
-      }
-      
-      return true
-    })
-    
-    logger.info(`Processing ${filteredRepos.length} repositories after filtering`)
-    
-    // Check if any repos in the include list weren't found
-    if (includeList.length > 0) {
-      const foundRepoNames = new Set(filteredRepos.map(r => r.name))
-      const missingRepos = includeList.filter(name => !foundRepoNames.has(name))
-      if (missingRepos.length > 0) {
-        logger.warn(`⚠️  ${missingRepos.length} repo(s) from config not found or not accessible:`)
-        missingRepos.forEach(name => logger.warn(`   - ${name}`))
-      }
-    }
-    
-    // NOTE: Organization-level rulesets require admin:org permission and are NOT used.
-    // Instead, org-level rulesets from settings.yml are applied as repo-level rulesets
-    // to each managed repository. This provides the same protection without requiring
-    // org admin permissions.
-    
-    // Helper function to determine which suborg a repo belongs to
-    function getSuborgForRepo(repoName) {
-      const suborgConfig = deploymentConfig.subOrgConfig || {}
-      
-      for (const [suborgName, config] of Object.entries(suborgConfig)) {
-        // Check if repo is in the suborg's repo list
-        if (config.repos && config.repos.includes(repoName)) {
-          return suborgName
-        }
-      }
-      
-      return null
-    }
-    
-    // Process each repository
-    const results = { success: [], failed: [], skipped: [] }
-    
-    for (const repo of filteredRepos) {
-      try {
-        // Determine which suborg this repo belongs to
-        const suborgName = getSuborgForRepo(repo.name)
-        
-        // Check if repo has specific settings
-        const repoConfig = repoSettings[repo.name]
-        const suborgConfig = suborgName ? suborgSettings[suborgName] : null
-        
-        if (!repoConfig && !suborgConfig) {
-          logger.trace(`Skipping ${repo.name} - no config`)
-          results.skipped.push(repo.name)
-          continue
-        }
-        
-        // Build config source description
-        const configSources = []
-        if (suborgConfig) configSources.push(`suborg:${suborgName}`)
-        if (repoConfig) configSources.push('repo-specific')
-        const configSource = configSources.length > 0 ? ` [${configSources.join(' + ')}]` : ''
-        
-        logger.info(`Processing repository: ${repo.name}${configSource}`)
-        
-        // Merge settings: org defaults + suborg + repo specific
-        let mergedSettings = { ...orgSettings }
-        
-        if (suborgConfig) {
-          logger.debug(`Applying suborg config: ${suborgName}`)
-          // Merge suborg settings (arrays like rulesets and teams should be combined)
-          // For custom_properties, merge arrays and let suborg properties override org properties by name
-          const mergedCustomProps = [...(mergedSettings.custom_properties || [])]
-          if (suborgConfig.custom_properties) {
-            suborgConfig.custom_properties.forEach(suborgProp => {
-              const existingIndex = mergedCustomProps.findIndex(p => p.name === suborgProp.name)
-              if (existingIndex >= 0) {
-                mergedCustomProps[existingIndex] = suborgProp
-              } else {
-                mergedCustomProps.push(suborgProp)
-              }
-            })
-          }
-          
-          mergedSettings = {
-            ...mergedSettings,
-            ...suborgConfig,
-            rulesets: [...(mergedSettings.rulesets || []), ...(suborgConfig.rulesets || [])],
-            teams: suborgConfig.teams || mergedSettings.teams,
-            custom_properties: mergedCustomProps
-          }
-        }
-        
-        if (repoConfig) {
-          logger.debug(`Applying repo-specific config`)
-          // Repo-specific settings are merged with inherited settings
-          // Arrays like rulesets are combined (org + suborg + repo)
-          // For custom_properties, merge arrays and let repo properties override org/suborg properties by name
-          const mergedCustomProps = [...(mergedSettings.custom_properties || [])]
-          if (repoConfig.custom_properties) {
-            repoConfig.custom_properties.forEach(repoProp => {
-              const existingIndex = mergedCustomProps.findIndex(p => p.name === repoProp.name)
-              if (existingIndex >= 0) {
-                mergedCustomProps[existingIndex] = repoProp
-              } else {
-                mergedCustomProps.push(repoProp)
-              }
-            })
-          }
-          
-          mergedSettings = {
-            ...mergedSettings,
-            ...repoConfig,
-            rulesets: [...(mergedSettings.rulesets || []), ...(repoConfig.rulesets || [])],
-            teams: repoConfig.teams || mergedSettings.teams,
-            custom_properties: mergedCustomProps
-          }
-        }
-        
-        logger.debug(`Merged settings for ${repo.name}:`, JSON.stringify(mergedSettings, null, 2))
-        
-        if (DRY_RUN === 'true') {
-          logger.info(`\n[DRY RUN] Would apply the following settings to: ${repo.name}`)
-          logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-          
-          // Show repository settings
-          if (mergedSettings.repository) {
-            logger.info('  📋 Repository:')
-            if (mergedSettings.repository.description) {
-              logger.info(`     Description: "${mergedSettings.repository.description}"`)
-            }
-          }
-          
-          // Show teams
-          if (mergedSettings.teams && mergedSettings.teams.length > 0) {
-            logger.info(`  👥 Teams (${mergedSettings.teams.length}):`)
-            mergedSettings.teams.forEach(team => {
-              logger.info(`     - ${team.name}: ${team.permission}`)
-            })
-          }
-          
-          // Show rulesets
-          if (mergedSettings.rulesets && mergedSettings.rulesets.length > 0) {
-            logger.info(`  🛡️  Rulesets (${mergedSettings.rulesets.length}):`)
-            mergedSettings.rulesets.forEach(ruleset => {
-              logger.info(`     - ${ruleset.name} (${ruleset.enforcement})`)
-              if (ruleset.conditions?.ref_name?.include) {
-                logger.info(`       Applies to: ${ruleset.conditions.ref_name.include.join(', ')}`)
-              }
-              if (ruleset.rules) {
-                ruleset.rules.forEach(rule => {
-                  logger.info(`       Rule: ${rule.type}`)
-                  if (rule.type === 'required_status_checks' && rule.parameters?.required_status_checks) {
-                    rule.parameters.required_status_checks.forEach(check => {
-                      logger.info(`         - ${check.context}`)
-                    })
-                  }
-                })
-              }
-            })
-          }
-          
-          // Show custom properties
-          if (mergedSettings.custom_properties && mergedSettings.custom_properties.length > 0) {
-            logger.info(`  🏷️  Custom Properties (${mergedSettings.custom_properties.length}):`)
-            mergedSettings.custom_properties.forEach(prop => {
-              logger.info(`     - ${prop.name}: "${prop.value}"`)
-            })
-          }
-          
-          logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
-          results.success.push(repo.name)
-        } else {
-          // Apply settings using plugins directly
-          logger.info(`Applying settings to: ${repo.name}`)
-          
-          try {
-            const repoObj = { owner: GH_ORG, repo: repo.name }
-            const errors = []
-            const installationId = 1  // Dummy ID for token auth (not used for API calls)
-            
-            // Apply repository settings (description, features, etc.)
-            if (mergedSettings.repository) {
-              logger.debug('Applying repository settings...')
-              const repoPlugin = new RepositoryPlugin(false, octokit, repoObj, mergedSettings.repository, installationId, logger, errors)
-              await repoPlugin.sync()
-            }
-            
-            // Apply teams
-            if (mergedSettings.teams && mergedSettings.teams.length > 0) {
-              logger.debug(`Applying ${mergedSettings.teams.length} teams...`)
-              const teamsPlugin = new TeamsPlugin(false, octokit, repoObj, mergedSettings.teams, logger, errors)
-              await teamsPlugin.sync()
-            }
-            
-            // Apply collaborators
-            if (mergedSettings.collaborators !== undefined) {
-              logger.debug(`Applying collaborators (${mergedSettings.collaborators.length} users)...`)
-              const collaboratorsPlugin = new CollaboratorsPlugin(false, octokit, repoObj, mergedSettings.collaborators, logger, errors)
-              await collaboratorsPlugin.sync()
-            }
-            
-            // Apply rulesets (repo-level scope)
-            if (mergedSettings.rulesets && mergedSettings.rulesets.length > 0) {
-              logger.debug(`Applying ${mergedSettings.rulesets.length} rulesets...`)
-              const rulesetsPlugin = new RulesetsPlugin(false, octokit, repoObj, mergedSettings.rulesets, logger, errors, 'repo')
-              await rulesetsPlugin.sync()
-            }
-            
-            // Apply custom properties
-            if (mergedSettings.custom_properties && mergedSettings.custom_properties.length > 0) {
-              logger.debug(`Applying ${mergedSettings.custom_properties.length} custom properties...`)
-              const customPropsPlugin = new CustomPropertiesPlugin(false, octokit, repoObj, mergedSettings.custom_properties, logger, errors)
-              await customPropsPlugin.sync()
-            }
-            
-            if (errors.length > 0) {
-              logger.warn(`Completed with ${errors.length} warning(s)`)
-              errors.forEach(err => logger.warn(`  - ${err.msg || err}`))
-            }
-            
-            logger.info(`✅ Successfully applied settings to ${repo.name}`)
-            results.success.push(repo.name)
-          } catch (error) {
-            logger.error(`❌ Failed to apply settings to ${repo.name}:`, error.message)
-            results.failed.push({ repo: repo.name, error: error.message })
-          }
-        }
-        
-      } catch (error) {
-        logger.error(`Failed to process ${repo.name}:`, error.message)
-        results.failed.push({ repo: repo.name, error: error.message })
-      }
-    }
-    
-    // Summary
-    logger.info('\n========== SYNC SUMMARY ==========')
-    logger.info(`Total repositories: ${filteredRepos.length}`)
-    logger.info(`Successful: ${results.success.length}`)
-    logger.info(`Failed: ${results.failed.length}`)
-    logger.info(`Skipped: ${results.skipped.length}`)
-    
-    if (results.failed.length > 0) {
-      logger.error('\nFailed repositories:')
-      results.failed.forEach(f => logger.error(`  - ${f.repo}: ${f.error}`))
+
+    const repo = { owner: GH_ORG, repo: env.ADMIN_REPO }
+
+    // Use the core Settings engine via our standalone subclass
+    const settings = await StandaloneSettings.syncAll(nop, context, repo, config)
+
+    // Exit with error if there were failures
+    if (settings.errors && settings.errors.length > 0) {
       process.exit(1)
     }
-    
+
     logger.info('\nStandalone sync completed successfully!')
-    
   } catch (error) {
-    logger.error('Fatal error during standalone sync:', error)
+    logger.error('Fatal error during standalone sync:', error.message || error)
     process.exit(1)
   }
+}
+
+// Override Settings.syncAll to use our StandaloneSettings class
+StandaloneSettings.syncAll = async function (nop, context, repo, config, ref) {
+  const settings = new StandaloneSettings(nop, context, repo, config, ref)
+  try {
+    await settings.loadConfigs()
+    await settings.updateOrg()
+    await settings.updateAll()
+    await settings.handleResults()
+  } catch (error) {
+    settings.logError(error.message)
+    await settings.handleResults()
+  }
+  return settings
 }
 
 // Run the script

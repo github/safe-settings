@@ -11,22 +11,26 @@ The standalone mode implementation is completely **additive** - no core safe-set
 ### 1. `standalone/standalone-sync.js`
 **Purpose**: Main script for running safe-settings without a webhook server
 
+**Architecture**: A thin subclass (`StandaloneSettings`) of the core `Settings` class that overrides only what's needed for standalone execution:
+1. **Config loading** → reads YAML from the local filesystem instead of GitHub API
+2. **Repo listing** → uses `repos.listForOrg` instead of the App-only `/installation/repositories`
+3. **Result handling** → prints to stdout instead of creating GitHub check runs
+
+All merging logic, plugin orchestration, suborg resolution, validation, and `restrictedRepos` filtering is inherited directly from the core `Settings` class.
+
 **Features**:
 - Token-based authentication (PAT or GitHub App token)
-- Direct filesystem config loading from admin repository
-- Organization-level repository pagination
-- Suborg support (group repos by name pattern, team, or custom property)
-- Direct plugin execution (Repository, Teams, Rulesets, CustomProperties)
-- Custom properties merging across org/suborg/repo levels
-- Dry-run mode support
+- Full plugin support (all 12 plugins: repository, labels, collaborators, teams, milestones, branches, autolinks, validator, rulesets, environments, custom_properties, variables)
+- Suborg support (name patterns, teams, custom properties — via inherited logic)
+- Dry-run (nop) mode with change reporting
 - GitHub Actions compatible
+- Minimal code surface — easy to keep in sync with upstream
 
 **Key Implementation Details**:
+- Extends `Settings` class with ~5 method overrides
 - Uses `@octokit/rest` with simple token authentication
-- Loads configs directly from filesystem paths (no GitHub API config fetch)
-- Merges settings from 3 levels: org → suborg → repo
-- Implements custom array merging by property name for teams, custom_properties
-- Applies settings per-repository with error handling
+- Resolves config base path (supports Actions layout and local testing)
+- Provides a mock `context` object to satisfy the `Settings` constructor
 
 ### 2. `standalone/README.md`
 **Purpose**: Complete documentation for standalone mode
@@ -57,44 +61,39 @@ The standalone mode implementation is completely **additive** - no core safe-set
 
 ## Core Dependencies Used
 
-The standalone mode leverages existing safe-settings infrastructure:
+The standalone mode directly extends the core `Settings` class:
 
-### Plugins (Unchanged)
-- `lib/plugins/repository.js` - Repository settings
-- `lib/plugins/teams.js` - Team permissions
-- `lib/plugins/rulesets.js` - Branch rulesets
-- `lib/plugins/custom_properties.js` - Custom properties
-
-### Utilities (Unchanged)
-- `lib/mergeDeep.js` - Deep merging logic
-- `lib/mergeArrayBy.js` - Array merging by property
+### Core (Inherited via subclass)
+- `lib/settings.js` - The `StandaloneSettings` class extends this directly
+- All plugins registered in `Settings.PLUGINS` (repository, labels, collaborators, teams, milestones, branches, autolinks, validator, rulesets, environments, custom_properties, variables)
+- `lib/mergeDeep.js` - Deep merging logic (used internally by Settings)
+- `lib/glob.js` - Glob pattern matching for restrictedRepos
+- `lib/env.js` - Environment variable configuration
 
 ### External Dependencies (Already in package.json)
 - `@octokit/rest` - GitHub API client
 - `js-yaml` - YAML parsing
-- `minimatch` - Glob pattern matching
 
 ## Why No Core Changes Were Needed
 
-Safe-settings has a clean plugin architecture that separates:
-1. **Event handling** (webhooks) - Not needed for standalone
-2. **Config loading** (GitHub API) - Replaced with filesystem loading
-3. **Settings application** (plugins) - **Reused as-is**
+The `Settings` class has a clean separation of concerns:
+1. **Config loading** (`loadYaml`, `getRepoConfigMap`, `getSubOrgConfigMap`) - Overridden to use filesystem
+2. **Repo enumeration** (`eachRepositoryRepos`) - Overridden to use org API
+3. **Result reporting** (`handleResults`, `createCheckRun`) - Overridden for stdout
+4. **Everything else** (merging, plugin orchestration, validation, filtering) - Inherited as-is
 
-The plugin classes (`Repository`, `Teams`, `Rulesets`, `CustomProperties`) expose clean interfaces:
-```javascript
-const plugin = new Plugin(nop, github, repo, config, log, errors)
-await plugin.sync()
-```
-
-This made it possible to build standalone mode without modifying any core functionality.
+This subclass approach means:
+- Any new plugins added upstream automatically work in standalone mode
+- Bug fixes to merging/filtering logic are inherited for free
+- The standalone code surface is minimal (~150 lines of overrides)
 
 ## Merging Strategy for Upstream Updates
 
 When pulling updates from upstream `github/safe-settings`:
 
-### Safe to Update
-✅ All core plugins (`lib/plugins/*.js`)
+### Safe to Update (no conflicts expected)
+✅ All core plugins (`lib/plugins/*.js`) - inherited automatically
+✅ `lib/settings.js` - our subclass adapts to changes
 ✅ All utilities (`lib/*.js`)
 ✅ Documentation (`docs/`, `README.md`)
 ✅ Tests (`test/`)
@@ -102,16 +101,13 @@ When pulling updates from upstream `github/safe-settings`:
 
 ### Manual Review Required
 ⚠️ `package.json` - Preserve the `standalone-sync` script
-⚠️ `package-lock.json` - May have conflicts, regenerate if needed
+⚠️ `lib/settings.js` - If method signatures change for overridden methods (`loadYaml`, `getRepoConfigMap`, `getSubOrgConfigMap`, `eachRepositoryRepos`)
 
 ### Our Custom Code
-🔒 `standalone/` directory - Keep all our changes
+🔒 `standalone/` directory - All our changes are here
 
 ### Recommended Merge Process
 ```bash
-# Add upstream remote (if not already added)
-git remote add upstream https://github.com/github/safe-settings.git
-
 # Fetch upstream
 git fetch upstream
 
@@ -119,11 +115,13 @@ git fetch upstream
 git merge upstream/main-enterprise
 
 # Resolve conflicts in package.json (keep our standalone-sync script)
-# Regenerate package-lock.json if needed
 npm install
 
-# Test standalone mode still works
-npm run standalone-sync -- --help
+# Verify standalone still loads correctly
+node --check standalone/standalone-sync.js
+
+# Test standalone mode
+DRY_RUN=true GH_ORG=your-org GITHUB_TOKEN=your-token npm run standalone-sync
 ```
 
 ## Testing Standalone Mode
@@ -146,16 +144,11 @@ npm run standalone-sync
 
 ## Future Enhancements
 
-Potential improvements that maintain separation from core:
+Potential improvements:
 
-1. **Webhook compatibility** - Make standalone mode callable from webhook events
-2. **Partial sync** - Sync only specific plugins (e.g., only rulesets)
-3. **Diff preview** - Show what would change before applying
-4. **Rollback support** - Save state before changes for easy rollback
-5. **Parallel execution** - Process multiple repos concurrently
-6. **Config validation** - Pre-validate YAML before applying
-
-All of these can be implemented within the `standalone/` directory without core changes.
+1. **Upstream integration** - Submit as a PR to `github/safe-settings` since the subclass approach is clean and non-invasive
+2. **Selective sync** - Use `syncSelectedRepos` instead of `syncAll` for PR-only changed repos
+3. **Config validation** - Pre-validate YAML schema before applying
 
 ## Support
 
