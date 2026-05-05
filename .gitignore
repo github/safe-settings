@@ -140,3 +140,6 @@ samconfig.toml
 # test file to be ignored
 test.log
 reports
+safe-settings-gh-app.pem.bak
+.configs
+schema/.cache/

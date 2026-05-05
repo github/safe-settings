@@ -1,3 +1,4 @@
+require('dotenv').config()
 const appFn = require('./')
 const { FULL_SYNC_NOP } = require('./lib/env')
 const { createProbot } = require('probot')
