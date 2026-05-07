@@ -1,9 +1,43 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Safe-settings org-level configuration",
-  "description": "Schema for .github/settings.yml — org-level safe-settings configuration",
+  "title": "Safe-settings suborg-level configuration",
+  "description": "Schema for .github/suborgs/*.yml — suborg-level safe-settings configuration. Defines which repos belong to the suborg and what settings to apply.",
   "type": "object",
   "properties": {
+    "suborgrepos": {
+      "type": "array",
+      "description": "Glob patterns matching repository names. Repos whose names match any pattern are included in this suborg.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suborgteams": {
+      "type": "array",
+      "description": "Team slugs. Repos that belong to any of these teams are included in this suborg.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suborgproperties": {
+      "type": "array",
+      "description": "Custom property filters. Repos with matching custom property values are included in this suborg.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "property_name": {
+            "type": "string",
+            "description": "The name of the custom property"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Accepted values for this property"
+          }
+        }
+      }
+    },
     "repositories": {
       "$ref": "#/$defs/RepositorySettings"
     },
@@ -48,13 +82,6 @@
     "validator": {
       "$ref": "#/$defs/ValidatorSettings"
     },
-    "rulesets": {
-      "description": "Rulesets. Org-level only — rulesets defined here apply to the organization and are NOT inherited by suborg or repo override files.",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/RulesetSettings"
-      }
-    },
     "environments": {
       "description": "Deployment environments",
       "type": "array",
@@ -79,7 +106,7 @@
   },
   "$defs": {
     "RepositorySettings": {
-      "description": "Repository settings",
+      "description": "Repository settings. Use force_create to create the repository if it does not exist, and template to specify a template repository to use when creating it.",
       "allOf": [
         {
           "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1repos~1{owner}~1{repo}/patch/requestBody/content/application~1json/schema"
@@ -119,11 +146,11 @@
               }
             },
             "force_create": {
-              "description": "Force create the repository",
+              "description": "If true, create the repository if it does not already exist.",
               "type": "boolean"
             },
             "template": {
-              "description": "Name of a template repository to use when creating the repository",
+              "description": "Name of a template repository to use when creating a new repository.",
               "type": "string"
             }
           }

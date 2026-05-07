@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Safe-settings org-level configuration",
-  "description": "Schema for .github/settings.yml — org-level safe-settings configuration",
+  "title": "Safe-settings repo-level configuration",
+  "description": "Schema for .github/repos/{repo-name}.yml — repo-level safe-settings override configuration. Settings here are merged on top of org-level and suborg-level settings for the specific repository.",
   "type": "object",
   "properties": {
     "repositories": {
@@ -47,13 +47,6 @@
     },
     "validator": {
       "$ref": "#/$defs/ValidatorSettings"
-    },
-    "rulesets": {
-      "description": "Rulesets. Org-level only — rulesets defined here apply to the organization and are NOT inherited by suborg or repo override files.",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/RulesetSettings"
-      }
     },
     "environments": {
       "description": "Deployment environments",
@@ -119,11 +112,11 @@
               }
             },
             "force_create": {
-              "description": "Force create the repository",
+              "description": "If true, create the repository if it does not already exist.",
               "type": "boolean"
             },
             "template": {
-              "description": "Name of a template repository to use when creating the repository",
+              "description": "Name of a template repository to use when creating a new repository.",
               "type": "string"
             }
           }
