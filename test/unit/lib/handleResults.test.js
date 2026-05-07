@@ -2,6 +2,7 @@
 'use strict'
 
 const Settings = require('../../../lib/settings')
+const { isEmptyChange, isDeepEmpty } = require('../../../lib/settings')
 const env = require('../../../lib/env')
 
 // ---------------------------------------------------------------------------
@@ -362,6 +363,76 @@ describe('handleResults()', () => {
 
       // Assert
       expect(createComment).not.toHaveBeenCalled()
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Test 9 — isDeepEmpty recursive detection
+  // -------------------------------------------------------------------------
+  describe('isDeepEmpty recursive detection', () => {
+    it('null/undefined are deep-empty', () => {
+      expect(isDeepEmpty(null)).toBe(true)
+      expect(isDeepEmpty(undefined)).toBe(true)
+    })
+
+    it('empty arrays and objects are deep-empty', () => {
+      expect(isDeepEmpty([])).toBe(true)
+      expect(isDeepEmpty({})).toBe(true)
+    })
+
+    it('nested empty structures are deep-empty', () => {
+      expect(isDeepEmpty({ entries: [] })).toBe(true)
+      expect(isDeepEmpty({ a: { b: [] } })).toBe(true)
+      expect(isDeepEmpty({ a: null, b: undefined, c: {} })).toBe(true)
+      expect(isDeepEmpty([{}, [], null])).toBe(true)
+    })
+
+    it('non-empty values are NOT deep-empty', () => {
+      expect(isDeepEmpty('text')).toBe(false)
+      expect(isDeepEmpty(42)).toBe(false)
+      expect(isDeepEmpty(false)).toBe(false)
+      expect(isDeepEmpty([1])).toBe(false)
+      expect(isDeepEmpty({ key: 'value' })).toBe(false)
+    })
+
+    it('partially-filled nested structures are NOT deep-empty', () => {
+      expect(isDeepEmpty({ entries: [{ name: 'x' }] })).toBe(false)
+      expect(isDeepEmpty({ a: null, b: 'content' })).toBe(false)
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Test 10 — isEmptyChange with deeply-nested empty structures
+  // -------------------------------------------------------------------------
+  describe('isEmptyChange with deeply-nested empty structures', () => {
+    it('action with { entries: [] } additions is considered empty', () => {
+      expect(isEmptyChange({ additions: { entries: [] }, deletions: null, modifications: null })).toBe(true)
+    })
+
+    it('action with nested empty objects across all fields is empty', () => {
+      expect(isEmptyChange({ additions: { a: {} }, deletions: { b: [] }, modifications: { c: null } })).toBe(true)
+    })
+
+    it('action with real content in additions is NOT empty', () => {
+      expect(isEmptyChange({ additions: { entries: [{ name: 'label-a' }] }, deletions: null, modifications: null })).toBe(false)
+    })
+
+    it('filters nested-empty results from PR comment output', async () => {
+      const { context, createComment } = buildContext()
+      const nestedEmptyResult = makeNopResult({
+        repo: 'nested-empty-repo',
+        plugin: 'labels',
+        additions: { entries: [] },
+        deletions: { items: [{}] },
+        modifications: null
+      })
+      const settings = buildSettings(context, [nestedEmptyResult])
+
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).not.toContain('nested-empty-repo')
+      expect(body).toContain('_No changes to apply._')
     })
   })
 })
