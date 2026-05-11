@@ -75,13 +75,15 @@ function buildContext (overrides = {}) {
   return { context, createComment, checksUpdate }
 }
 
-function buildSettings (context, results = []) {
+function buildSettings (context, results = [], config = {}, baseConfig = null) {
   const settings = new Settings(
     /* nop */ true,
     context,
     { owner: 'test-org', repo: 'admin' },
-    /* config */ {},
-    /* ref */ 'main'
+    /* config */ config,
+    /* ref */ 'main',
+    /* suborg */ null,
+    /* baseConfig */ baseConfig
   )
   settings.results = results
   return settings
@@ -433,6 +435,406 @@ describe('handleResults()', () => {
       const body = getCombinedCommentBody(createComment)
       expect(body).not.toContain('nested-empty-repo')
       expect(body).toContain('_No changes to apply._')
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Test 11 — Base config filtering: org-level rulesets
+  // -------------------------------------------------------------------------
+  describe('base config filtering for org-level rulesets', () => {
+    it('only shows rulesets that changed between base and PR config', async () => {
+      const { context, createComment } = buildContext()
+
+      const baseConfig = {
+        rulesets: [
+          { name: 'Rule A', enforcement: 'active', conditions: { repository_name: { include: ['*'] } } },
+          { name: 'Rule B', enforcement: 'active', conditions: { repository_name: { include: ['agent-*'] } } },
+          { name: 'Rule C', enforcement: 'evaluate', conditions: { repository_name: { include: ['*'] } } }
+        ]
+      }
+      const prConfig = {
+        rulesets: [
+          { name: 'Rule A', enforcement: 'active', conditions: { repository_name: { include: ['*'] } } },
+          { name: 'Rule B', enforcement: 'active', conditions: { repository_name: { include: ['mythapi-*'] } } }, // changed!
+          { name: 'Rule C', enforcement: 'evaluate', conditions: { repository_name: { include: ['*'] } } }
+        ]
+      }
+
+      // NOP comparison found "changes" for all 3 rulesets (due to API drift)
+      const orgResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'test-org (org)',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [{ name: 'Rule B', conditions: { repository_name: { include: ['agent-*'] } } }],
+          modifications: [
+            { name: 'Rule A', bypass_actors: [{ actor_id: 1 }] },
+            { name: 'Rule B', conditions: { repository_name: { include: ['mythapi-*'] } } },
+            { name: 'Rule C', bypass_actors: [{ actor_id: 1 }] }
+          ]
+        }
+      }
+
+      const settings = buildSettings(context, [orgResult], prConfig, baseConfig)
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      // Rule B changed — should appear (note: prettify converts spaces to &nbsp;)
+      expect(body).toContain('Rule&nbsp;B')
+      // Rule A and Rule C are unchanged in config — should NOT appear
+      expect(body).not.toContain('Rule&nbsp;A')
+      expect(body).not.toContain('Rule&nbsp;C')
+    })
+
+    it('shows all rulesets when no baseConfig is provided (fallback)', async () => {
+      const { context, createComment } = buildContext()
+
+      const orgResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'test-org (org)',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [],
+          modifications: [
+            { name: 'Rule A', bypass_actors: [{ actor_id: 1 }] },
+            { name: 'Rule B', conditions: { repository_name: { include: ['mythapi-*'] } } }
+          ]
+        }
+      }
+
+      // No baseConfig — should show everything (no filtering)
+      const settings = buildSettings(context, [orgResult], { rulesets: [] })
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('Rule&nbsp;A')
+      expect(body).toContain('Rule&nbsp;B')
+    })
+
+    it('filters out org result entirely when no rulesets changed', async () => {
+      const { context, createComment } = buildContext()
+
+      const sameRulesets = [
+        { name: 'Rule A', enforcement: 'active' },
+        { name: 'Rule B', enforcement: 'evaluate' }
+      ]
+      const baseConfig = { rulesets: sameRulesets }
+      const prConfig = { rulesets: sameRulesets }
+
+      const orgResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'test-org (org)',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [],
+          modifications: [
+            { name: 'Rule A', bypass_actors: [{ actor_id: 1 }] },
+            { name: 'Rule B', bypass_actors: [{ actor_id: 1 }] }
+          ]
+        }
+      }
+
+      const settings = buildSettings(context, [orgResult], prConfig, baseConfig)
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('_No changes to apply._')
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Test 12 — Base config filtering: repo-level results
+  // -------------------------------------------------------------------------
+  describe('base config filtering for repo-level results', () => {
+    it('filters out repo results when their config section did not change', async () => {
+      const { context, createComment } = buildContext()
+
+      const baseConfig = {
+        rulesets: [
+          { name: 'Org Rule', conditions: { repository_name: { include: ['agent-*'] } } }
+        ],
+        labels: [{ name: 'bug', color: 'red' }]
+      }
+      const prConfig = {
+        rulesets: [
+          { name: 'Org Rule', conditions: { repository_name: { include: ['mythapi-*'] } } } // changed
+        ],
+        labels: [{ name: 'bug', color: 'red' }] // unchanged
+      }
+
+      // Repo-level labels result — labels section didn't change
+      const repoLabelsResult = makeNopResult({
+        repo: 'my-repo',
+        plugin: 'labels',
+        additions: ['stale-label']
+      })
+
+      // Org-level rulesets result — rulesets section DID change
+      const orgResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'test-org (org)',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [],
+          modifications: [{ name: 'Org Rule', conditions: { repository_name: { include: ['mythapi-*'] } } }]
+        }
+      }
+
+      const settings = buildSettings(context, [repoLabelsResult, orgResult], prConfig, baseConfig)
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      // Org rulesets should show (prettify converts spaces to &nbsp;)
+      expect(body).toContain('Org&nbsp;Rule')
+      // Repo labels should NOT show (labels section unchanged)
+      expect(body).not.toContain('my-repo')
+    })
+
+    it('shows repo results when their config section DID change', async () => {
+      const { context, createComment } = buildContext()
+
+      const baseConfig = { labels: [{ name: 'bug', color: 'red' }] }
+      const prConfig = { labels: [{ name: 'bug', color: 'blue' }] } // changed!
+
+      const repoLabelsResult = makeNopResult({
+        repo: 'affected-repo',
+        plugin: 'labels',
+        additions: [],
+        modifications: [{ name: 'bug', color: 'blue' }]
+      })
+
+      const settings = buildSettings(context, [repoLabelsResult], prConfig, baseConfig)
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('affected-repo')
+    })
+
+    it('preserves ERROR results regardless of config filtering', async () => {
+      const { context, createComment } = buildContext()
+
+      const baseConfig = { labels: [{ name: 'bug', color: 'red' }] }
+      const prConfig = { labels: [{ name: 'bug', color: 'red' }] } // unchanged
+
+      const errorResult = makeErrorResult({ repo: 'error-repo', plugin: 'labels', msg: 'API failure' })
+
+      const settings = buildSettings(context, [errorResult], prConfig, baseConfig)
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('error-repo')
+      expect(body).toContain('API failure')
+    })
+
+    it('filters out repo-level rulesets even when org rulesets section changed', async () => {
+      const { context, createComment } = buildContext()
+
+      const baseConfig = {
+        rulesets: [{ name: 'Org Rule', conditions: { repository_name: { include: ['agent-*'] } } }]
+      }
+      const prConfig = {
+        rulesets: [{ name: 'Org Rule', conditions: { repository_name: { include: ['mythapi-*'] } } }]
+      }
+
+      // Repo-level rulesets result (from override file, not global config)
+      const repoRulesetsResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'some-repo',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [],
+          modifications: [{ name: 'repo-lvl-rule', enforcement: 'active' }]
+        }
+      }
+
+      const settings = buildSettings(context, [repoRulesetsResult], prConfig, baseConfig)
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      // Repo-level rulesets should be filtered (override file didn't change)
+      expect(body).not.toContain('some-repo')
+    })
+
+    it('keeps repo-level results when repo is in changedRepoNames', async () => {
+      const { context, createComment } = buildContext()
+
+      const baseConfig = { labels: [{ name: 'bug', color: 'red' }] }
+      const prConfig = { labels: [{ name: 'bug', color: 'red' }] } // unchanged globally
+
+      // Repo-level result for a repo whose override file changed
+      const repoResult = makeNopResult({
+        repo: 'changed-repo',
+        plugin: 'labels',
+        modifications: [{ name: 'bug', color: 'green' }]
+      })
+
+      const settings = buildSettings(context, [repoResult], prConfig, baseConfig)
+      // Simulate syncSelectedSettings — this repo had its override file changed
+      settings.changedRepoNames = new Set(['changed-repo'])
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('changed-repo')
+    })
+
+    it('filters repo-level rulesets but keeps repo in changedRepoNames', async () => {
+      const { context, createComment } = buildContext()
+
+      const baseConfig = {
+        rulesets: [{ name: 'Org Rule', enforcement: 'active' }]
+      }
+      const prConfig = {
+        rulesets: [{ name: 'Org Rule', enforcement: 'active' }]
+      }
+
+      // Two repos: one selected (override changed), one not
+      const selectedRepoResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'selected-repo',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [],
+          modifications: [{ name: 'repo-rule', enforcement: 'active' }]
+        }
+      }
+      const driftRepoResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'drift-repo',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [],
+          modifications: [{ name: 'other-rule', enforcement: 'evaluate' }]
+        }
+      }
+
+      const settings = buildSettings(context, [selectedRepoResult, driftRepoResult], prConfig, baseConfig)
+      settings.changedRepoNames = new Set(['selected-repo'])
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('selected-repo')
+      expect(body).not.toContain('drift-repo')
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Test 13 — getChangedEntryNames helper
+  // -------------------------------------------------------------------------
+  describe('getChangedEntryNames', () => {
+    const { getChangedEntryNames } = require('../../../lib/settings')
+
+    it('returns empty set when both arrays are identical', () => {
+      const entries = [{ name: 'A', val: 1 }, { name: 'B', val: 2 }]
+      expect(getChangedEntryNames(entries, entries).size).toBe(0)
+    })
+
+    it('detects added entries', () => {
+      const base = [{ name: 'A', val: 1 }]
+      const pr = [{ name: 'A', val: 1 }, { name: 'B', val: 2 }]
+      const changed = getChangedEntryNames(base, pr)
+      expect(changed.has('B')).toBe(true)
+      expect(changed.has('A')).toBe(false)
+    })
+
+    it('detects deleted entries', () => {
+      const base = [{ name: 'A', val: 1 }, { name: 'B', val: 2 }]
+      const pr = [{ name: 'A', val: 1 }]
+      const changed = getChangedEntryNames(base, pr)
+      expect(changed.has('B')).toBe(true)
+      expect(changed.has('A')).toBe(false)
+    })
+
+    it('detects modified entries', () => {
+      const base = [{ name: 'A', val: 1 }, { name: 'B', val: 2 }]
+      const pr = [{ name: 'A', val: 1 }, { name: 'B', val: 99 }]
+      const changed = getChangedEntryNames(base, pr)
+      expect(changed.has('B')).toBe(true)
+      expect(changed.has('A')).toBe(false)
+    })
+
+    it('handles null/undefined base gracefully', () => {
+      const pr = [{ name: 'A' }, { name: 'B' }]
+      const changed = getChangedEntryNames(null, pr)
+      expect(changed.has('A')).toBe(true)
+      expect(changed.has('B')).toBe(true)
+    })
+
+    it('handles null/undefined PR gracefully', () => {
+      const base = [{ name: 'A' }, { name: 'B' }]
+      const changed = getChangedEntryNames(base, null)
+      expect(changed.has('A')).toBe(true)
+      expect(changed.has('B')).toBe(true)
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Test 14 — filterActionByChangedNames helper
+  // -------------------------------------------------------------------------
+  describe('filterActionByChangedNames', () => {
+    const { filterActionByChangedNames } = require('../../../lib/settings')
+
+    it('keeps entries matching changed names', () => {
+      const action = {
+        additions: [{ name: 'New Rule', enforcement: 'active' }],
+        deletions: [{ name: 'Old Rule', enforcement: 'evaluate' }],
+        modifications: [
+          { name: 'Changed Rule', conditions: { include: ['*'] } },
+          { name: 'Unchanged Rule', bypass_actors: [{ actor_id: 1 }] }
+        ]
+      }
+      const changed = new Set(['New Rule', 'Old Rule', 'Changed Rule'])
+      const result = filterActionByChangedNames(action, changed)
+
+      expect(result.additions).toHaveLength(1)
+      expect(result.deletions).toHaveLength(1)
+      expect(result.modifications).toHaveLength(1)
+      expect(result.modifications[0].name).toBe('Changed Rule')
+    })
+
+    it('returns null when all entries are filtered out', () => {
+      const action = {
+        additions: [],
+        deletions: [],
+        modifications: [
+          { name: 'Noise A', bypass_actors: [{ actor_id: 1 }] },
+          { name: 'Noise B', bypass_actors: [{ actor_id: 2 }] }
+        ]
+      }
+      const changed = new Set(['Something Else'])
+      const result = filterActionByChangedNames(action, changed)
+      expect(result).toBeNull()
+    })
+
+    it('keeps entries without a name field (structural entries)', () => {
+      const action = {
+        additions: [],
+        deletions: [{ conditions: { repository_name: { include: ['old-*'] } } }], // no name field
+        modifications: []
+      }
+      const changed = new Set(['Rule X'])
+      const result = filterActionByChangedNames(action, changed)
+      expect(result.deletions).toHaveLength(1)
     })
   })
 })

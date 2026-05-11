@@ -19,7 +19,7 @@ let deploymentConfig
 
 module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) => {
   let appSlug = 'safe-settings'
-  async function syncAllSettings (nop, context, repo = context.repo(), ref) {
+  async function syncAllSettings (nop, context, repo = context.repo(), ref, baseRef) {
     try {
       deploymentConfig = await loadYamlFileSystem()
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
@@ -27,8 +27,21 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
+
+      // Load base branch config for NOP filtering (only show PR-introduced changes)
+      let baseConfig = null
+      if (nop && baseRef) {
+        try {
+          const baseConfigManager = new ConfigManager(context, baseRef)
+          const baseRuntimeConfig = await baseConfigManager.loadGlobalSettingsYaml()
+          baseConfig = Object.assign({}, deploymentConfig, baseRuntimeConfig)
+        } catch (e) {
+          robot.log.debug(`Could not load base config for NOP filtering: ${e.message}`)
+        }
+      }
+
       if (ref) {
-        return Settings.syncAll(nop, context, repo, config, ref)
+        return Settings.syncAll(nop, context, repo, config, ref, baseConfig)
       } else {
         return Settings.syncAll(nop, context, repo, config)
       }
@@ -73,7 +86,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     }
   }
 
-  async function syncSelectedSettings (nop, context, repos, subOrgs, ref) {
+  async function syncSelectedSettings (nop, context, repos, subOrgs, ref, baseRef) {
     try {
       deploymentConfig = await loadYamlFileSystem()
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
@@ -81,7 +94,20 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
-      return Settings.syncSelectedRepos(nop, context, repos, subOrgs, config, ref)
+
+      // Load base branch config for NOP filtering
+      let baseConfig = null
+      if (nop && baseRef) {
+        try {
+          const baseConfigManager = new ConfigManager(context, baseRef)
+          const baseRuntimeConfig = await baseConfigManager.loadGlobalSettingsYaml()
+          baseConfig = Object.assign({}, deploymentConfig, baseRuntimeConfig)
+        } catch (e) {
+          robot.log.debug(`Could not load base config for NOP filtering: ${e.message}`)
+        }
+      }
+
+      return Settings.syncSelectedRepos(nop, context, repos, subOrgs, config, ref, baseConfig)
     } catch (e) {
       if (nop) {
         let filename = env.SETTINGS_FILE_PATH
@@ -588,14 +614,16 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
 
     if (settingsModified) {
       robot.log.debug(`Changes in '${Settings.FILE_PATH}' detected, doing a full synch...`)
-      return syncAllSettings(true, context, context.repo(), pull_request.head.ref)
+      const baseRef = pull_request.base.ref || repository.default_branch
+      return syncAllSettings(true, context, context.repo(), pull_request.head.ref, baseRef)
     }
 
     const repoChanges = getChangedRepoConfigName(files, context.repo().owner)
     const subOrgChanges = getChangedSubOrgConfigName(files)
 
     if (repoChanges.length > 0 || subOrgChanges.length > 0) {
-      return syncSelectedSettings(true, context, repoChanges, subOrgChanges, pull_request.head.ref)
+      const baseRef = pull_request.base.ref || repository.default_branch
+      return syncSelectedSettings(true, context, repoChanges, subOrgChanges, pull_request.head.ref, baseRef)
     }
 
     // if no safe-settings changes detected, send a success to the check run
