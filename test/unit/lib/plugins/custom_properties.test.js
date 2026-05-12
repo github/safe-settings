@@ -58,6 +58,24 @@ describe('CustomProperties', () => {
       ])
     })
 
+    it('should normalize paginated custom properties when property name shape differs', async () => {
+      const mockResponse = [
+        { name: 'Owner', value: 'My Team' },
+        { property_name: 'Criticality', value: 'High' },
+        { value: 'ignored' }
+      ]
+
+      github.paginate.mockResolvedValue(mockResponse)
+
+      const plugin = configure()
+      const result = await plugin.find()
+
+      expect(result).toEqual([
+        { name: 'owner', value: 'My Team' },
+        { name: 'criticality', value: 'High' }
+      ])
+    })
+
     it('should sync', async () => {
       const mockResponse = [
         { property_name: 'no-change', value: 'no-change' },
