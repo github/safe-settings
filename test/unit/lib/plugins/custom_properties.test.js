@@ -32,6 +32,11 @@ describe('CustomProperties', () => {
       expect(plugin.entries).toEqual([{ name: 'test', value: 'test' }])
     })
 
+    it('should normalize entries with property_name when be instantiated', () => {
+      const plugin = configure([{ property_name: 'ent-ownership', value: 'expert-services' }])
+      expect(plugin.entries).toEqual([{ name: 'ent-ownership', value: 'expert-services' }])
+    })
+
     it('should fetch and normalize custom properties successfully', async () => {
       const mockResponse = [
         { property_name: 'Test1', value: 'value1' },
