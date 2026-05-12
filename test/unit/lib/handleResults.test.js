@@ -334,7 +334,113 @@ describe('handleResults()', () => {
   })
 
   // -------------------------------------------------------------------------
-  // Test 8 — does not create PR comment when CREATE_PR_COMMENT is not true
+  // Test 8 — compact hybrid rendering
+  // -------------------------------------------------------------------------
+  describe('compact hybrid rendering', () => {
+    it('shows affected repo, changed policy, and concise ruleset diff', async () => {
+      const { context, createComment } = buildContext()
+
+      const baseConfig = {
+        rulesets: [
+          {
+            name: 'Agent Studio - Required Workflows',
+            conditions: { repository_name: { include: ['agent-*'] } }
+          }
+        ]
+      }
+      const prConfig = {
+        rulesets: [
+          {
+            name: 'Agent Studio - Required Workflows',
+            conditions: { repository_name: { include: ['mythapi-*'] } }
+          }
+        ]
+      }
+      const orgResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'test-org (org)',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [
+            {
+              name: 'Agent Studio - Required Workflows',
+              conditions: { repository_name: { include: ['agent-*'] } }
+            }
+          ],
+          modifications: [
+            {
+              name: 'Agent Studio - Required Workflows',
+              conditions: { repository_name: { include: ['mythapi-*'] } },
+              bypass_actors: [{ actor_id: 1 }]
+            }
+          ]
+        }
+      }
+
+      const settings = buildSettings(context, [orgResult], prConfig, baseConfig)
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('**Repos affected:** 1')
+      expect(body).toContain('| Repo | Policy / Setting | Change |')
+      expect(body).toContain('test-org (org)')
+      expect(body).toContain('Agent Studio - Required Workflows')
+      expect(body).toContain('conditions.repository_name.include: agent-* -&gt; mythapi-*')
+      expect(body).not.toContain('Additions')
+      expect(body).not.toContain('Deletions')
+      expect(body).not.toContain('Modifications')
+    })
+
+    it('uses the same compact row model in the check-run summary', async () => {
+      const { context, checksUpdate } = buildContext()
+      const result = makeNopResult({
+        repo: 'my-repo',
+        plugin: 'labels',
+        modifications: [{ name: 'bug', color: 'blue' }]
+      })
+      const settings = buildSettings(context, [result])
+
+      await settings.handleResults()
+
+      const summary = checksUpdate.mock.calls[0][0].output.summary
+      expect(summary).toContain('Number of repos affected')
+      expect(summary).toContain('| Repo | Policy / Setting | Change |')
+      expect(summary).toContain('my-repo')
+      expect(summary).toContain('bug')
+      expect(summary).toContain('Changed: color: blue')
+    })
+
+    it('prefers structured action fields over generic msg text', async () => {
+      const { context, createComment } = buildContext()
+      const result = {
+        type: 'NOP',
+        plugin: 'labels',
+        repo: 'my-repo',
+        endpoint: '',
+        body: {},
+        action: {
+          msg: 'Changes found',
+          additions: [{ name: 'security', color: 'red' }],
+          deletions: null,
+          modifications: null
+        }
+      }
+      const settings = buildSettings(context, [result])
+
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('security')
+      expect(body).toContain('Added: color: red')
+      expect(body).not.toContain('Changes found')
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Test 9 — does not create PR comment when CREATE_PR_COMMENT is not true
   // -------------------------------------------------------------------------
   describe('does not create PR comment when CREATE_PR_COMMENT is not true', () => {
     it('createComment is never called when CREATE_PR_COMMENT is "false"', async () => {
@@ -482,11 +588,11 @@ describe('handleResults()', () => {
       await settings.handleResults()
 
       const body = getCombinedCommentBody(createComment)
-      // Rule B changed — should appear (note: prettify converts spaces to &nbsp;)
-      expect(body).toContain('Rule&nbsp;B')
+      // Rule B changed — should appear
+      expect(body).toContain('Rule B')
       // Rule A and Rule C are unchanged in config — should NOT appear
-      expect(body).not.toContain('Rule&nbsp;A')
-      expect(body).not.toContain('Rule&nbsp;C')
+      expect(body).not.toContain('Rule A')
+      expect(body).not.toContain('Rule C')
     })
 
     it('shows all rulesets when no baseConfig is provided (fallback)', async () => {
@@ -513,8 +619,8 @@ describe('handleResults()', () => {
       await settings.handleResults()
 
       const body = getCombinedCommentBody(createComment)
-      expect(body).toContain('Rule&nbsp;A')
-      expect(body).toContain('Rule&nbsp;B')
+      expect(body).toContain('Rule A')
+      expect(body).toContain('Rule B')
     })
 
     it('filters out org result entirely when no rulesets changed', async () => {
@@ -596,8 +702,8 @@ describe('handleResults()', () => {
       await settings.handleResults()
 
       const body = getCombinedCommentBody(createComment)
-      // Org rulesets should show (prettify converts spaces to &nbsp;)
-      expect(body).toContain('Org&nbsp;Rule')
+      // Org rulesets should show
+      expect(body).toContain('Org Rule')
       // Repo labels should NOT show (labels section unchanged)
       expect(body).not.toContain('my-repo')
     })
