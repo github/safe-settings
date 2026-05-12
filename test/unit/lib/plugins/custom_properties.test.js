@@ -27,12 +27,12 @@ describe('CustomProperties', () => {
   })
 
   describe('Custom Properties plugin', () => {
-    it('should normalize entries when be instantiated', () => {
+    it('should normalize entries when instantiated', () => {
       const plugin = configure([{ name: 'Test', value: 'test' }])
       expect(plugin.entries).toEqual([{ name: 'test', value: 'test' }])
     })
 
-    it('should normalize entries with property_name when be instantiated', () => {
+    it('should normalize entries with property_name when instantiated', () => {
       const plugin = configure([{ property_name: 'ent-ownership', value: 'expert-services' }])
       expect(plugin.entries).toEqual([{ name: 'ent-ownership', value: 'expert-services' }])
     })
