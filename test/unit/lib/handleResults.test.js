@@ -546,6 +546,22 @@ describe('handleResults()', () => {
       expect(body).toContain('-OLD.yml')
       expect(body).toContain('-NEW.yml')
     })
+
+    it('does not hide non-identity fields whose value equals the target name', async () => {
+      const { context, createComment } = buildContext()
+      const result = makeNopResult({
+        repo: 'my-repo',
+        plugin: 'labels',
+        additions: [{ name: 'bug', description: 'bug', color: 'red' }]
+      })
+      const settings = buildSettings(context, [result])
+
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('<td>Added</td><td><code>description</code></td><td></td><td>bug</td>')
+      expect(body).toContain('<td>Added</td><td><code>color</code></td><td></td><td>red</td>')
+    })
   })
 
   // -------------------------------------------------------------------------
