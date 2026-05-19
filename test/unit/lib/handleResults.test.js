@@ -239,6 +239,39 @@ describe('handleResults()', () => {
       expect(summary.length).toBeLessThan(55536)
       expect(summary).not.toContain('too many changes to report')
     })
+
+    it('truncates oversized PR comments without exceeding the limit', async () => {
+      const { context, createComment } = buildContext()
+      const result = makeNopResult({
+        repo: 'huge-repo',
+        plugin: 'labels',
+        additions: [{ name: 'huge-label', description: 'x'.repeat(60000) }]
+      })
+      const settings = buildSettings(context, [result])
+
+      await settings.handleResults()
+
+      const bodies = getCommentBodies(createComment)
+      bodies.forEach(body => {
+        expect(body.length).toBeLessThanOrEqual(55536)
+      })
+      expect(bodies.some(body => body.includes('too many changes to report'))).toBe(true)
+    })
+
+    it('truncates oversized check-run summaries without exceeding the limit', async () => {
+      const { context, checksUpdate } = buildContext()
+      const errorResult = makeErrorResult({
+        repo: 'broken-repo',
+        msg: 'x'.repeat(60000)
+      })
+      const settings = buildSettings(context, [errorResult])
+
+      await settings.handleResults()
+
+      const summary = checksUpdate.mock.calls[0][0].output.summary
+      expect(summary.length).toBeLessThanOrEqual(55536)
+      expect(summary).toContain('too many changes to report')
+    })
   })
 
   // -------------------------------------------------------------------------
@@ -334,10 +367,10 @@ describe('handleResults()', () => {
   })
 
   // -------------------------------------------------------------------------
-  // Test 8 — compact hybrid rendering
+  // Test 8 — expanded per-rule rendering
   // -------------------------------------------------------------------------
-  describe('compact hybrid rendering', () => {
-    it('shows affected repo, changed policy, and concise ruleset diff', async () => {
+  describe('expanded per-rule rendering', () => {
+    it('shows affected repo overview, changed policy, and field-level ruleset diff', async () => {
       const { context, createComment } = buildContext()
 
       const baseConfig = {
@@ -385,16 +418,15 @@ describe('handleResults()', () => {
 
       const body = getCombinedCommentBody(createComment)
       expect(body).toContain('**Repos affected:** 1')
-      expect(body).toContain('| Repo | Policy / Setting | Change |')
+      expect(body).toContain('Only affected repositories are listed.')
+      expect(body).toContain('| Repo | Rulesets settings |')
       expect(body).toContain('test-org (org)')
-      expect(body).toContain('Agent Studio - Required Workflows')
-      expect(body).toContain('conditions.repository_name.include: agent-* -&gt; mythapi-*')
-      expect(body).not.toContain('Additions')
-      expect(body).not.toContain('Deletions')
-      expect(body).not.toContain('Modifications')
+      expect(body).toContain('#### Agent Studio - Required Workflows')
+      expect(body).toContain('<th>Change</th><th>Field</th><th>Before</th><th>After</th>')
+      expect(body).toContain('<td>Modified</td><td><code>conditions.repository_name.include</code></td><td>agent-*</td><td>mythapi-*</td>')
     })
 
-    it('uses the same compact row model in the check-run summary', async () => {
+    it('uses the same expanded display model in the check-run summary', async () => {
       const { context, checksUpdate } = buildContext()
       const result = makeNopResult({
         repo: 'my-repo',
@@ -407,10 +439,10 @@ describe('handleResults()', () => {
 
       const summary = checksUpdate.mock.calls[0][0].output.summary
       expect(summary).toContain('Number of repos affected')
-      expect(summary).toContain('| Repo | Policy / Setting | Change |')
+      expect(summary).toContain('<th>Change</th><th>Field</th><th>Before</th><th>After</th>')
       expect(summary).toContain('my-repo')
-      expect(summary).toContain('bug')
-      expect(summary).toContain('Changed: color: blue')
+      expect(summary).toContain('#### bug')
+      expect(summary).toContain('<td>Modified</td><td><code>color</code></td><td></td><td>blue</td>')
     })
 
     it('prefers structured action fields over generic msg text', async () => {
@@ -434,8 +466,85 @@ describe('handleResults()', () => {
 
       const body = getCombinedCommentBody(createComment)
       expect(body).toContain('security')
-      expect(body).toContain('Added: color: red')
+      expect(body).toContain('<td>Added</td><td><code>color</code></td><td></td><td>red</td>')
       expect(body).not.toContain('Changes found')
+    })
+
+    it('renders nested object values inside details blocks', async () => {
+      const { context, createComment } = buildContext()
+      const result = makeNopResult({
+        repo: 'my-repo',
+        plugin: 'branches',
+        additions: [{
+          name: 'main',
+          required_workflows: [{ path: '.github/workflows/build.yml', ref: 'main' }]
+        }]
+      })
+      const settings = buildSettings(context, [result])
+
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('#### main')
+      expect(body).toContain('<details><summary>')
+      expect(body).toContain('"path"')
+    })
+
+    it('shows added and deleted fields within a matched modification', async () => {
+      const { context, createComment } = buildContext()
+      const result = {
+        type: 'NOP',
+        plugin: 'labels',
+        repo: 'my-repo',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: null,
+          deletions: [{ name: 'bug', color: 'red', oldOnly: true }],
+          modifications: [{ name: 'bug', color: 'blue', newOnly: true }]
+        }
+      }
+      const settings = buildSettings(context, [result])
+
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('<td>Modified</td><td><code>color</code></td><td>red</td><td>blue</td>')
+      expect(body).toContain('<td>Added</td><td><code>newOnly</code></td><td></td><td>true</td>')
+      expect(body).toContain('<td>Deleted</td><td><code>oldOnly</code></td><td>true</td><td></td>')
+    })
+
+    it('detects nested value modifications beyond the display preview', async () => {
+      const { context, createComment } = buildContext()
+      const sharedPrefix = 'a'.repeat(120)
+      const result = {
+        type: 'NOP',
+        plugin: 'branches',
+        repo: 'my-repo',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: null,
+          deletions: [{
+            name: 'main',
+            required_workflows: [{ path: `${sharedPrefix}-OLD.yml`, ref: 'main' }],
+            enforce_admins: false
+          }],
+          modifications: [{
+            name: 'main',
+            required_workflows: [{ path: `${sharedPrefix}-NEW.yml`, ref: 'main' }],
+            enforce_admins: true
+          }]
+        }
+      }
+      const settings = buildSettings(context, [result])
+
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('<td>Modified</td><td><code>required_workflows</code></td>')
+      expect(body).toContain('-OLD.yml')
+      expect(body).toContain('-NEW.yml')
     })
   })
 
