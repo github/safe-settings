@@ -344,10 +344,10 @@ describe('handleResults()', () => {
   })
 
   // -------------------------------------------------------------------------
-  // Test 7 — org-level result rows retain (org) labeling
+  // Test 7 — org-level result rows display the admin repo
   // -------------------------------------------------------------------------
   describe('org-level labeling', () => {
-    it('includes repos tagged with (org) in output', async () => {
+    it('shows the admin repo name instead of the org target in output', async () => {
       // Arrange
       const { context, createComment } = buildContext()
       const orgResult = makeNopResult({
@@ -362,15 +362,16 @@ describe('handleResults()', () => {
 
       // Assert
       const body = getCombinedCommentBody(createComment)
-      expect(body).toContain('test-org (org)')
+      expect(body).toContain('admin')
+      expect(body).not.toContain('test-org (org)')
     })
   })
 
   // -------------------------------------------------------------------------
-  // Test 8 — expanded per-rule rendering
+  // Test 8 — table-free rendering with trimmed changed fields
   // -------------------------------------------------------------------------
-  describe('expanded per-rule rendering', () => {
-    it('shows affected repo overview, changed policy, and field-level ruleset diff', async () => {
+  describe('table-free rendering with trimmed changed fields', () => {
+    it('shows affected admin target, changed policy, and field-level ruleset diff', async () => {
       const { context, createComment } = buildContext()
 
       const baseConfig = {
@@ -418,19 +419,60 @@ describe('handleResults()', () => {
 
       const body = getCombinedCommentBody(createComment)
       expect(body).toContain('**Repos affected:** 1')
-      expect(body).toContain('Only affected repositories are listed.')
-      expect(body).toContain('| Repo | Rulesets settings |')
-      expect(body).toContain('test-org (org)')
-      expect(body).toContain('#### Agent Studio - Required Workflows')
-      expect(body).toContain('<th>Change</th><th>Field</th><th>Before</th><th>After</th>')
-      expect(body).toContain('<td>Modified</td><td><code>conditions.repository_name.include</code></td><td>agent-*</td><td>mythapi-*</td>')
+      expect(body).toContain('<summary>Rulesets — 1 repo, 1 policy changed</summary>')
+      expect(body).toContain('**admin**')
+      expect(body).not.toContain('| Repo |')
+      expect(body).not.toContain('<table>')
+      expect(body).not.toContain('test-org (org)')
+      expect(body).toContain('- `Agent Studio - Required Workflows`')
+      expect(body).toContain('  - ~ `conditions.repository_name.include`')
+      expect(body).toContain('    - before: `agent-*`')
+      expect(body).toContain('    - after: `mythapi-*`')
+      expect(body).not.toContain('bypass_actors')
     })
 
-    it('uses the same expanded display model in the check-run summary', async () => {
+    it('does not render config-changed rulesets absent from NOP actions', async () => {
+      const { context, createComment } = buildContext()
+      const baseConfig = {
+        rulesets: [
+          { name: 'Rule B', conditions: { repository_name: { include: ['agent-*'] } } },
+          { name: 'Rule D', enforcement: 'evaluate' }
+        ]
+      }
+      const prConfig = {
+        rulesets: [
+          { name: 'Rule B', conditions: { repository_name: { include: ['mythapi-*'] } } },
+          { name: 'Rule D', enforcement: 'active' }
+        ]
+      }
+      const orgResult = {
+        type: 'NOP',
+        plugin: 'Rulesets',
+        repo: 'test-org (org)',
+        endpoint: '',
+        body: {},
+        action: {
+          additions: [],
+          deletions: [{ name: 'Rule B', conditions: { repository_name: { include: ['agent-*'] } } }],
+          modifications: [{ name: 'Rule B', conditions: { repository_name: { include: ['mythapi-*'] } } }]
+        }
+      }
+      const settings = buildSettings(context, [orgResult], prConfig, baseConfig)
+
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('Rule B')
+      expect(body).not.toContain('Rule D')
+      expect(body).toContain('<summary>Rulesets — 1 repo, 1 policy changed</summary>')
+    })
+
+    it('uses the same table-free trimmed details in the check-run summary', async () => {
       const { context, checksUpdate } = buildContext()
       const result = makeNopResult({
         repo: 'my-repo',
         plugin: 'labels',
+        additions: null,
         modifications: [{ name: 'bug', color: 'blue' }]
       })
       const settings = buildSettings(context, [result])
@@ -439,10 +481,32 @@ describe('handleResults()', () => {
 
       const summary = checksUpdate.mock.calls[0][0].output.summary
       expect(summary).toContain('Number of repos affected')
-      expect(summary).toContain('<th>Change</th><th>Field</th><th>Before</th><th>After</th>')
-      expect(summary).toContain('my-repo')
-      expect(summary).toContain('#### bug')
-      expect(summary).toContain('<td>Modified</td><td><code>color</code></td><td></td><td>blue</td>')
+      expect(summary).toContain('<summary>labels — 1 repo, 1 setting changed</summary>')
+      expect(summary).toContain('**my-repo**')
+      expect(summary).toContain('- `bug`')
+      expect(summary).toContain('  - ~ `color`')
+      expect(summary).toContain('    - after: `blue`')
+      expect(summary).not.toContain('| Repo |')
+      expect(summary).not.toContain('<table>')
+    })
+
+    it('pairs action diff entries by non-name identity fields', async () => {
+      const { context, createComment } = buildContext()
+      const result = makeNopResult({
+        repo: 'my-repo',
+        plugin: 'teams',
+        deletions: [{ login: 'admin-team', permission: 'pull' }],
+        modifications: [{ login: 'admin-team', permission: 'push' }]
+      })
+      const settings = buildSettings(context, [result])
+
+      await settings.handleResults()
+
+      const body = getCombinedCommentBody(createComment)
+      expect(body).toContain('- `admin-team`')
+      expect(body).toContain('  - ~ `permission`')
+      expect(body).toContain('    - before: `pull`')
+      expect(body).toContain('    - after: `push`')
     })
 
     it('prefers structured action fields over generic msg text', async () => {
@@ -466,11 +530,11 @@ describe('handleResults()', () => {
 
       const body = getCombinedCommentBody(createComment)
       expect(body).toContain('security')
-      expect(body).toContain('<td>Added</td><td><code>color</code></td><td></td><td>red</td>')
+      expect(body).toContain('  - + `color`: `red`')
       expect(body).not.toContain('Changes found')
     })
 
-    it('renders nested object values inside details blocks', async () => {
+    it('renders large object values as compact inline JSON', async () => {
       const { context, createComment } = buildContext()
       const result = makeNopResult({
         repo: 'my-repo',
@@ -485,9 +549,10 @@ describe('handleResults()', () => {
       await settings.handleResults()
 
       const body = getCombinedCommentBody(createComment)
-      expect(body).toContain('#### main')
-      expect(body).toContain('<details><summary>')
+      expect(body).toContain('- `main`')
+      expect(body).toContain('required_workflows')
       expect(body).toContain('"path"')
+      expect(body).toContain('.github/workflows/build.yml')
     })
 
     it('shows added and deleted fields within a matched modification', async () => {
@@ -509,14 +574,16 @@ describe('handleResults()', () => {
       await settings.handleResults()
 
       const body = getCombinedCommentBody(createComment)
-      expect(body).toContain('<td>Modified</td><td><code>color</code></td><td>red</td><td>blue</td>')
-      expect(body).toContain('<td>Added</td><td><code>newOnly</code></td><td></td><td>true</td>')
-      expect(body).toContain('<td>Deleted</td><td><code>oldOnly</code></td><td>true</td><td></td>')
+      expect(body).toContain('  - ~ `color`')
+      expect(body).toContain('    - before: `red`')
+      expect(body).toContain('    - after: `blue`')
+      expect(body).toContain('  - + `newOnly`: `true`')
+      expect(body).toContain('  - - `oldOnly`: `true`')
     })
 
     it('detects nested value modifications beyond the display preview', async () => {
       const { context, createComment } = buildContext()
-      const sharedPrefix = 'a'.repeat(120)
+      const sharedPrefix = 'a'.repeat(240)
       const result = {
         type: 'NOP',
         plugin: 'branches',
@@ -542,7 +609,7 @@ describe('handleResults()', () => {
       await settings.handleResults()
 
       const body = getCombinedCommentBody(createComment)
-      expect(body).toContain('<td>Modified</td><td><code>required_workflows</code></td>')
+      expect(body).toContain('  - ~ `required_workflows`')
       expect(body).toContain('-OLD.yml')
       expect(body).toContain('-NEW.yml')
     })
@@ -559,8 +626,8 @@ describe('handleResults()', () => {
       await settings.handleResults()
 
       const body = getCombinedCommentBody(createComment)
-      expect(body).toContain('<td>Added</td><td><code>description</code></td><td></td><td>bug</td>')
-      expect(body).toContain('<td>Added</td><td><code>color</code></td><td></td><td>red</td>')
+      expect(body).toContain('  - + `description`: `bug`')
+      expect(body).toContain('  - + `color`: `red`')
     })
   })
 
