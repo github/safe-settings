@@ -115,7 +115,7 @@ default_permissions:
     organization_administration: write
 
     # Manage Actions variables.
-    # https://docs.github.com/en/rest/actions/variables?apiVersion=2022-11-28
+    # https://docs.github.com/en/rest/actions/variables?apiVersion=2026-03-10
     actions_variables: write
 
 
