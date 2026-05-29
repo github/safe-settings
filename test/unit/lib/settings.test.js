@@ -462,4 +462,40 @@ repository:
       );
     });
   });
+
+  describe('changed config tracking', () => {
+    it('syncAll tracks repo and suborg override changes during full nop runs', async () => {
+      const config = { restrictedRepos: [] }
+      const changedFiles = {
+        repos: [{ repo: 'repo-from-override' }],
+        subOrgs: [{ path: '.github/suborgs/frontend.yml' }]
+      }
+
+      const loadConfigsSpy = jest.spyOn(Settings.prototype, 'loadConfigs').mockImplementation(async function () {
+        this.subOrgConfigs = {
+          'repo-from-suborg': { source: '.github/suborgs/frontend.yml' },
+          'repo-from-other-suborg': { source: '.github/suborgs/backend.yml' }
+        }
+      })
+      const updateOrgSpy = jest.spyOn(Settings.prototype, 'updateOrg').mockResolvedValue(undefined)
+      const updateAllSpy = jest.spyOn(Settings.prototype, 'updateAll').mockResolvedValue(undefined)
+      const handleResultsSpy = jest.spyOn(Settings.prototype, 'handleResults').mockImplementation(async function () {
+        expect(this.changedRepoNames.has('repo-from-override')).toBe(true)
+        expect(this.changedRepoNames.has('repo-from-suborg')).toBe(true)
+        expect(this.changedRepoNames.has('repo-from-other-suborg')).toBe(false)
+      })
+
+      await Settings.syncAll(true, stubContext, mockRepo, config, mockRef, {}, changedFiles)
+
+      expect(loadConfigsSpy).toHaveBeenCalledTimes(1)
+      expect(updateOrgSpy).toHaveBeenCalledTimes(1)
+      expect(updateAllSpy).toHaveBeenCalledTimes(1)
+      expect(handleResultsSpy).toHaveBeenCalledTimes(1)
+
+      loadConfigsSpy.mockRestore()
+      updateOrgSpy.mockRestore()
+      updateAllSpy.mockRestore()
+      handleResultsSpy.mockRestore()
+    })
+  })
 }) // Settings Tests
