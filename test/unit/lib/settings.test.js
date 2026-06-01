@@ -462,4 +462,75 @@ repository:
       );
     });
   });
+
+  describe('updateRepos archived repos', () => {
+    const Archive = require('../../../lib/plugins/archive')
+    let settings
+
+    beforeEach(() => {
+      // suborg must be undefined, otherwise updateRepos returns early because the
+      // repo is not part of the changed suborg config.
+      mockSubOrg = undefined
+      stubConfig = {
+        restrictedRepos: {},
+        // Presence of a repository section means a repoConfig is built and the
+        // main `if (repoConfig)` branch of updateRepos runs.
+        repository: { has_wiki: false }
+      }
+      settings = createSettings(stubConfig)
+      // Avoid any network calls for config loading.
+      settings.subOrgConfigs = {}
+      settings.repoConfigs = {}
+      jest.spyOn(settings, 'childPluginsList').mockReturnValue([])
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    it('skips the repository plugin for a repo that is already archived', async () => {
+      jest.spyOn(Archive.prototype, 'getState').mockResolvedValue({
+        isArchived: true,
+        shouldArchive: false,
+        shouldUnarchive: false
+      })
+      const repoSync = jest.spyOn(Settings.PLUGINS.repository.prototype, 'sync').mockResolvedValue([])
+      const archiveSync = jest.spyOn(Archive.prototype, 'sync').mockResolvedValue([])
+
+      await settings.updateRepos({ owner: 'test', repo: 'archived-repo' })
+
+      // No settings update is attempted against the read-only archived repo.
+      expect(repoSync).not.toHaveBeenCalled()
+      expect(archiveSync).not.toHaveBeenCalled()
+    })
+
+    it('configures and then archives a repo that is being newly archived', async () => {
+      jest.spyOn(Archive.prototype, 'getState').mockResolvedValue({
+        isArchived: false,
+        shouldArchive: true,
+        shouldUnarchive: false
+      })
+      const repoSync = jest.spyOn(Settings.PLUGINS.repository.prototype, 'sync').mockResolvedValue([])
+      const archiveSync = jest.spyOn(Archive.prototype, 'sync').mockResolvedValue([])
+
+      await settings.updateRepos({ owner: 'test', repo: 'to-archive' })
+
+      // The repo is still writable, so settings are applied before it is archived.
+      expect(repoSync).toHaveBeenCalled()
+      expect(archiveSync).toHaveBeenCalled()
+    })
+
+    it('configures a non-archived repo as usual', async () => {
+      jest.spyOn(Archive.prototype, 'getState').mockResolvedValue({
+        isArchived: false,
+        shouldArchive: false,
+        shouldUnarchive: false
+      })
+      const repoSync = jest.spyOn(Settings.PLUGINS.repository.prototype, 'sync').mockResolvedValue([])
+
+      await settings.updateRepos({ owner: 'test', repo: 'normal-repo' })
+
+      expect(repoSync).toHaveBeenCalled()
+    })
+  }) // updateRepos archived repos
 }) // Settings Tests
