@@ -462,4 +462,91 @@ repository:
       );
     });
   });
+
+  describe('updateRepos - archived repo skipping', () => {
+    const Archive = require('../../../lib/plugins/archive')
+
+    let settings
+    let mockRepoSync
+    let originalRepoPlugin
+
+    beforeEach(() => {
+      // Preserve the original RepoPlugin so it can be restored after each test
+      originalRepoPlugin = Settings.PLUGINS.repository
+
+      // Replace RepoPlugin with a mock constructor whose sync() we can assert on
+      mockRepoSync = jest.fn().mockResolvedValue([])
+      Settings.PLUGINS.repository = jest.fn().mockImplementation(() => ({
+        sync: mockRepoSync
+      }))
+
+      // Build a Settings instance that will enter the `if (repoConfig)` branch:
+      //   config.repository must be defined so repoConfig is truthy
+      settings = new Settings(
+        false,
+        stubContext,
+        { owner: 'test-org', repo: 'test-repo' },
+        { repository: { name: 'test-repo' } },
+        'main'
+      )
+
+      // Pre-set subOrgConfigs so updateRepos() does not call the async getSubOrgConfigs()
+      settings.subOrgConfigs = {}
+
+      // Pre-set repoConfigs so getRepoOverrideConfig() does not throw on undefined
+      settings.repoConfigs = {}
+    })
+
+    afterEach(() => {
+      // Restore the real RepoPlugin and all prototype spies
+      Settings.PLUGINS.repository = originalRepoPlugin
+      jest.restoreAllMocks()
+    })
+
+    it('updateRepos when repo is already archived and not being unarchived does not call RepoPlugin sync', async () => {
+      // Arrange
+      jest.spyOn(Archive.prototype, 'getState').mockResolvedValue({
+        isArchived: true,
+        shouldArchive: false,
+        shouldUnarchive: false
+      })
+
+      // Act
+      await settings.updateRepos({ owner: 'test-org', repo: 'test-repo' })
+
+      // Assert
+      expect(mockRepoSync).not.toHaveBeenCalled()
+    })
+
+    it('updateRepos when repo is archived but is being unarchived calls RepoPlugin sync', async () => {
+      // Arrange
+      jest.spyOn(Archive.prototype, 'getState').mockResolvedValue({
+        isArchived: true,
+        shouldArchive: false,
+        shouldUnarchive: true
+      })
+      jest.spyOn(Archive.prototype, 'sync').mockResolvedValue([])
+
+      // Act
+      await settings.updateRepos({ owner: 'test-org', repo: 'test-repo' })
+
+      // Assert
+      expect(mockRepoSync).toHaveBeenCalledTimes(1)
+    })
+
+    it('updateRepos when repo is not archived calls RepoPlugin sync', async () => {
+      // Arrange
+      jest.spyOn(Archive.prototype, 'getState').mockResolvedValue({
+        isArchived: false,
+        shouldArchive: false,
+        shouldUnarchive: false
+      })
+
+      // Act
+      await settings.updateRepos({ owner: 'test-org', repo: 'test-repo' })
+
+      // Assert
+      expect(mockRepoSync).toHaveBeenCalledTimes(1)
+    })
+  }) // updateRepos - archived repo skipping
 }) // Settings Tests
