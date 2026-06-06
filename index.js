@@ -19,13 +19,24 @@ let deploymentConfig
 
 module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) => {
   let appSlug = 'safe-settings'
+
+  function stripDeploymentOnlyProperties (config) {
+    if (config && typeof config === 'object') {
+      const sanitized = Object.assign({}, config)
+      delete sanitized.configvalidators
+      delete sanitized.overridevalidators
+      return sanitized
+    }
+    return config
+  }
+
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
     try {
       deploymentConfig = await loadYamlFileSystem()
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
       const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      const config = Object.assign({}, deploymentConfig, stripDeploymentOnlyProperties(runtimeConfig))
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       if (ref) {
         return Settings.syncAll(nop, context, repo, config, ref)
@@ -54,7 +65,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
       const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      const config = Object.assign({}, deploymentConfig, stripDeploymentOnlyProperties(runtimeConfig))
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       return Settings.sync(nop, context, repo, config, ref)
     } catch (e) {
@@ -79,7 +90,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
       const configManager = new ConfigManager(context, ref)
       const runtimeConfig = await configManager.loadGlobalSettingsYaml()
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      const config = Object.assign({}, deploymentConfig, stripDeploymentOnlyProperties(runtimeConfig))
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       return Settings.syncSelectedRepos(nop, context, repos, subOrgs, config, ref)
     } catch (e) {
