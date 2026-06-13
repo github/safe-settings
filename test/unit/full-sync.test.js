@@ -9,11 +9,11 @@ describe('full-sync.js', () => {
   let mockApp
 
   beforeEach(() => {
+    jest.clearAllMocks()
     require('probot').createProbot.mockImplementation(({ overrides }) => ({
       log: overrides.log
     }))
     mockApp = { syncInstallation: jest.fn() }
-    jest.clearAllMocks()
   })
 
   it('should pass logger to createProbot via overrides (v14 fix)', async () => {
