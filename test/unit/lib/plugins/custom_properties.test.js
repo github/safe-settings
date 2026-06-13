@@ -27,9 +27,14 @@ describe('CustomProperties', () => {
   })
 
   describe('Custom Properties plugin', () => {
-    it('should normalize entries when be instantiated', () => {
+    it('should normalize entries when instantiated', () => {
       const plugin = configure([{ name: 'Test', value: 'test' }])
       expect(plugin.entries).toEqual([{ name: 'test', value: 'test' }])
+    })
+
+    it('should normalize entries with property_name when instantiated', () => {
+      const plugin = configure([{ property_name: 'ent-ownership', value: 'expert-services' }])
+      expect(plugin.entries).toEqual([{ name: 'ent-ownership', value: 'expert-services' }])
     })
 
     it('should fetch and normalize custom properties successfully', async () => {
@@ -55,6 +60,24 @@ describe('CustomProperties', () => {
       expect(result).toEqual([
         { name: 'test1', value: 'value1' },
         { name: 'test2', value: 'value2' }
+      ])
+    })
+
+    it('should normalize paginated custom properties when property name shape differs', async () => {
+      const mockResponse = [
+        { name: 'Owner', value: 'My Team' },
+        { property_name: 'Criticality', value: 'High' },
+        { value: 'ignored' }
+      ]
+
+      github.paginate.mockResolvedValue(mockResponse)
+
+      const plugin = configure()
+      const result = await plugin.find()
+
+      expect(result).toEqual([
+        { name: 'owner', value: 'My Team' },
+        { name: 'criticality', value: 'High' }
       ])
     })
 
