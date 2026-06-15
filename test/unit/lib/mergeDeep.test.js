@@ -1882,4 +1882,55 @@ branches:
     expect(same.additions).toEqual({})
     expect(same.modifications).toEqual({})
   })
+
+  it('Teams: slug-based matching produces no diff when permissions match', () => {
+    const ignorableFields = []
+    const mockReturnGitHubContext = jest.fn().mockReturnValue({
+      request: () => {}
+    })
+    const mergeDeep = new MergeDeep(
+      log,
+      mockReturnGitHubContext,
+      ignorableFields
+    )
+
+    // API returns display name + slug; YAML uses slug as name
+    const target = [
+      { name: 'Dev Tooling', slug: 'dev-tooling', permission: 'admin' }
+    ]
+    const source = [
+      { name: 'dev-tooling', permission: 'admin' }
+    ]
+
+    const result = mergeDeep.compareDeep(target, source)
+    expect(result.hasChanges).toBeFalsy()
+  })
+
+  it('Teams: slug-based matching detects permission change as modification', () => {
+    const ignorableFields = []
+    const mockReturnGitHubContext = jest.fn().mockReturnValue({
+      request: () => {}
+    })
+    const mergeDeep = new MergeDeep(
+      log,
+      mockReturnGitHubContext,
+      ignorableFields
+    )
+
+    const target = [
+      { name: 'Dev Tooling', slug: 'dev-tooling', permission: 'admin' }
+    ]
+    const source = [
+      { name: 'dev-tooling', permission: 'push' }
+    ]
+
+    const result = mergeDeep.compareDeep(target, source)
+    expect(result.hasChanges).toBeTruthy()
+    // Should be a modification, not an addition+deletion
+    expect(result.modifications).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ permission: 'push' })
+      ])
+    )
+  })
 })
