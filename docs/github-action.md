@@ -11,6 +11,15 @@ Follow the [Create the GitHub App](deploy.md#create-the-github-app) guide to cre
 Running a full-sync with `safe-settings` can be done via `npm run full-sync`. This requires installing Node, such as with [actions/setup-node](https://github.com/actions/setup-node) (see example below). When doing so, the appropriate environment variables must be set (see the [Environment variables](#environment-variables) document for more details).
 
 
+### GitHub Action Mode
+
+When running safe-settings in GitHub Actions, you can enable `GITHUB_ACTION_MODE=true` to automatically post PR comments using the built-in GitHub Actions environment variables. When this mode is enabled:
+
+- `GITHUB_REPOSITORY` (format: `owner/repo`) - automatically injected by GitHub Actions
+- `GITHUB_REF` (format: `refs/pull/123/merge` for PRs) - automatically injected by GitHub Actions
+
+These variables are used to identify the PR and post comments without additional configuration.
+
 ### Example GHA Workflow
 The below example uses the GHA "cron" feature to run a full-sync every 4 hours. While not required, this example uses the `.github` repo as the `admin` repo (set via `ADMIN_REPO` env var) and the safe-settings configurations are stored in the `safe-settings/` directory (set via `CONFIG_PATH` and `DEPLOYMENT_CONFIG_FILE`).
 
@@ -54,4 +63,7 @@ jobs:
           ADMIN_REPO: .github
           CONFIG_PATH: safe-settings
           DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/safe-settings/deployment-settings.yml
+          # Enable GitHub Action mode to post PR comments using built-in env vars
+          # GITHUB_REPOSITORY and GITHUB_REF are automatically injected by GitHub Actions
+          GITHUB_ACTION_MODE: true
 ```
