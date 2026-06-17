@@ -235,7 +235,10 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       const installation = installations[0]
       const github = await robot.auth(installation.id)
       const context = {
+        name: "full-sync",
         payload: {
+          repository: { owner: { login: installation.account.login }, name: env.ADMIN_REPO, default_branch: "main" },
+          sender: { login: "safe-settings[bot]" },
           installation
         },
         octokit: github,

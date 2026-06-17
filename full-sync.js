@@ -3,7 +3,9 @@ const { FULL_SYNC_NOP } = require('./lib/env')
 const { createProbot } = require('probot')
 
 async function performFullSync (appFn, nop) {
-  const probot = createProbot()
+  const pino = require('pino')
+  const log = pino({ level: process.env.LOG_LEVEL || 'info' })
+  const probot = createProbot({ overrides: { log } })
   probot.log.info(`Starting full sync with NOP=${nop}`)
 
   try {
