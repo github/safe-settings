@@ -93,6 +93,56 @@ describe('Archive Plugin', () => {
     })
   })
 
+  describe('getState', () => {
+    it('getState when repo is already archived and desired state is not set returns isArchived true shouldArchive false shouldUnarchive false', async () => {
+      // Arrange
+      github.rest.repos.get.mockResolvedValue({ data: { archived: true } })
+      archive = new Archive(false, github, repo, {}, log)
+
+      // Act
+      const result = await archive.getState()
+
+      // Assert
+      expect(result).toEqual({
+        isArchived: true,
+        shouldArchive: false,
+        shouldUnarchive: false
+      })
+    })
+
+    it('getState when repo is not archived and desired state is not set returns isArchived false shouldArchive false shouldUnarchive false', async () => {
+      // Arrange
+      github.rest.repos.get.mockResolvedValue({ data: { archived: false } })
+      archive = new Archive(false, github, repo, {}, log)
+
+      // Act
+      const result = await archive.getState()
+
+      // Assert
+      expect(result).toEqual({
+        isArchived: false,
+        shouldArchive: false,
+        shouldUnarchive: false
+      })
+    })
+
+    it('getState when repo is archived and desired state is false returns isArchived true shouldArchive false shouldUnarchive true', async () => {
+      // Arrange
+      github.rest.repos.get.mockResolvedValue({ data: { archived: true } })
+      archive = new Archive(false, github, repo, { archived: false }, log)
+
+      // Act
+      const result = await archive.getState()
+
+      // Assert
+      expect(result).toEqual({
+        isArchived: true,
+        shouldArchive: false,
+        shouldUnarchive: true
+      })
+    })
+  })
+
   describe('sync', () => {
     beforeEach(() => {
       archive = new Archive(false, github, repo, settings, log)
