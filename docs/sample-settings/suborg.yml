@@ -14,3 +14,25 @@ suborgproperties:
 - EDP: true
 
 # Every other property is the same as the org level settings and can be overridden here
+
+# Teams
+# See https://docs.github.com/en/rest/teams/teams?apiVersion=2026-03-10#create-a-team for available options
+teams:
+  # Apply this team to every repo in the suborg
+  - name: suborg-owners
+    permission: admin
+
+  # Apply this team to all repos in the suborg EXCEPT those matching the exclude globs.
+  # Patterns use minimatch syntax (same as .gitignore-style globs).
+  - name: engineers
+    permission: pull
+    exclude:
+      - '*-sandbox'
+      - test-*
+
+  # Apply this team ONLY to repos in the suborg whose names match the include globs.
+  - name: platform-team
+    permission: push
+    include:
+      - platform-*
+      - core

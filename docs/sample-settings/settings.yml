@@ -161,6 +161,24 @@ teams:
   - name: globalteam
     permission: push
     visibility: closed
+  # You can exclude specific repositories from a team grant. The team is applied to
+  # every repository in scope *except* those matching the exclude glob patterns.
+  # Patterns use minimatch syntax (same engine as .gitignore-style globs).
+  # If a repo already has this team and later matches an exclude pattern,
+  # safe-settings will revoke the team membership on the next sync.
+  - name: engineering
+    permission: pull
+    exclude:
+      - sandbox-*
+      - test-*
+  # You can include only specific repositories for a team grant. The team is applied
+  # *only* to repositories whose names match at least one include glob pattern.
+  # Repositories not matching will have this team membership revoked if previously granted.
+  - name: platform
+    permission: push
+    include:
+      - platform-*
+      - platform-core
 
 # Branch protection rules
 # See https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2026-03-10#update-branch-protection for available options

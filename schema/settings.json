@@ -196,8 +196,43 @@
       ]
     },
     "TeamSettings": {
-      "description": "A team entry",
-      "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1teams/post/requestBody/content/application~1json/schema"
+      "description": "A team entry. Use `exclude` and `include` to scope which repositories this team grant applies to within a suborg or org-level settings file. Patterns are evaluated using minimatch glob syntax against the repository name. Omit both properties to apply the team to every repository in scope.",
+      "allOf": [
+        {
+          "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1teams/post/requestBody/content/application~1json/schema"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "exclude": {
+              "description": "Glob patterns (minimatch) of repository names to exclude from this team grant. The team is applied to every repository in scope *except* those whose names match at least one of these patterns. If a repository is already a member of the team and later matches an exclude pattern, safe-settings will revoke that team membership.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "examples": [
+                [
+                  "*-sandbox",
+                  "test-*"
+                ]
+              ]
+            },
+            "include": {
+              "description": "Glob patterns (minimatch) of repository names to include for this team grant. When set, the team is applied *only* to repositories whose names match at least one of these patterns. Repositories not matching will have the team membership revoked if it was previously granted.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "examples": [
+                [
+                  "my-app-*",
+                  "platform-core"
+                ]
+              ]
+            }
+          }
+        }
+      ]
     },
     "MilestoneSettings": {
       "description": "A milestone entry",

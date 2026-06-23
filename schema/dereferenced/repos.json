@@ -177,6 +177,19 @@
               "description": "Either `true` to enable the wiki for this repository or `false` to disable it.",
               "default": true
             },
+            "has_pull_requests": {
+              "type": "boolean",
+              "description": "Either `true` to allow pull requests for this repository or `false` to prevent pull requests.",
+              "default": true
+            },
+            "pull_request_creation_policy": {
+              "type": "string",
+              "description": "The policy that controls who can create pull requests for this repository: `all` or `collaborators_only`.",
+              "enum": [
+                "all",
+                "collaborators_only"
+              ]
+            },
             "is_template": {
               "type": "boolean",
               "description": "Either `true` to make this repo available as a template repository or `false` to prevent it.",
@@ -399,54 +412,89 @@
       "description": "Teams",
       "type": "array",
       "items": {
-        "description": "A team entry",
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "The name of the team."
-          },
-          "description": {
-            "type": "string",
-            "description": "The description of the team."
-          },
-          "maintainers": {
-            "type": "array",
-            "description": "List GitHub usernames for organization members who will become team maintainers.",
-            "items": {
-              "type": "string"
-            }
-          },
-          "repo_names": {
-            "type": "array",
-            "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
-            "items": {
-              "type": "string"
-            }
-          },
-          "privacy": {
-            "type": "string",
-            "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
-            "enum": [
-              "secret",
-              "closed"
+        "description": "A team entry. Use `exclude` and `include` to scope which repositories this team grant applies to within a suborg or org-level settings file. Patterns are evaluated using minimatch glob syntax against the repository name. Omit both properties to apply the team to every repository in scope.",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the team."
+              },
+              "description": {
+                "type": "string",
+                "description": "The description of the team."
+              },
+              "maintainers": {
+                "type": "array",
+                "description": "List GitHub usernames for organization members who will become team maintainers.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "repo_names": {
+                "type": "array",
+                "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "privacy": {
+                "type": "string",
+                "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
+                "enum": [
+                  "secret",
+                  "closed"
+                ]
+              },
+              "notification_setting": {
+                "type": "string",
+                "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
+                "enum": [
+                  "notifications_enabled",
+                  "notifications_disabled"
+                ]
+              },
+              "parent_team_id": {
+                "type": "integer",
+                "description": "The ID of a team to set as the parent team."
+              }
+            },
+            "required": [
+              "name"
             ]
           },
-          "notification_setting": {
-            "type": "string",
-            "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
-            "enum": [
-              "notifications_enabled",
-              "notifications_disabled"
-            ]
-          },
-          "parent_team_id": {
-            "type": "integer",
-            "description": "The ID of a team to set as the parent team."
+          {
+            "type": "object",
+            "properties": {
+              "exclude": {
+                "description": "Glob patterns (minimatch) of repository names to exclude from this team grant. The team is applied to every repository in scope *except* those whose names match at least one of these patterns. If a repository is already a member of the team and later matches an exclude pattern, safe-settings will revoke that team membership.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "examples": [
+                  [
+                    "*-sandbox",
+                    "test-*"
+                  ]
+                ]
+              },
+              "include": {
+                "description": "Glob patterns (minimatch) of repository names to include for this team grant. When set, the team is applied *only* to repositories whose names match at least one of these patterns. Repositories not matching will have the team membership revoked if it was previously granted.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "examples": [
+                  [
+                    "my-app-*",
+                    "platform-core"
+                  ]
+                ]
+              }
+            }
           }
-        },
-        "required": [
-          "name"
         ]
       }
     },
@@ -998,6 +1046,19 @@
               "description": "Either `true` to enable the wiki for this repository or `false` to disable it.",
               "default": true
             },
+            "has_pull_requests": {
+              "type": "boolean",
+              "description": "Either `true` to allow pull requests for this repository or `false` to prevent pull requests.",
+              "default": true
+            },
+            "pull_request_creation_policy": {
+              "type": "string",
+              "description": "The policy that controls who can create pull requests for this repository: `all` or `collaborators_only`.",
+              "enum": [
+                "all",
+                "collaborators_only"
+              ]
+            },
             "is_template": {
               "type": "boolean",
               "description": "Either `true` to make this repo available as a template repository or `false` to prevent it.",
@@ -1213,54 +1274,89 @@
       ]
     },
     "TeamSettings": {
-      "description": "A team entry",
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "The name of the team."
-        },
-        "description": {
-          "type": "string",
-          "description": "The description of the team."
-        },
-        "maintainers": {
-          "type": "array",
-          "description": "List GitHub usernames for organization members who will become team maintainers.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "repo_names": {
-          "type": "array",
-          "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "privacy": {
-          "type": "string",
-          "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
-          "enum": [
-            "secret",
-            "closed"
+      "description": "A team entry. Use `exclude` and `include` to scope which repositories this team grant applies to within a suborg or org-level settings file. Patterns are evaluated using minimatch glob syntax against the repository name. Omit both properties to apply the team to every repository in scope.",
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The name of the team."
+            },
+            "description": {
+              "type": "string",
+              "description": "The description of the team."
+            },
+            "maintainers": {
+              "type": "array",
+              "description": "List GitHub usernames for organization members who will become team maintainers.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "repo_names": {
+              "type": "array",
+              "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "privacy": {
+              "type": "string",
+              "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
+              "enum": [
+                "secret",
+                "closed"
+              ]
+            },
+            "notification_setting": {
+              "type": "string",
+              "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
+              "enum": [
+                "notifications_enabled",
+                "notifications_disabled"
+              ]
+            },
+            "parent_team_id": {
+              "type": "integer",
+              "description": "The ID of a team to set as the parent team."
+            }
+          },
+          "required": [
+            "name"
           ]
         },
-        "notification_setting": {
-          "type": "string",
-          "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
-          "enum": [
-            "notifications_enabled",
-            "notifications_disabled"
-          ]
-        },
-        "parent_team_id": {
-          "type": "integer",
-          "description": "The ID of a team to set as the parent team."
+        {
+          "type": "object",
+          "properties": {
+            "exclude": {
+              "description": "Glob patterns (minimatch) of repository names to exclude from this team grant. The team is applied to every repository in scope *except* those whose names match at least one of these patterns. If a repository is already a member of the team and later matches an exclude pattern, safe-settings will revoke that team membership.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "examples": [
+                [
+                  "*-sandbox",
+                  "test-*"
+                ]
+              ]
+            },
+            "include": {
+              "description": "Glob patterns (minimatch) of repository names to include for this team grant. When set, the team is applied *only* to repositories whose names match at least one of these patterns. Repositories not matching will have the team membership revoked if it was previously granted.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "examples": [
+                [
+                  "my-app-*",
+                  "platform-core"
+                ]
+              ]
+            }
+          }
         }
-      },
-      "required": [
-        "name"
       ]
     },
     "MilestoneSettings": {
@@ -1563,7 +1659,7 @@
               "actor_id": {
                 "type": "integer",
                 "nullable": true,
-                "description": "The ID of the actor that can bypass a ruleset. Required for `Integration`, `RepositoryRole`, and `Team` actor types. If `actor_type` is `OrganizationAdmin`, `actor_id` is ignored. If `actor_type` is `DeployKey`, this should be null. `OrganizationAdmin` is not applicable for personal repositories."
+                "description": "The ID of the actor that can bypass a ruleset. Required for `Integration`, `RepositoryRole`, `Team`, and `User` actor types. If `actor_type` is `OrganizationAdmin`, `actor_id` is ignored. If `actor_type` is `DeployKey`, this should be null. `OrganizationAdmin` is not applicable for personal repositories."
               },
               "actor_type": {
                 "type": "string",
@@ -1572,7 +1668,8 @@
                   "OrganizationAdmin",
                   "RepositoryRole",
                   "Team",
-                  "DeployKey"
+                  "DeployKey",
+                  "User"
                 ],
                 "description": "The type of actor that can bypass a ruleset."
               },
