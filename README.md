@@ -537,7 +537,7 @@ You can pass environment variables; the easiest way to do it is via a `.env` fil
   ```
   SETTINGS_FILE_PATH=settings.yml
   ```
-1. Configure the git ref that scheduled and full syncs read the configs from using `CONFIG_REF` (default is the default branch of the admin repo). Webhook-triggered syncs are not affected. For e.g.
+1. Read the configs from a different git ref of the admin repo during scheduled and full syncs with `CONFIG_REF` (default is the default branch). Webhook-triggered syncs are not affected. For example:
   ```
   CONFIG_REF=my-config-branch
   ```
