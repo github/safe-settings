@@ -576,7 +576,7 @@ repository:
 
         expect(stubContext.log.info).toHaveBeenCalledWith(expect.stringContaining('Changes found'))
         expect(stubContext.log.info).not.toHaveBeenCalledWith(expect.stringContaining('plain-value'))
-        expect(stubContext.log.debug).toHaveBeenCalledWith(expect.stringContaining('plain-value'))
+        expect(stubContext.log.debug).toHaveBeenCalledWith({ results: settings.results }, 'Dry-run results')
         expect(stubContext.octokit.rest.checks.update).not.toHaveBeenCalled()
       })
     })
