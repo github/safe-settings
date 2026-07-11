@@ -226,8 +226,8 @@
         "protection": {
           "anyOf": [
             {
-              "type": "null",
-              "description": "Set to `null` to delete the existing branch protection"
+              "enum": [null, {}, [], false],
+              "description": "An empty value deletes the existing branch protection"
             },
             {
               "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions-next/api.github.com/api.github.com.2026-03-10.json#/paths/~1repos~1{owner}~1{repo}~1branches~1{branch}~1protection/put/requestBody/content/application~1json/schema"

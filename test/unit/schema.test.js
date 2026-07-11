@@ -56,14 +56,15 @@ describe('dereferenced schemas', () => {
     })
   })
 
-  // `protection: null` is safe-settings' own delete-branch-protection semantic
-  // (see isEmpty in lib/plugins/branches.js); the GitHub API's PUT body it is
-  // validated against does not model that, so the schema allows null explicitly.
-  it('allows `protection: null` in every schema that has branches', () => {
+  // An empty `protection` value is safe-settings' own delete-branch-protection
+  // semantic (see isEmpty in lib/plugins/branches.js, and the plugin tests for
+  // null/{}/[]/false); the GitHub API's PUT body it is validated against does
+  // not model that, so the schema allows the empty values explicitly.
+  it('allows the empty protection values that delete branch protection', () => {
     files.forEach(file => {
       const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file)))
       const protection = schema.properties.branches.items.properties.protection
-      expect(protection.anyOf).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'null' })]))
+      expect(protection.anyOf).toEqual(expect.arrayContaining([expect.objectContaining({ enum: [null, {}, [], false] })]))
     })
   })
 })

@@ -499,8 +499,13 @@
           "protection": {
             "anyOf": [
               {
-                "type": "null",
-                "description": "Set to `null` to delete the existing branch protection"
+                "enum": [
+                  null,
+                  {},
+                  [],
+                  false
+                ],
+                "description": "An empty value deletes the existing branch protection"
               },
               {
                 "type": "object",
@@ -2406,8 +2411,13 @@
         "protection": {
           "anyOf": [
             {
-              "type": "null",
-              "description": "Set to `null` to delete the existing branch protection"
+              "enum": [
+                null,
+                {},
+                [],
+                false
+              ],
+              "description": "An empty value deletes the existing branch protection"
             },
             {
               "type": "object",
