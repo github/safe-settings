@@ -17,6 +17,7 @@ describe('Repository', () => {
   const log = jest.fn()
   log.debug = jest.fn()
   log.error = jest.fn()
+  log.info = jest.fn()
 
   function configure (config) {
     const nop = false
@@ -43,6 +44,7 @@ describe('Repository', () => {
           description: 'Hello World!',
           mediaType: { previews: ['nebula-preview'] }
         })
+        expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Applying repository settings changes to bkeepers/test'))
       })
     })
 
@@ -60,7 +62,7 @@ describe('Repository', () => {
       })
     })
 
-    it.only('syncs topics', () => {
+    it('syncs topics', () => {
       const plugin = configure({
         topics: ['foo', 'bar']
       })
@@ -74,6 +76,7 @@ describe('Repository', () => {
             previews: ['mercy']
           }
         })
+        expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Applying topic changes to bkeepers/test'))
       })
     })
   })

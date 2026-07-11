@@ -10,7 +10,7 @@ describe('Environments Plugin test suite', () => {
   const PrimaryEnvironmentNamesBeingTested = ['wait-timer_environment', 'wait-timer_2_environment', 'reviewers_environment', 'prevent-self-review_environment', 'deployment-branch-policy_environment', 'deployment-branch-policy-custom_environment', 'deployment-branch-policy-custom_environment_legacy', 'variables_environment', 'deployment-protection-rules_environment', 'new_environment', 'old_environment']
   const EnvironmentNamesForTheNewEnvironmentsTest = ['new-wait-timer', 'new-reviewers', 'new-prevent-self-review', 'new-deployment-branch-policy', 'new-deployment-branch-policy-custom', 'new-deployment-branch-policy-custom-legacy', 'new-variables', 'new-deployment-protection-rules']
   const AllEnvironmentNamesBeingTested = PrimaryEnvironmentNamesBeingTested.concat(EnvironmentNamesForTheNewEnvironmentsTest)
-  const log = { debug: jest.fn(), error: console.error }
+  const log = { debug: jest.fn(), info: jest.fn(), error: console.error }
   const errors = []
 
   function fillEnvironment (attrs) {
@@ -1409,7 +1409,7 @@ describe('nopifyRequest', () => {
     github = {
       request: jest.fn(() => Promise.resolve(true))
     };
-    plugin = new Environments(undefined, github, { owner: org, repo }, [], { debug: jest.fn(), error: console.error }, []);
+    plugin = new Environments(undefined, github, { owner: org, repo }, [], { debug: jest.fn(), info: jest.fn(), error: console.error }, []);
   });
 
   it('should make a request when nop is false', async () => {
