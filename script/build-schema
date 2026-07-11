@@ -32,9 +32,11 @@ const schemas = [
   console.log(`Fetching ${specUrl} ...`)
   const resolvedSpec = await $RefParser.dereference(specUrl)
 
+  // Serve the pre-dereferenced spec for the exact URL the schema files pin,
+  // so the resolver can never match a different document.
   const githubApiResolver = {
     order: 1,
-    canRead: /\/descriptions-next\/api\.github\.com\/api\.github\.com/,
+    canRead: file => file.url === specUrl,
     read: () => resolvedSpec
   }
 

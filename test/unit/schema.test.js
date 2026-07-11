@@ -36,8 +36,8 @@ describe('dereferenced schemas', () => {
     const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced/settings.json')))
     const protection = schema.properties.branches.items.properties.protection
     const protectionObject = protection.anyOf.find(variant => variant.type === 'object')
-    const requiredStatusChecks = protectionObject.properties.required_status_checks
-    expect(requiredStatusChecks.type).toContain('null')
+    expect(protectionObject.properties.required_status_checks.type).toContain('null')
+    expect(protectionObject.properties.enforce_admins.type).toContain('null')
     expect(protectionObject.properties.restrictions.type).toContain('null')
   })
 
