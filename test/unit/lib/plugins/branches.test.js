@@ -363,6 +363,39 @@ describe('Branches', () => {
     })
   })
 
+  describe('in nop mode', () => {
+    function configureNop (config) {
+      return new Branches(true, github, { owner: 'bkeepers', repo: 'test' }, config, log, [])
+    }
+
+    beforeEach(() => {
+      github.rest.repos.updateBranchProtection.endpoint = jest.fn().mockImplementation(params => {
+        return { url: 'updateBranchProtection', body: params }
+      })
+      github.rest.repos.deleteBranchProtection.endpoint = jest.fn().mockImplementation(params => {
+        return { url: 'deleteBranchProtection', body: params }
+      })
+    })
+
+    describe('when multiple branches have changes', () => {
+      it('reports each planned change exactly once', () => {
+        const plugin = configureNop(
+          [
+            { name: 'master', protection: { enforce_admins: true } },
+            { name: 'develop', protection: { enforce_admins: true } }
+          ]
+        )
+
+        return plugin.sync().then(res => {
+          const commands = res.filter(Boolean)
+          // Each branch produces two NopCommands: the diff record and the
+          // endpoint command. Two branches must yield four entries, not eight.
+          expect(commands.length).toBe(4)
+        })
+      })
+    })
+  })
+
   describe.skip('return values', () => {
     it('returns updateBranchProtection Promise', () => {
       const plugin = configure(
