@@ -564,17 +564,19 @@ repository:
           repo: 'test/test-repo',
           endpoint: '',
           body: '',
-          action: { msg: 'Changes found', additions: {}, modifications: { branch: {} }, deletions: {} }
+          action: { msg: 'Changes found', additions: {}, modifications: { MY_VAR: { value: 'plain-value' } }, deletions: {} }
         }
       ]
     })
 
     describe('in nop mode without a check run in the payload (full sync)', () => {
-      it('logs the results instead of updating a check run', async () => {
+      it('logs a summary instead of updating a check run, keeping config values out of info', async () => {
         // stubContext.payload only contains `installation`, like a full-sync context
         await settings.handleResults()
 
         expect(stubContext.log.info).toHaveBeenCalledWith(expect.stringContaining('Changes found'))
+        expect(stubContext.log.info).not.toHaveBeenCalledWith(expect.stringContaining('plain-value'))
+        expect(stubContext.log.debug).toHaveBeenCalledWith(expect.stringContaining('plain-value'))
         expect(stubContext.octokit.rest.checks.update).not.toHaveBeenCalled()
       })
     })
