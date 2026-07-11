@@ -12,7 +12,7 @@ describe('dereferenced schemas', () => {
 
   files.forEach(file => {
     describe(file, () => {
-      const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file)))
+      const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file), 'utf8'))
 
       it('contains no OpenAPI `nullable` keywords', () => {
         const found = []
@@ -33,7 +33,7 @@ describe('dereferenced schemas', () => {
   })
 
   it('allows null for required-but-nullable branch protection fields', () => {
-    const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced/settings.json')))
+    const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced/settings.json'), 'utf8'))
     const protection = schema.properties.branches.items.properties.protection
     const protectionObject = protection.anyOf.find(variant => variant.type === 'object')
     expect(protectionObject.properties.required_status_checks.type).toContain('null')
@@ -46,7 +46,7 @@ describe('dereferenced schemas', () => {
   // against the repo-level API shape, not the org-level one.
   it('validates per-repo rulesets in the suborg and repo schemas', () => {
     ;['suborgs.json', 'repos.json'].forEach(file => {
-      const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file)))
+      const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file), 'utf8'))
       const ruleset = schema.properties.rulesets.items
       expect(ruleset.required).toEqual(['name', 'enforcement'])
       // org-only condition targeting must not leak into the repo-level shape
@@ -62,7 +62,7 @@ describe('dereferenced schemas', () => {
   // not model that, so the schema allows the empty values explicitly.
   it('allows the empty protection values that delete branch protection', () => {
     files.forEach(file => {
-      const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file)))
+      const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file), 'utf8'))
       const protection = schema.properties.branches.items.properties.protection
       expect(protection.anyOf).toEqual(expect.arrayContaining([expect.objectContaining({ enum: [null, {}, [], false] })]))
     })
