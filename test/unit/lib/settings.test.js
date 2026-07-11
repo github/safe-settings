@@ -579,6 +579,17 @@ repository:
       })
     })
 
+    describe('in nop mode with a check run but no repository in the payload', () => {
+      it('logs the results instead of updating a check run', async () => {
+        stubContext.payload.check_run = { id: 42, check_suite: { pull_requests: [{ number: 1 }] } }
+
+        await settings.handleResults()
+
+        expect(stubContext.log.info).toHaveBeenCalledWith(expect.stringContaining('Changes found'))
+        expect(stubContext.octokit.rest.checks.update).not.toHaveBeenCalled()
+      })
+    })
+
     describe('in nop mode with a check run in the payload (webhook flow)', () => {
       it('completes the check run', async () => {
         stubContext.payload.check_run = { id: 42, check_suite: { pull_requests: [{ number: 1 }] } }
