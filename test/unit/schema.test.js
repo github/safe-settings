@@ -48,7 +48,9 @@ describe('dereferenced schemas', () => {
     ;['suborgs.json', 'repos.json'].forEach(file => {
       const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file), 'utf8'))
       const ruleset = schema.properties.rulesets.items
-      expect(ruleset.required).toEqual(['name', 'enforcement'])
+      // `required` is an unordered set in JSON Schema
+      expect(ruleset.required).toHaveLength(2)
+      expect(ruleset.required).toEqual(expect.arrayContaining(['name', 'enforcement']))
       // org-only condition targeting must not leak into the repo-level shape
       expect(JSON.stringify(ruleset.properties.conditions)).not.toContain('repository_name')
       const actorTypes = ruleset.properties.bypass_actors.items.properties.actor_type.enum
@@ -64,7 +66,11 @@ describe('dereferenced schemas', () => {
     files.forEach(file => {
       const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '../../schema/dereferenced', file), 'utf8'))
       const protection = schema.properties.branches.items.properties.protection
-      expect(protection.anyOf).toEqual(expect.arrayContaining([expect.objectContaining({ enum: [null, {}, [], false] })]))
+      // enum ordering is not semantically meaningful, so assert membership
+      const emptyVariant = protection.anyOf.find(variant => Array.isArray(variant.enum))
+      expect(emptyVariant).toBeDefined()
+      expect(emptyVariant.enum).toHaveLength(4)
+      expect(emptyVariant.enum).toEqual(expect.arrayContaining([null, {}, [], false]))
     })
   })
 })
