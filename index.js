@@ -242,7 +242,9 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
         log: robot.log,
         repo: () => { return { repo: env.ADMIN_REPO, owner: installation.account.login } }
       }
-      return syncAllSettings(nop, context)
+      // CONFIG_REF lets scheduled/CLI syncs read the config from a non-default
+      // ref of the admin repo (e.g. to test config changes from a branch).
+      return syncAllSettings(nop, context, context.repo(), env.CONFIG_REF)
     }
     return null
   }
