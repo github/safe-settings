@@ -48,6 +48,13 @@
     "validator": {
       "$ref": "#/$defs/ValidatorSettings"
     },
+    "rulesets": {
+      "description": "Repository rulesets applied to this repository",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RulesetSettings"
+      }
+    },
     "environments": {
       "description": "Deployment environments",
       "type": "array",
@@ -243,8 +250,8 @@
       }
     },
     "RulesetSettings": {
-      "description": "A ruleset entry",
-      "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions-next/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1rulesets/post/requestBody/content/application~1json/schema"
+      "description": "A repository ruleset entry",
+      "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions-next/api.github.com/api.github.com.2026-03-10.json#/paths/~1repos~1{owner}~1{repo}~1rulesets/post/requestBody/content/application~1json/schema"
     },
     "EnvironmentsSettings": {
       "description": "A deployment environment configuration entry",
