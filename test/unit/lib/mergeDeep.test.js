@@ -1907,4 +1907,13 @@ branches:
     const emptyTarget = mergeDeep.compareDeep([], [{ name: 'a' }])
     expect(emptyTarget).toHaveProperty('deletions')
   })
+
+  it('CompareDeep skips prototype pollution vectors when the target is empty', () => {
+    const mergeDeep = new MergeDeep(log, jest.fn(), [])
+    // JSON.parse creates `__proto__` as an own key, unlike object literals
+    const source = JSON.parse('{"name": "a", "__proto__": { "polluted": true }}')
+    const result = mergeDeep.compareDeep({}, source)
+    expect(result.additions).toEqual({ name: 'a' })
+    expect(result.additions.polluted).toBeUndefined()
+  })
 })
