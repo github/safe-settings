@@ -1888,6 +1888,7 @@ branches:
     // actor_id: null, so the config should carry null and still diff correctly.
     const mergeDeep = new MergeDeep(log, jest.fn(), [])
     const orgAdmin = { actor_id: null, actor_type: 'OrganizationAdmin', bypass_mode: 'pull_request' }
+    const deployKey = { actor_id: null, actor_type: 'DeployKey', bypass_mode: 'always' }
     const app = { actor_id: 210920, actor_type: 'Integration', bypass_mode: 'always' }
 
     it('deploys a config-only actor from an empty ruleset', () => {
@@ -1910,6 +1911,15 @@ branches:
     it('converges with mixed actors and still identifies real ids by actor_id', () => {
       const result = mergeDeep.compareDeep({ bypass_actors: [app, orgAdmin] }, { bypass_actors: [app, orgAdmin] })
       expect(result.hasChanges).toEqual(false)
+    })
+
+    it('handles a DeployKey actor the same way, distinct from other null-id actors', () => {
+      const deploys = mergeDeep.compareDeep({ bypass_actors: [orgAdmin] }, { bypass_actors: [orgAdmin, deployKey] })
+      expect(deploys.hasChanges).toEqual(true)
+      expect(deploys.additions.bypass_actors).toEqual([deployKey])
+
+      const converged = mergeDeep.compareDeep({ bypass_actors: [orgAdmin, deployKey] }, { bypass_actors: [orgAdmin, deployKey] })
+      expect(converged.hasChanges).toEqual(false)
     })
   })
 })
