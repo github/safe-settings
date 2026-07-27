@@ -494,6 +494,54 @@ See [`docs/sample-settings/settings.yml`](docs/sample-settings/settings.yml) for
 >       - '*-config'
 >  ```
 
+#### Preserving custom properties that `safe-settings` does not manage
+
+Custom properties cannot be deleted through the API, so a property that exists on a
+repository but is absent from `custom_properties` has its value set to `null`. By
+default `safe-settings` therefore owns *every* custom property on the repository. Use
+the object form to declare what it manages and leave everything else untouched:
+
+```yml
+custom_properties:
+  include:
+    - name: ruleset-tier
+      value: strict
+  exclude:
+    # Never clear the value of any property starting with "app-"
+    - name: ^app-
+```
+
+To manage only the properties you declare and leave all others alone, exclude
+everything with `.*`:
+
+```yml
+custom_properties:
+  include:
+    - name: ruleset-tier
+      value: strict
+  exclude:
+    - name: .*
+```
+
+> [!NOTE]
+> Unlike the repository patterns above, these are **regular expressions matched
+> against the property name**, not globs — "match everything" is `.*`, and a bare `*`
+> is not a valid pattern. Casing does not matter.
+>
+> - `exclude` only prevents clearing. A property in `include` is always applied, even
+>   if it also matches an `exclude` pattern
+> - `exclude` on its own still means `safe-settings` manages this repository's custom
+>   properties — every property not matching a pattern is cleared. To manage nothing,
+>   omit the `custom_properties` section entirely
+> - An invalid pattern, or an object form with neither `include` nor `exclude`, is
+>   reported as a config error and fails closed: every property on that repository is
+>   left untouched, so a typo protects values rather than clearing them
+> - `exclude` patterns accumulate across scopes, so a repository can add patterns to
+>   the ones defined for the org or suborg without restating them
+
+See [`docs/sample-settings/settings.yml`](docs/sample-settings/settings.yml) for a
+commented example.
+
 ### Additional values
 
 In addition to the values in the file above, the settings file can have some additional values:
