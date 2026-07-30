@@ -242,7 +242,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
         log: robot.log,
         repo: () => { return { repo: env.ADMIN_REPO, owner: installation.account.login } }
       }
-      return syncAllSettings(nop, context)
+      return syncAllSettings(nop, context, context.repo(), env.CONFIG_REF)
     }
     return null
   }
