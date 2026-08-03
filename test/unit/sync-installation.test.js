@@ -128,6 +128,46 @@ describe('syncInstallation', () => {
     })
   })
 
+  describe('when a sync returns no result', () => {
+    // In nop mode `syncAllSettings` reports the error via `handleError` and
+    // returns nothing, which must not be mistaken for a successful sync.
+    beforeEach(() => {
+      installations = [installation(1, 'org-one'), installation(2, 'org-two')]
+      Settings.syncAll
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce({ errors: [] })
+    })
+
+    it('counts the installation as failed and keeps it out of the results', async () => {
+      const app = createApp()
+
+      const result = await app.syncInstallation(true)
+
+      expect(result.results).toEqual([{ errors: [] }])
+      expect(result.errors).toHaveLength(1)
+      expect(result.errors[0].message).toContain('installation 1 for org-one')
+      expect(result.errors[0].message).toContain('returned no result')
+    })
+
+    it('still syncs the remaining installations', async () => {
+      const app = createApp()
+
+      await app.syncInstallation(true)
+
+      expect(Settings.syncAll).toHaveBeenCalledTimes(2)
+      expect(Settings.syncAll.mock.calls[1][2]).toEqual({ repo: 'admin', owner: 'org-two' })
+    })
+
+    it('reflects the failure in the summary log', async () => {
+      const app = createApp()
+
+      await app.syncInstallation(true)
+
+      expect(robot.log.error).toHaveBeenCalledWith(expect.stringContaining('installation 1 for org-one'))
+      expect(robot.log.info).toHaveBeenCalledWith(expect.stringContaining('Synced 1 of 2 installation(s); 1 failed'))
+    })
+  })
+
   describe('without any installation', () => {
     it('returns null and does not sync', async () => {
       const app = createApp()

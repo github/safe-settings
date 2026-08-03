@@ -256,8 +256,18 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
           repo: () => { return { repo: env.ADMIN_REPO, owner } }
         }
         const result = await syncAllSettings(nop, context)
+        if (!result) {
+          // In nop mode `syncAllSettings` reports the error and returns nothing.
+          // Counting that as a success would silently hide a broken config, so
+          // treat a missing result as a failure of this installation.
+          failed++
+          const msg = `Sync of installation ${installation.id} for ${owner} returned no result`
+          robot.log.error(msg)
+          errors.push(new Error(msg))
+          continue
+        }
         results.push(result)
-        if (result?.errors?.length) {
+        if (result.errors?.length) {
           errors.push(...result.errors)
         }
       } catch (e) {
