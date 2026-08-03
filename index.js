@@ -231,20 +231,44 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       github.rest.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
 
-    if (installations.length > 0) {
-      const installation = installations[0]
-      const github = await robot.auth(installation.id)
-      const context = {
-        payload: {
-          installation
-        },
-        octokit: github,
-        log: robot.log,
-        repo: () => { return { repo: env.ADMIN_REPO, owner: installation.account.login } }
-      }
-      return syncAllSettings(nop, context)
+    if (installations.length === 0) {
+      return null
     }
-    return null
+
+    // Sync every installation. A single failing installation must not prevent
+    // the remaining ones from being synced, so each iteration is isolated and
+    // its error is collected instead of thrown.
+    const results = []
+    const errors = []
+    let failed = 0
+
+    for (const installation of installations) {
+      try {
+        const owner = installation.account.login
+        robot.log.debug(`Syncing installation ${installation.id} for ${owner}`)
+        const github = await robot.auth(installation.id)
+        const context = {
+          payload: {
+            installation
+          },
+          octokit: github,
+          log: robot.log,
+          repo: () => { return { repo: env.ADMIN_REPO, owner } }
+        }
+        const result = await syncAllSettings(nop, context)
+        results.push(result)
+        if (result?.errors?.length) {
+          errors.push(...result.errors)
+        }
+      } catch (e) {
+        failed++
+        robot.log.error(`Failed to sync installation ${installation.id} for ${installation.account?.login}: ${e}`)
+        errors.push(e)
+      }
+    }
+
+    robot.log.info(`Synced ${installations.length - failed} of ${installations.length} installation(s); ${failed} failed`)
+    return { results, errors }
   }
 
   robot.on('push', async context => {
