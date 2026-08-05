@@ -42,7 +42,7 @@
     "@eslint/eslintrc": "^3.1.0",
     "@travi/any": "^3.1.2",
     "check-engine": "^1.10.1",
-    "eslint": "^8.46.0",
+    "eslint": "^10.1.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
