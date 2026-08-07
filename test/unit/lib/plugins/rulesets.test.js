@@ -292,7 +292,7 @@ describe('Rulesets', () => {
   })
 
   describe('when {{EXTERNALLY_DEFINED}} is present in "required_status_checks" and status checks exist in GitHub', () => {
-    it('it retains the status checks from GitHub and everything else is reset to the safe-settings', () => {
+    it('skips the placeholder-only ruleset and updates the genuinely changed ones', () => {
       // Mock the GitHub API response
       github.paginate = jest.fn().mockResolvedValue([
         generateRequestRuleset(
@@ -355,21 +355,11 @@ describe('Rulesets', () => {
       )
 
       return plugin.sync().then(() => {
+        // Ruleset 1 only differs by the {{EXTERNALLY_DEFINED}} placeholder, which
+        // resolves to the live status checks, so it must not be updated at all.
+        expect(github.request).toHaveBeenCalledTimes(2)
         expect(github.request).toHaveBeenNthCalledWith(
           1,
-          'PUT /repos/{owner}/{repo}/rulesets/{id}',
-          generateResponseRuleset(
-            1,
-            'All branches 1',
-            repo_conditions,
-            [
-              { context: 'Custom Check 1' },
-              { context: 'Custom Check 2' }
-            ]
-          )
-        )
-        expect(github.request).toHaveBeenNthCalledWith(
-          2,
           'PUT /repos/{owner}/{repo}/rulesets/{id}',
           generateResponseRuleset(
             2,
@@ -382,7 +372,7 @@ describe('Rulesets', () => {
           )
         )
         expect(github.request).toHaveBeenNthCalledWith(
-          3,
+          2,
           'PUT /repos/{owner}/{repo}/rulesets/{id}',
           generateResponseRuleset(
             3,
@@ -473,7 +463,7 @@ describe('Rulesets', () => {
   })
 
   describe('[org] when {{EXTERNALLY_DEFINED}} is present in "required_status_checks" and status checks exist in GitHub', () => {
-    it('it retains the status checks from GitHub', () => {
+    it('reports no changes when only the placeholder differs from GitHub', () => {
       // Mock the GitHub API response
       github.paginate = jest.fn().mockResolvedValue([
         generateRequestRuleset(
@@ -506,20 +496,48 @@ describe('Rulesets', () => {
       )
 
       return plugin.sync().then(() => {
-        expect(github.request).toHaveBeenNthCalledWith(
-          1,
-          'PUT /orgs/{org}/rulesets/{id}',
-          generateResponseRuleset(
-            1,
-            'All branches 1',
-            org_conditions,
-            [
-              { context: 'Custom Check 1' },
-              { context: 'Custom Check 2' }
-            ],
-            true
-          )
-        )
+        // The placeholder resolves to the live status checks, so the ruleset is unchanged
+        expect(github.request).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('in nop mode', () => {
+    beforeEach(() => {
+      github.request.endpoint = Object.assign(
+        jest.fn().mockImplementation((route, parms) => { return { url: route, body: parms } }),
+        { merge: github.request.endpoint.merge }
+      )
+    })
+
+    it('does not plan an update when {{EXTERNALLY_DEFINED}} matches the status checks in GitHub', () => {
+      github.paginate = jest.fn().mockResolvedValue([
+        generateRequestRuleset(1, 'All branches 1', repo_conditions, [{ context: 'Custom Check 1' }])
+      ])
+
+      const plugin = configure([
+        generateRequestRuleset(1, 'All branches 1', repo_conditions, [{ context: '{{EXTERNALLY_DEFINED}}' }])
+      ], 'repo', true)
+
+      return plugin.sync().then(res => {
+        // sync resolves with nothing when no changes are detected
+        const messages = (res || []).flat(2).map(nopCommand => nopCommand.action?.msg)
+        expect(messages).not.toContain('Update Ruleset')
+      })
+    })
+
+    it('still plans an update when the config genuinely differs from GitHub', () => {
+      github.paginate = jest.fn().mockResolvedValue([
+        generateRequestRuleset(1, 'All branches 1', repo_conditions, [{ context: 'Custom Check 1' }])
+      ])
+
+      const plugin = configure([
+        generateRequestRuleset(1, 'All branches 1', repo_conditions, [{ context: 'Other Check' }])
+      ], 'repo', true)
+
+      return plugin.sync().then(res => {
+        const messages = res.flat(2).map(nopCommand => nopCommand.action?.msg)
+        expect(messages).toContain('Update Ruleset')
       })
     })
   })
