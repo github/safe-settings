@@ -224,7 +224,30 @@
     },
     "TeamSettings": {
       "description": "A team entry",
-      "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1teams/post/requestBody/content/application~1json/schema"
+      "allOf": [
+        {
+          "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1teams/post/requestBody/content/application~1json/schema"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "exclude": {
+              "description": "You can exclude a list of repos for this team and all repos except these repos would have this team",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "include": {
+              "description": "You can include a list of repos for this team and only those repos would have this team",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
     },
     "MilestoneSettings": {
       "description": "A milestone entry",
