@@ -28,17 +28,17 @@
   "author": "Yadhav Jayaraman",
   "license": "ISC",
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^12.0.2",
+    "@apidevtools/json-schema-ref-parser": "^14.2.1",
     "@probot/adapter-aws-lambda-serverless": "^4.0.3",
     "deepmerge": "^4.3.1",
     "eta": "^3.5.0",
     "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21",
-    "minimatch": "^10.0.1",
-    "node-cron": "^3.0.2",
+    "lodash": "^4.18.1",
+    "minimatch": "^10.2.1",
+    "node-cron": "^4.2.1",
     "octokit": "^5.0.2",
-    "probot": "^13.4.4",
-    "proxy-from-env": "^1.1.0",
+    "probot": "^14.3.2",
+    "proxy-from-env": "^2.1.0",
     "undici": "^7.7.0"
   },
   "devDependencies": {
@@ -58,7 +58,7 @@
     "nock": "^14.0.1",
     "nodemon": "^3.1.9",
     "npm-run-all": "^4.1.5",
-    "smee-client": "^4.3.1",
+    "smee-client": "^5.0.0",
     "standard": "^17.1.2"
   },
   "standard": {
@@ -67,10 +67,13 @@
     ]
   },
   "engines": {
-    "node": ">= 16.0.0"
+    "node": ">= 22.0.0"
   },
   "jest": {
     "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup.js"
+    ],
     "reporters": [
       "default",
       "jest-junit"

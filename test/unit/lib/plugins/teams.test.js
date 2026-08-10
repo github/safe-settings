@@ -23,25 +23,32 @@ describe('Teams', () => {
   beforeEach(() => {
     github = {
       paginate: jest.fn()
-        .mockImplementation(async (fetch) => {
-          const response = await fetch()
+        .mockImplementation(async (fetch, params) => {
+          if (typeof fetch !== 'function') {
+            return []
+          }
+          const response = await fetch(params)
           return response.data
         }),
-      teams: {
-        create: jest.fn().mockResolvedValue(),
-        getByName: jest.fn(),
-        addOrUpdateRepoPermissionsInOrg: jest.fn().mockResolvedValue()
+      rest: {
+        teams: {
+          create: jest.fn().mockResolvedValue(),
+          getByName: jest.fn(),
+          addOrUpdateRepoPermissionsInOrg: jest.fn().mockResolvedValue()
+        },
+        repos: {
+          listTeams: jest.fn().mockResolvedValue({
+            data: [
+              { id: unchangedTeamId, slug: unchangedTeamName, permission: 'push' },
+              { id: removedTeamId, slug: removedTeamName, permission: 'push' },
+              { id: updatedTeamId, slug: updatedTeamName, permission: 'pull' }
+            ]
+          })
+        }
       },
-      repos: {
-        listTeams: jest.fn().mockResolvedValue({
-          data: [
-            { id: unchangedTeamId, slug: unchangedTeamName, permission: 'push' },
-            { id: removedTeamId, slug: removedTeamName, permission: 'push' },
-            { id: updatedTeamId, slug: updatedTeamName, permission: 'pull' }
-          ]
-        })
-      },
-      request: jest.fn().mockResolvedValue()
+      request: Object.assign(jest.fn().mockResolvedValue(), {
+        endpoint: jest.fn().mockReturnValue({})
+      })
     }
   })
 
@@ -53,7 +60,7 @@ describe('Teams', () => {
         { name: addedTeamName, permission: 'pull' }
       ])
 
-      when(github.teams.getByName)
+      when(github.rest.teams.getByName)
         .defaultResolvedValue({})
         .calledWith({ org: 'bkeepers', team_slug: addedTeamName })
         .mockResolvedValue({ data: { id: addedTeamId } })
@@ -72,7 +79,7 @@ describe('Teams', () => {
         }
       )
 
-      expect(github.teams.addOrUpdateRepoPermissionsInOrg).toHaveBeenCalledWith({
+      expect(github.rest.teams.addOrUpdateRepoPermissionsInOrg).toHaveBeenCalledWith({
         org,
         team_id: addedTeamId,
         team_slug: addedTeamName,
@@ -99,7 +106,7 @@ describe('Teams', () => {
 
   describe('filtering teams by include/exclude', () => {
     beforeEach(() => {
-      github.repos.listTeams.mockResolvedValue({ data: [] })
+      github.rest.repos.listTeams.mockResolvedValue({ data: [] })
     })
 
     it('does not add a team when the repo matches an exclude glob', async () => {
@@ -109,7 +116,7 @@ describe('Teams', () => {
 
       await plugin.sync()
 
-      expect(github.teams.addOrUpdateRepoPermissionsInOrg).not.toHaveBeenCalled()
+      expect(github.rest.teams.addOrUpdateRepoPermissionsInOrg).not.toHaveBeenCalled()
     })
 
     it('does not add a team when the repo is not in an include glob', async () => {
@@ -119,11 +126,11 @@ describe('Teams', () => {
 
       await plugin.sync()
 
-      expect(github.teams.addOrUpdateRepoPermissionsInOrg).not.toHaveBeenCalled()
+      expect(github.rest.teams.addOrUpdateRepoPermissionsInOrg).not.toHaveBeenCalled()
     })
 
     it('adds a team when the repo matches an include glob', async () => {
-      when(github.teams.getByName)
+      when(github.rest.teams.getByName)
         .calledWith({ org, team_slug: addedTeamName })
         .mockResolvedValue({ data: { id: addedTeamId } })
 
@@ -133,7 +140,7 @@ describe('Teams', () => {
 
       await plugin.sync()
 
-      expect(github.teams.addOrUpdateRepoPermissionsInOrg).toHaveBeenCalledWith({
+      expect(github.rest.teams.addOrUpdateRepoPermissionsInOrg).toHaveBeenCalledWith({
         org,
         team_id: addedTeamId,
         team_slug: addedTeamName,
@@ -190,7 +197,7 @@ describe('Teams', () => {
     })
 
     it('looks up the group id by name and PATCHes the team link', async () => {
-      when(github.teams.getByName)
+      when(github.rest.teams.getByName)
         .defaultResolvedValue({})
         .calledWith({ org, team_slug: addedTeamName })
         .mockResolvedValue({ data: { id: addedTeamId } })
@@ -275,7 +282,7 @@ describe('Teams', () => {
     })
 
     it('paginates the external-groups list only once per org across multiple syncs sharing the github client', async () => {
-      when(github.teams.getByName)
+      when(github.rest.teams.getByName)
         .defaultResolvedValue({})
         .calledWith({ org, team_slug: addedTeamName })
         .mockResolvedValue({ data: { id: addedTeamId } })

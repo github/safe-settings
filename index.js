@@ -161,7 +161,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
   async function listAllInstallations () {
     const github = await robot.auth()
     return github.paginate(
-      github.apps.listInstallations.endpoint.merge({ per_page: 100 })
+      github.rest.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
   }
 
@@ -337,7 +337,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
   async function createCheckRun (context, pull_request, head_sha, head_branch) {
     const { payload } = context
     // robot.log.debug(`Check suite was requested! for ${context.repo()} ${pull_request.number} ${head_sha} ${head_branch}`)
-    const res = await context.octokit.checks.create({
+    const res = await context.octokit.rest.checks.create({
       owner: payload.repository.owner.login,
       repo: payload.repository.name,
       name: 'Safe-setting validator',
@@ -352,7 +352,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     if (installations.length > 0) {
       const installation = installations[0]
       const github = await robot.auth(installation.id)
-      const app = await github.apps.getAuthenticated()
+      const app = await github.rest.apps.getAuthenticated()
       appSlug = app.data.slug
       robot.log.info(`Validated the app is configured properly = \n${JSON.stringify(app.data, null, 2)}`)
     }
@@ -792,11 +792,11 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       output: { title: 'Starting NOP', summary: 'initiating...' }
     }
     robot.log.debug(`Updating check run ${JSON.stringify(params)}`)
-    await context.octokit.checks.update(params)
+    await context.octokit.rest.checks.update(params)
 
     params = Object.assign(context.repo(), { pull_number: pull_request.number })
 
-    const changes = await context.octokit.pulls.listFiles(params)
+    const changes = await context.octokit.rest.pulls.listFiles(params)
     const files = changes.data.map(f => { return f.filename })
 
     const settingsModified = files.includes(Settings.FILE_PATH)
@@ -828,7 +828,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       output: { title: 'No Safe-settings changes detected', summary: 'No changes detected' }
     }
     robot.log.debug(`Completing check run ${JSON.stringify(params)}`)
-    await context.octokit.checks.update(params)
+    await context.octokit.rest.checks.update(params)
   })
 
   robot.on('repository.created', async context => {
@@ -899,7 +899,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     if (overwrite) return filePath
     const { owner } = context.repo()
     try {
-      await context.octokit.repos.getContent({ owner, repo: env.ADMIN_REPO, path: filePath })
+      await context.octokit.rest.repos.getContent({ owner, repo: env.ADMIN_REPO, path: filePath })
       // File exists -> redirect to .sample
       return filePath.replace(/(\.ya?ml)$/i, '.sample$1')
     } catch (e) {
@@ -916,12 +916,12 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     const { owner } = context.repo()
     const repo = env.ADMIN_REPO
 
-    const repoInfo = await github.repos.get({ owner, repo })
+    const repoInfo = await github.rest.repos.get({ owner, repo })
     const baseBranch = repoInfo.data.default_branch
-    const baseRef = await github.git.getRef({ owner, repo, ref: `heads/${baseBranch}` })
+    const baseRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${baseBranch}` })
     const branchName = `safe-settings-generate/${opts.sourceType}-${opts.sourceValue}-${Date.now()}`.replace(/[^a-zA-Z0-9/_.-]/g, '-')
 
-    await github.git.createRef({
+    await github.rest.git.createRef({
       owner,
       repo,
       ref: `refs/heads/${branchName}`,
@@ -930,13 +930,13 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
 
     let existingSha
     try {
-      const existing = await github.repos.getContent({ owner, repo, path: filePath, ref: branchName })
+      const existing = await github.rest.repos.getContent({ owner, repo, path: filePath, ref: branchName })
       existingSha = existing.data.sha
     } catch (e) {
       if (e.status !== 404) throw e
     }
 
-    await github.repos.createOrUpdateFileContents({
+    await github.rest.repos.createOrUpdateFileContents({
       owner,
       repo,
       path: filePath,
@@ -946,7 +946,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       sha: existingSha
     })
 
-    const pr = await github.pulls.create({
+    const pr = await github.rest.pulls.create({
       owner,
       repo,
       title: `Generate safe-settings config for ${opts.sourceType}: ${opts.sourceValue}`,

@@ -3,7 +3,7 @@
 const { when } = require('jest-when')
 const Rulesets = require('../../../../lib/plugins/rulesets')
 const version = {
-  'X-GitHub-Api-Version': '2022-11-28'
+  'X-GitHub-Api-Version': '2026-03-10'
 }
 const repo_conditions = {
   ref_name: {
@@ -95,12 +95,14 @@ describe('Rulesets', () => {
 
   beforeEach(() => {
     github = {
-      repos: {
-        get: jest.fn().mockResolvedValue({
-          data: {
-            default_branch: 'main'
-          }
-        })
+      rest: {
+        repos: {
+          get: jest.fn().mockResolvedValue({
+            data: {
+              default_branch: 'main'
+            }
+          })
+        }
       },
       request: jest.fn().mockImplementation(() => Promise.resolve('request')),
     }
@@ -856,12 +858,12 @@ describe('Rulesets', () => {
     }
 
     it('resolves a Team bypass actor name to actor_id and strips the alias', async () => {
-      github.teams = { getByName: jest.fn().mockResolvedValue({ data: { id: 42 } }) }
+      github.rest.teams = { getByName: jest.fn().mockResolvedValue({ data: { id: 42 } }) }
       const plugin = configure([bypassRuleset({ name: 'my-team', actor_type: 'Team' })], 'org')
 
       await plugin.resolveNamesToIds()
 
-      expect(github.teams.getByName).toHaveBeenCalledWith({ org: 'jitran', team_slug: 'my-team' })
+      expect(github.rest.teams.getByName).toHaveBeenCalledWith({ org: 'jitran', team_slug: 'my-team' })
       expect(plugin.rulesets[0].bypass_actors[0]).toEqual({ actor_id: 42, actor_type: 'Team', bypass_mode: 'always' })
       expect(plugin.rulesets[0].bypass_actors[0].name).toBeUndefined()
     })
@@ -918,19 +920,19 @@ describe('Rulesets', () => {
     })
 
     it('resolves a reviewer slug to id and strips the alias', async () => {
-      github.teams = { getByName: jest.fn().mockResolvedValue({ data: { id: 555 } }) }
+      github.rest.teams = { getByName: jest.fn().mockResolvedValue({ data: { id: 555 } }) }
       const plugin = configure([reviewerRuleset({ slug: 'reviewers', type: 'Team' })], 'org')
 
       await plugin.resolveNamesToIds()
 
       const reviewer = plugin.rulesets[0].rules[0].parameters.required_reviewers[0].reviewer
-      expect(github.teams.getByName).toHaveBeenCalledWith({ org: 'jitran', team_slug: 'reviewers' })
+      expect(github.rest.teams.getByName).toHaveBeenCalledWith({ org: 'jitran', team_slug: 'reviewers' })
       expect(reviewer).toEqual({ id: 555, type: 'Team' })
       expect(reviewer.slug).toBeUndefined()
     })
 
     it('caches repeated lookups so each name resolves with a single API call', async () => {
-      github.teams = { getByName: jest.fn().mockResolvedValue({ data: { id: 42 } }) }
+      github.rest.teams = { getByName: jest.fn().mockResolvedValue({ data: { id: 42 } }) }
       const plugin = configure([
         {
           name: 'Multi',
@@ -947,18 +949,18 @@ describe('Rulesets', () => {
 
       await plugin.resolveNamesToIds()
 
-      expect(github.teams.getByName).toHaveBeenCalledTimes(1)
+      expect(github.rest.teams.getByName).toHaveBeenCalledTimes(1)
       expect(plugin.rulesets[0].bypass_actors.map(a => a.actor_id)).toEqual([42, 42])
     })
 
     it('leaves numeric actor_id untouched and makes no lookup (backward compatible)', async () => {
-      github.teams = { getByName: jest.fn() }
+      github.rest.teams = { getByName: jest.fn() }
       github.request = jest.fn()
       const plugin = configure([bypassRuleset({ actor_id: 234, actor_type: 'Team' })], 'org')
 
       await plugin.resolveNamesToIds()
 
-      expect(github.teams.getByName).not.toHaveBeenCalled()
+      expect(github.rest.teams.getByName).not.toHaveBeenCalled()
       expect(github.request).not.toHaveBeenCalled()
       expect(plugin.rulesets[0].bypass_actors[0]).toEqual({ actor_id: 234, actor_type: 'Team', bypass_mode: 'always' })
     })
@@ -981,14 +983,14 @@ describe('Rulesets', () => {
     it('throws a clear error when a team slug cannot be resolved', async () => {
       const notFound = new Error('Not Found')
       notFound.status = 404
-      github.teams = { getByName: jest.fn().mockRejectedValue(notFound) }
+      github.rest.teams = { getByName: jest.fn().mockRejectedValue(notFound) }
       const plugin = configure([bypassRuleset({ name: 'ghost-team', actor_type: 'Team' })], 'org')
       await expect(plugin.resolveNamesToIds()).rejects.toThrow(/Unable to resolve Team slug 'ghost-team'/)
     })
 
     it('sync sends the resolved actor_id to the API', async () => {
       github.paginate = jest.fn().mockResolvedValue([])
-      github.teams = { getByName: jest.fn().mockResolvedValue({ data: { id: 42 } }) }
+      github.rest.teams = { getByName: jest.fn().mockResolvedValue({ data: { id: 42 } }) }
       const postCalls = []
       github.request = jest.fn().mockImplementation((route, body) => {
         if (route.startsWith('POST')) postCalls.push({ route, body })

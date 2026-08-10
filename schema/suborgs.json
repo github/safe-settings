@@ -1,9 +1,43 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Safe-settings org-level configuration",
-  "description": "Schema for .github/settings.yml — org-level safe-settings configuration",
+  "title": "Safe-settings suborg-level configuration",
+  "description": "Schema for .github/suborgs/*.yml — suborg-level safe-settings configuration. Defines which repos belong to the suborg and what settings to apply.",
   "type": "object",
   "properties": {
+    "suborgrepos": {
+      "type": "array",
+      "description": "Glob patterns matching repository names. Repos whose names match any pattern are included in this suborg.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suborgteams": {
+      "type": "array",
+      "description": "Team slugs. Repos that belong to any of these teams are included in this suborg.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "suborgproperties": {
+      "type": "array",
+      "description": "Custom property filters. Repos with matching custom property values are included in this suborg.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "property_name": {
+            "type": "string",
+            "description": "The name of the custom property"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Accepted values for this property"
+          }
+        }
+      }
+    },
     "repositories": {
       "$ref": "#/$defs/RepositorySettings"
     },
@@ -48,13 +82,6 @@
     "validator": {
       "$ref": "#/$defs/ValidatorSettings"
     },
-    "rulesets": {
-      "description": "Rulesets. Org-level only — rulesets defined here apply to the organization and are NOT inherited by suborg or repo override files.",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/RulesetSettings"
-      }
-    },
     "environments": {
       "description": "Deployment environments",
       "type": "array",
@@ -79,7 +106,7 @@
   },
   "$defs": {
     "RepositorySettings": {
-      "description": "Repository settings",
+      "description": "Repository settings. Use force_create to create the repository if it does not exist, and template to specify a template repository to use when creating it.",
       "allOf": [
         {
           "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1repos~1{owner}~1{repo}/patch/requestBody/content/application~1json/schema"
@@ -119,11 +146,11 @@
               }
             },
             "force_create": {
-              "description": "Force create the repository",
+              "description": "If true, create the repository if it does not already exist.",
               "type": "boolean"
             },
             "template": {
-              "description": "Name of a template repository to use when creating the repository",
+              "description": "Name of a template repository to use when creating a new repository.",
               "type": "string"
             }
           }
@@ -197,49 +224,7 @@
     },
     "TeamSettings": {
       "description": "A team entry",
-      "allOf": [
-        {
-          "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1teams~1{team_slug}~1repos~1{owner}~1{repo}/put/requestBody/content/application~1json/schema"
-        },
-        {
-          "type": "object",
-          "required": [
-            "name"
-          ],
-          "properties": {
-            "name": {
-              "description": "The name (or slug) of the team to grant access to the repo.",
-              "type": "string"
-            },
-            "privacy": {
-              "description": "The level of privacy the team should have when it is created by safe-settings. The options are `secret` (visible only to organization owners and members of the team) or `closed` (visible to all members of the organization).",
-              "type": "string",
-              "enum": [
-                "secret",
-                "closed"
-              ]
-            },
-            "external_group": {
-              "description": "The display name of an external IdP group to link to this team.",
-              "type": "string"
-            },
-            "exclude": {
-              "description": "Exclude this team from repos whose names match one of these glob patterns.",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "include": {
-              "description": "Apply this team only to repos whose names match one of these glob patterns.",
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      ]
+      "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1teams/post/requestBody/content/application~1json/schema"
     },
     "MilestoneSettings": {
       "description": "A milestone entry",
@@ -367,151 +352,6 @@
           "type": "string",
           "enum": ["all", "private", "selected"]
         }
-      }
-    },
-    "custom_repository_roles": {
-      "description": "Org-level custom repository roles. Only valid in the org-level settings.yml.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "name",
-          "base_role",
-          "permissions"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "The name of the custom role."
-          },
-          "description": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "A short description of the role."
-          },
-          "base_role": {
-            "type": "string",
-            "enum": [
-              "read",
-              "triage",
-              "write",
-              "maintain"
-            ],
-            "description": "The system role from which this role inherits permissions."
-          },
-          "permissions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Additional fine-grained permissions included in this role."
-          }
-        }
-      }
-    },
-    "app_installations": {
-      "description": "Manage which repositories a GitHub App installation can access. The target is a GitHub App installation rather than a repository. Repo selection follows the config hierarchy: org-level settings.yml selects all repos in the org; suborgs/*.yml selects repos by the suborg's targeting criteria; repos/*.yml adds the specific repo. Requires safe-settings to be installed on the enterprise with 'Enterprise organization installations' permission.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "app_slug"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "app_slug": {
-            "type": "string",
-            "description": "The slug of the GitHub App installation to manage."
-          }
-        }
-      }
-    },
-    "additive_plugins": {
-      "description": "List of plugins to run in additive mode. In additive mode the plugin will only add and update entries; it will never call remove(), so items that exist on GitHub but are absent from the YAML are preserved. Supported plugins: labels, collaborators, teams, milestones, autolinks, environments, custom_properties, variables, rulesets, custom_repository_roles, app_installations. Declare only in settings.yml (org level) to keep behavior consistent across all repos.",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "labels",
-          "collaborators",
-          "teams",
-          "milestones",
-          "autolinks",
-          "environments",
-          "custom_properties",
-          "variables",
-          "rulesets",
-          "custom_repository_roles",
-          "app_installations"
-        ]
-      }
-    },
-    "disable_plugins": {
-      "description": "List of plugins to disable at this configuration layer. Each entry is either a plugin name (string shorthand, equivalent to target: all) or an object {plugin, target}. target=self disables the plugin at this layer only; target=children disables it at all lower layers; target=all disables it at this layer and all lower layers. Cascade is union-only; lower layers cannot re-enable a disabled plugin.",
-      "type": "array",
-      "items": {
-        "oneOf": [
-          {
-            "type": "string",
-            "enum": [
-              "repository",
-              "labels",
-              "collaborators",
-              "teams",
-              "milestones",
-              "branches",
-              "autolinks",
-              "validator",
-              "rulesets",
-              "environments",
-              "custom_properties",
-              "custom_repository_roles",
-              "variables",
-              "archive",
-              "app_installations"
-            ]
-          },
-          {
-            "type": "object",
-            "required": [
-              "plugin"
-            ],
-            "additionalProperties": false,
-            "properties": {
-              "plugin": {
-                "type": "string",
-                "enum": [
-                  "repository",
-                  "labels",
-                  "collaborators",
-                  "teams",
-                  "milestones",
-                  "branches",
-                  "autolinks",
-                  "validator",
-                  "rulesets",
-                  "environments",
-                  "custom_properties",
-                  "custom_repository_roles",
-                  "variables",
-                  "archive",
-                  "app_installations"
-                ]
-              },
-              "target": {
-                "type": "string",
-                "enum": [
-                  "self",
-                  "children",
-                  "all"
-                ],
-                "default": "all"
-              }
-            }
-          }
-        ]
       }
     }
   }

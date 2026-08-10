@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const { Octokit } = require('@octokit/core')
+class Octokit {}
 const Settings = require('../../../lib/settings')
 const yaml = require('js-yaml')
 // jest.mock('../../../lib/settings', () => {
@@ -52,8 +52,10 @@ repository:
   topics:
   - frontend
      `).toString('base64');
-    mockOctokit.repos = {
-      getContent: jest.fn().mockResolvedValue({ data: { content } })
+    mockOctokit.rest = {
+      repos: {
+        getContent: jest.fn().mockResolvedValue({ data: { content } })
+      }
     }
 
     mockOctokit.request = {
@@ -310,8 +312,10 @@ repository:
       Settings.fileCache = {};
       stubContext = {
         octokit: {
-          repos: {
-            getContent: jest.fn()
+          rest: {
+            repos: {
+              getContent: jest.fn()
+            }
           },
           request: jest.fn(),
           paginate: jest.fn()
@@ -334,7 +338,7 @@ repository:
       // Given
       const filePath = 'path/to/file.yml';
       const content = Buffer.from('key: value').toString('base64');
-      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockResolvedValue({
         data: { content },
         headers: { etag: 'etag123' }
       });
@@ -355,14 +359,14 @@ repository:
       const filePath = 'path/to/file.yml';
       const content = Buffer.from('key: value').toString('base64');
       Settings.fileCache[`${mockRepo.owner}/${filePath}`] = { etag: 'etag123', data: { content } };
-      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue({ status: 304 });
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockRejectedValue({ status: 304 });
 
       // When
       const result = await settings.loadYaml(filePath);
 
       // Then
       expect(result).toEqual({ key: 'value' });
-      expect(settings.github.repos.getContent).toHaveBeenCalledWith(
+      expect(settings.github.rest.repos.getContent).toHaveBeenCalledWith(
         expect.objectContaining({ headers: { 'If-None-Match': 'etag123' } })
       );
     });
@@ -373,7 +377,7 @@ repository:
       const content = Buffer.from('key: value').toString('base64');
       const wrongContent = Buffer.from('wrong: content').toString('base64');
       Settings.fileCache['another-org/path/to/file.yml'] = { etag: 'etag123', data: { wrongContent } };
-      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockResolvedValue({
         data: { content },
         headers: { etag: 'etag123' }
       });
@@ -388,7 +392,7 @@ repository:
     it('should return null when the file path is a folder', async () => {
       // Given
       const filePath = 'path/to/folder';
-      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockResolvedValue({
         data: []
       });
 
@@ -402,7 +406,7 @@ repository:
     it('should return null when the file is a symlink or submodule', async () => {
       // Given
       const filePath = 'path/to/symlink';
-      jest.spyOn(settings.github.repos, 'getContent').mockResolvedValue({
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockResolvedValue({
         data: { content: null }
       });
 
@@ -416,7 +420,7 @@ repository:
     it('should handle 404 errors gracefully and return null', async () => {
       // Given
       const filePath = 'path/to/nonexistent.yml';
-      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue({ status: 404 });
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockRejectedValue({ status: 404 });
 
       // When
       const result = await settings.loadYaml(filePath);
@@ -428,7 +432,7 @@ repository:
     it('should throw an error for non-404 exceptions when not in nop mode', async () => {
       // Given
       const filePath = 'path/to/error.yml';
-      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
 
       // When / Then
       await expect(settings.loadYaml(filePath)).rejects.toThrow('Unexpected error');
@@ -438,7 +442,7 @@ repository:
       // Given
       const filePath = 'path/to/error.yml';
       settings.nop = true;
-      jest.spyOn(settings.github.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
+      jest.spyOn(settings.github.rest.repos, 'getContent').mockRejectedValue(new Error('Unexpected error'));
       jest.spyOn(settings, 'appendToResults');
 
       // When
@@ -1060,8 +1064,8 @@ repository:
       it('28. base-config filtering preserves org-rulesets informational NopCommands', async () => {
         stubContext.payload.repository = { owner: { login: 'test' }, name: 'safe-settings' }
         stubContext.payload.check_run = { id: 123, check_suite: { pull_requests: [{ number: 456 }] } }
-        stubContext.octokit.checks = { update: jest.fn().mockResolvedValue({}) }
-        stubContext.octokit.issues = { createComment: jest.fn().mockResolvedValue({}) }
+        stubContext.octokit.rest.checks = { update: jest.fn().mockResolvedValue({}) }
+        stubContext.octokit.rest.issues = { createComment: jest.fn().mockResolvedValue({}) }
 
         const settings = new Settings(true, stubContext, mockRepo, {
           rulesets: [{ name: 'managed', enforcement: 'disabled' }]
@@ -1084,8 +1088,8 @@ repository:
 
         await settings.handleResults()
 
-        expect(stubContext.octokit.checks.update).toHaveBeenCalled()
-        const summary = stubContext.octokit.checks.update.mock.calls[0][0].output.summary
+        expect(stubContext.octokit.rest.checks.update).toHaveBeenCalled()
+        const summary = stubContext.octokit.rest.checks.update.mock.calls[0][0].output.summary
         expect(summary).toMatch(/Informational messages/)
         expect(summary).toMatch(/suppressed by additive_plugins/)
       })
@@ -1434,7 +1438,7 @@ repository:
         teams: [{ name: 'core', permission: 'push' }]
       })).toString('base64')
 
-      stubContext.octokit.repos.getContent = jest.fn().mockImplementation((params) => {
+      stubContext.octokit.rest.repos.getContent = jest.fn().mockImplementation((params) => {
         if (params.ref === 'prev-sha') {
           return Promise.resolve({ data: { content: previousContent } })
         }
@@ -1473,7 +1477,7 @@ repository:
         teams: [{ name: 'core', permission: 'push' }]
       })).toString('base64')
 
-      stubContext.octokit.repos.getContent = jest.fn().mockImplementation((params) => {
+      stubContext.octokit.rest.repos.getContent = jest.fn().mockImplementation((params) => {
         if (params.ref === 'prev-sha') {
           return Promise.resolve({ data: { content: previousContent } })
         }
@@ -1508,7 +1512,7 @@ repository:
         teams: [{ name: 'core', permission: 'push' }]
       })).toString('base64')
 
-      stubContext.octokit.repos.getContent = jest.fn().mockImplementation((params) => {
+      stubContext.octokit.rest.repos.getContent = jest.fn().mockImplementation((params) => {
         if (params.ref === 'prev-sha') {
           return Promise.resolve({ data: { content: previousContent } })
         }
@@ -1542,7 +1546,7 @@ repository:
         teams: [{ name: 'core', permission: 'push' }]
       })).toString('base64')
 
-      stubContext.octokit.repos.getContent = jest.fn().mockImplementation((params) => {
+      stubContext.octokit.rest.repos.getContent = jest.fn().mockImplementation((params) => {
         if (params.ref === 'prev-sha') {
           return Promise.resolve({ data: { content: previousContent } })
         }
@@ -1574,7 +1578,7 @@ repository:
         suborgrepos: ['repo-a', 'repo-b']
       })).toString('base64')
 
-      stubContext.octokit.repos.getContent = jest.fn().mockResolvedValue({
+      stubContext.octokit.rest.repos.getContent = jest.fn().mockResolvedValue({
         data: { content: previousContent }
       })
 
@@ -1601,7 +1605,7 @@ repository:
     })
 
     it('handles 404 gracefully when previous file does not exist', async () => {
-      stubContext.octokit.repos.getContent = jest.fn().mockRejectedValue(
+      stubContext.octokit.rest.repos.getContent = jest.fn().mockRejectedValue(
         Object.assign(new Error('Not Found'), { status: 404 })
       )
 
