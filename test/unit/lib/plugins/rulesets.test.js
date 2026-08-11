@@ -181,6 +181,84 @@ describe('Rulesets', () => {
     })
   })
 
+  describe('idempotent create when the ruleset already exists (retried/concurrent POST)', () => {
+    function duplicateNameError () {
+      const e = new Error('Validation Failed')
+      e.status = 422
+      e.response = { data: { errors: ['Name must be unique'] } }
+      return e
+    }
+
+    function wireRequest (routeResults) {
+      const calls = []
+      const request = jest.fn().mockImplementation((route, body) => {
+        calls.push({ route, body })
+        const handler = routeResults[route]
+        return handler ? handler() : Promise.resolve({ url: route })
+      })
+      request.endpoint = jest.fn().mockImplementation((route, body) => ({ url: route, body }))
+      request.endpoint.merge = jest.fn().mockImplementation((route, body) => ({ method: 'GET', url: route, ...body }))
+      github.request = request
+      return calls
+    }
+
+    it('reconciles a repo ruleset by updating the existing one on 422 "Name must be unique"', async () => {
+      const attrs = generateRequestRuleset(0, 'synk', repo_conditions, [])
+      delete attrs.id
+      const existing = generateResponseRuleset(42, 'synk', repo_conditions, [])
+      const calls = wireRequest({
+        'POST /repos/{owner}/{repo}/rulesets': () => Promise.reject(duplicateNameError())
+      })
+      github.paginate = jest.fn()
+        .mockResolvedValueOnce([{ id: 42, name: 'synk', source_type: 'Repository' }])
+        .mockResolvedValueOnce([existing])
+
+      const plugin = configure([attrs])
+      await plugin.add(attrs)
+
+      const put = calls.find(c => c.route === 'PUT /repos/{owner}/{repo}/rulesets/{id}')
+      expect(put).toBeDefined()
+      expect(put.body.id).toBe(42)
+    })
+
+    it('reconciles an org ruleset by updating the existing one on 422 "Name must be unique"', async () => {
+      const attrs = generateRequestRuleset(0, 'synk', org_conditions, [], true)
+      delete attrs.id
+      const existing = generateResponseRuleset(7, 'synk', org_conditions, [], true)
+      const calls = wireRequest({
+        'POST /orgs/{org}/rulesets': () => Promise.reject(duplicateNameError())
+      })
+      github.paginate = jest.fn()
+        .mockResolvedValueOnce([{ id: 7, name: 'synk', source_type: 'Organization' }])
+        .mockResolvedValueOnce([existing])
+
+      const plugin = configure([attrs], 'org')
+      await plugin.add(attrs)
+
+      const put = calls.find(c => c.route === 'PUT /orgs/{org}/rulesets/{id}')
+      expect(put).toBeDefined()
+      expect(put.body.id).toBe(7)
+    })
+
+    it('does not reconcile (surfaces the error) for a 422 that is not a name-uniqueness violation', async () => {
+      const attrs = generateRequestRuleset(0, 'synk', repo_conditions, [])
+      delete attrs.id
+      const other = new Error('Validation Failed')
+      other.status = 422
+      other.response = { data: { errors: ['Something else is invalid'] } }
+      const calls = wireRequest({
+        'POST /repos/{owner}/{repo}/rulesets': () => Promise.reject(other)
+      })
+      github.paginate = jest.fn()
+
+      const plugin = configure([attrs])
+      await plugin.add(attrs)
+
+      expect(github.paginate).not.toHaveBeenCalled()
+      expect(calls.some(c => c.route === 'PUT /repos/{owner}/{repo}/rulesets/{id}')).toBe(false)
+    })
+  })
+
   describe('when {{EXTERNALLY_DEFINED}} is present in "required_status_checks" and no status checks exist in GitHub', () => {
     it('it initialises the status checks with an empty list', () => {
       // Mock the GitHub API response
@@ -216,7 +294,7 @@ describe('Rulesets', () => {
   })
 
   describe('when {{EXTERNALLY_DEFINED}} is present in "required_status_checks" and status checks exist in GitHub', () => {
-    it('it retains the status checks from GitHub and everything else is reset to the safe-settings', () => {
+    it('skips the placeholder-only ruleset and updates the genuinely changed ones', () => {
       // Mock the GitHub API response
       github.paginate = jest.fn().mockResolvedValue([
         generateRequestRuleset(
@@ -279,21 +357,11 @@ describe('Rulesets', () => {
       )
 
       return plugin.sync().then(() => {
+        // Ruleset 1 only differs by the {{EXTERNALLY_DEFINED}} placeholder, which
+        // resolves to the live status checks, so it must not be updated at all.
+        expect(github.request).toHaveBeenCalledTimes(2)
         expect(github.request).toHaveBeenNthCalledWith(
           1,
-          'PUT /repos/{owner}/{repo}/rulesets/{id}',
-          generateResponseRuleset(
-            1,
-            'All branches 1',
-            repo_conditions,
-            [
-              { context: 'Custom Check 1' },
-              { context: 'Custom Check 2' }
-            ]
-          )
-        )
-        expect(github.request).toHaveBeenNthCalledWith(
-          2,
           'PUT /repos/{owner}/{repo}/rulesets/{id}',
           generateResponseRuleset(
             2,
@@ -306,7 +374,7 @@ describe('Rulesets', () => {
           )
         )
         expect(github.request).toHaveBeenNthCalledWith(
-          3,
+          2,
           'PUT /repos/{owner}/{repo}/rulesets/{id}',
           generateResponseRuleset(
             3,
@@ -397,7 +465,7 @@ describe('Rulesets', () => {
   })
 
   describe('[org] when {{EXTERNALLY_DEFINED}} is present in "required_status_checks" and status checks exist in GitHub', () => {
-    it('it retains the status checks from GitHub', () => {
+    it('reports no changes when only the placeholder differs from GitHub', () => {
       // Mock the GitHub API response
       github.paginate = jest.fn().mockResolvedValue([
         generateRequestRuleset(
@@ -430,20 +498,48 @@ describe('Rulesets', () => {
       )
 
       return plugin.sync().then(() => {
-        expect(github.request).toHaveBeenNthCalledWith(
-          1,
-          'PUT /orgs/{org}/rulesets/{id}',
-          generateResponseRuleset(
-            1,
-            'All branches 1',
-            org_conditions,
-            [
-              { context: 'Custom Check 1' },
-              { context: 'Custom Check 2' }
-            ],
-            true
-          )
-        )
+        // The placeholder resolves to the live status checks, so the ruleset is unchanged
+        expect(github.request).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('in nop mode', () => {
+    beforeEach(() => {
+      github.request.endpoint = Object.assign(
+        jest.fn().mockImplementation((route, parms) => { return { url: route, body: parms } }),
+        { merge: github.request.endpoint.merge }
+      )
+    })
+
+    it('does not plan an update when {{EXTERNALLY_DEFINED}} matches the status checks in GitHub', () => {
+      github.paginate = jest.fn().mockResolvedValue([
+        generateRequestRuleset(1, 'All branches 1', repo_conditions, [{ context: 'Custom Check 1' }])
+      ])
+
+      const plugin = configure([
+        generateRequestRuleset(1, 'All branches 1', repo_conditions, [{ context: '{{EXTERNALLY_DEFINED}}' }])
+      ], 'repo', true)
+
+      return plugin.sync().then(res => {
+        // sync resolves with nothing when no changes are detected
+        const messages = (res || []).flat(2).map(nopCommand => nopCommand.action?.msg)
+        expect(messages).not.toContain('Update Ruleset')
+      })
+    })
+
+    it('still plans an update when the config genuinely differs from GitHub', () => {
+      github.paginate = jest.fn().mockResolvedValue([
+        generateRequestRuleset(1, 'All branches 1', repo_conditions, [{ context: 'Custom Check 1' }])
+      ])
+
+      const plugin = configure([
+        generateRequestRuleset(1, 'All branches 1', repo_conditions, [{ context: 'Other Check' }])
+      ], 'repo', true)
+
+      return plugin.sync().then(res => {
+        const messages = res.flat(2).map(nopCommand => nopCommand.action?.msg)
+        expect(messages).toContain('Update Ruleset')
       })
     })
   })

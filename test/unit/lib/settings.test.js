@@ -1061,6 +1061,35 @@ repository:
         expect(msgs.some(m => /teams/.test(m))).toBe(true)
       })
 
+      it.each([
+        ['without a check run', {}],
+        ['without a repository', { check_run: { id: 123 } }]
+      ])('28. full-sync dry run %s logs a value-free summary instead of updating a check run', async (_description, payload) => {
+        stubContext.payload = { installation: { id: 123 }, ...payload }
+        stubContext.octokit.checks = { update: jest.fn().mockResolvedValue({}) }
+
+        const settings = new Settings(true, stubContext, mockRepo, {}, mockRef)
+        settings.results = [{
+          type: 'INFO',
+          plugin: 'Variables',
+          repo: 'test/test-repo',
+          endpoint: '',
+          action: {
+            msg: 'Changes found',
+            additions: {},
+            modifications: { MY_VAR: { value: 'plain-value' } },
+            deletions: {}
+          }
+        }]
+
+        await settings.handleResults()
+
+        expect(stubContext.log.info).toHaveBeenCalledWith(expect.stringContaining('Changes found'))
+        expect(stubContext.log.info).not.toHaveBeenCalledWith(expect.stringContaining('plain-value'))
+        expect(stubContext.log.debug).toHaveBeenCalledWith({ results: settings.results }, 'Dry-run results')
+        expect(stubContext.octokit.checks.update).not.toHaveBeenCalled()
+      })
+
       it('28. base-config filtering preserves org-rulesets informational NopCommands', async () => {
         stubContext.payload.repository = { owner: { login: 'test' }, name: 'safe-settings' }
         stubContext.payload.check_run = { id: 123, check_suite: { pull_requests: [{ number: 456 }] } }

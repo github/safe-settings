@@ -363,6 +363,60 @@ describe('Branches', () => {
     })
   })
 
+  describe('in nop mode', () => {
+    function configureNop (config) {
+      return new Branches(true, github, { owner: 'bkeepers', repo: 'test' }, config, log, [])
+    }
+
+    beforeEach(() => {
+      github.rest.repos.updateBranchProtection.endpoint = jest.fn().mockImplementation(params => {
+        return { url: 'updateBranchProtection', body: params }
+      })
+      github.rest.repos.deleteBranchProtection.endpoint = jest.fn().mockImplementation(params => {
+        return { url: 'deleteBranchProtection', body: params }
+      })
+    })
+
+    describe('when branch protection already exists', () => {
+      it('labels the NopCommand as an update and names the branch in the diff message', () => {
+        const plugin = configureNop(
+          [{
+            name: 'master',
+            protection: { enforce_admins: true }
+          }]
+        )
+
+        return plugin.sync().then(res => {
+          const messages = res.map(nopCommand => nopCommand.action.msg)
+          expect(messages).toContain('Update Branch Protection')
+          expect(messages).not.toContain('Add Branch Protection')
+          const diffMessage = messages.find(msg => typeof msg === 'string' && msg.includes('will be applied to the branch protection'))
+          expect(diffMessage).toBeDefined()
+          expect(diffMessage).toContain('for master branch')
+          expect(diffMessage).not.toContain('undefined')
+        })
+      })
+    })
+
+    describe('when branch protection does not exist yet', () => {
+      it('labels the NopCommand as an add', () => {
+        github.rest.repos.getBranchProtection = jest.fn().mockRejectedValue({ status: 404 })
+        const plugin = configureNop(
+          [{
+            name: 'master',
+            protection: { enforce_admins: true }
+          }]
+        )
+
+        return plugin.sync().then(res => {
+          const messages = res.map(nopCommand => nopCommand.action.msg)
+          expect(messages).toContain('Add Branch Protection')
+          expect(messages).not.toContain('Update Branch Protection')
+        })
+      })
+    })
+  })
+
   describe.skip('return values', () => {
     it('returns updateBranchProtection Promise', () => {
       const plugin = configure(
