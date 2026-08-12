@@ -231,8 +231,24 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
       github.rest.apps.listInstallations.endpoint.merge({ per_page: 100 })
     )
 
-    if (installations.length > 0) {
-      const installation = installations[0]
+    // When GH_ORG is set, sync the installation on that account instead of
+    // whichever one the API happens to list first. The order of
+    // `GET /app/installations` is not guaranteed to keep the account you care
+    // about at index 0, so an app installed on more than one account can
+    // otherwise start reading its config from, and applying settings to, a
+    // different account than the operator intended. Without GH_ORG the
+    // behavior is unchanged.
+    const installation = env.GH_ORG
+      ? installations.find(i => i.account?.login?.toLowerCase() === env.GH_ORG.toLowerCase())
+      : installations[0]
+
+    if (env.GH_ORG && !installation) {
+      const accounts = installations.map(i => i.account?.login).join(', ')
+      throw new Error(`No app installation found for GH_ORG '${env.GH_ORG}'. Installed on: [${accounts}]`)
+    }
+
+    if (installation) {
+      robot.log.info(`Syncing installation ${installation.id} on account ${installation.account?.login}`)
       const github = await robot.auth(installation.id)
       const context = {
         payload: {

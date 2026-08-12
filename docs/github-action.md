@@ -14,6 +14,8 @@ Running a full-sync with `safe-settings` can be done via `npm run full-sync`. Th
 ### Example GHA Workflow
 The below example uses the GHA "cron" feature to run a full-sync every 4 hours. While not required, this example uses the `.github` repo as the `admin` repo (set via `ADMIN_REPO` env var) and the safe-settings configurations are stored in the `safe-settings/` directory (set via `CONFIG_PATH` and `DEPLOYMENT_CONFIG_FILE`).
 
+`GH_ORG` names the account to sync. If the App is installed on more than one account, set it: it selects the installation to sync, and the full-sync fails rather than syncing a different account if the App is not installed on it.
+
 ```yaml
 name: Safe Settings Sync
 on:
