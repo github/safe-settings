@@ -10,3 +10,9 @@
 | Configure deployment environments | [Deployment Environments](github-settings/6.%20deployment-environments.md) |
 | Configure auto-link references | [AutoLinks](github-settings/7.%20autolinks.md) |
 | Configure pre-defined labels for issues and pull requests | [Labels](github-settings/8.%20labels.md) |
+
+## Agentic config normalization
+
+safe-settings also includes agentic tooling to help consolidate and normalize
+duplicated config across an org's `settings.yml`, `repos/*.yml`, and
+`suborgs/*.yml` files. See [Agentic Config Normalization](agentic/README.md).
