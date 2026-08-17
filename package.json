@@ -29,7 +29,7 @@
     "@probot/adapter-aws-lambda-serverless": "^4.0.3",
     "deepmerge": "^4.3.1",
     "eta": "^3.5.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^5.2.2",
     "lodash": "^4.18.1",
     "minimatch": "^10.2.1",
     "node-cron": "^4.2.1",
