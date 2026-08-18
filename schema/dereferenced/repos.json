@@ -417,69 +417,43 @@
           {
             "type": "object",
             "properties": {
+              "permission": {
+                "type": "string",
+                "description": "The permission to grant the team on this repository. We accept the following permissions to be set: `pull`, `triage`, `push`, `maintain`, `admin` and you can also specify a custom repository role name, if the owning organization has defined any. If no permission is specified, the team's `permission` attribute will be used to determine what permission to grant the team on this repository."
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
               "name": {
-                "type": "string",
-                "description": "The name of the team."
-              },
-              "description": {
-                "type": "string",
-                "description": "The description of the team."
-              },
-              "maintainers": {
-                "type": "array",
-                "description": "List GitHub usernames for organization members who will become team maintainers.",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "repo_names": {
-                "type": "array",
-                "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
-                "items": {
-                  "type": "string"
-                }
+                "description": "The name (or slug) of the team to grant access to the repo.",
+                "type": "string"
               },
               "privacy": {
+                "description": "The level of privacy the team should have when it is created by safe-settings. The options are `secret` (visible only to organization owners and members of the team) or `closed` (visible to all members of the organization).",
                 "type": "string",
-                "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
                 "enum": [
                   "secret",
                   "closed"
                 ]
               },
-              "notification_setting": {
-                "type": "string",
-                "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
-                "enum": [
-                  "notifications_enabled",
-                  "notifications_disabled"
-                ]
+              "external_group": {
+                "description": "The display name of an external IdP group to link to this team.",
+                "type": "string"
               },
-              "parent_team_id": {
-                "type": "integer",
-                "description": "The ID of a team to set as the parent team."
-              },
-              "parent_team_slug": {
-                "type": "string",
-                "description": "The slug of a team to set as the parent team. Ignored when `parent_team_id` is also provided."
-              }
-            },
-            "required": [
-              "name"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
               "exclude": {
-                "description": "You can exclude a list of repos for this team and all repos except these repos would have this team",
+                "description": "Exclude this team from repos whose names match one of these glob patterns.",
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
               },
               "include": {
-                "description": "You can include a list of repos for this team and only those repos would have this team",
+                "description": "Apply this team only to repos whose names match one of these glob patterns.",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -1271,69 +1245,43 @@
         {
           "type": "object",
           "properties": {
+            "permission": {
+              "type": "string",
+              "description": "The permission to grant the team on this repository. We accept the following permissions to be set: `pull`, `triage`, `push`, `maintain`, `admin` and you can also specify a custom repository role name, if the owning organization has defined any. If no permission is specified, the team's `permission` attribute will be used to determine what permission to grant the team on this repository."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
             "name": {
-              "type": "string",
-              "description": "The name of the team."
-            },
-            "description": {
-              "type": "string",
-              "description": "The description of the team."
-            },
-            "maintainers": {
-              "type": "array",
-              "description": "List GitHub usernames for organization members who will become team maintainers.",
-              "items": {
-                "type": "string"
-              }
-            },
-            "repo_names": {
-              "type": "array",
-              "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
-              "items": {
-                "type": "string"
-              }
+              "description": "The name (or slug) of the team to grant access to the repo.",
+              "type": "string"
             },
             "privacy": {
+              "description": "The level of privacy the team should have when it is created by safe-settings. The options are `secret` (visible only to organization owners and members of the team) or `closed` (visible to all members of the organization).",
               "type": "string",
-              "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
               "enum": [
                 "secret",
                 "closed"
               ]
             },
-            "notification_setting": {
-              "type": "string",
-              "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
-              "enum": [
-                "notifications_enabled",
-                "notifications_disabled"
-              ]
+            "external_group": {
+              "description": "The display name of an external IdP group to link to this team.",
+              "type": "string"
             },
-            "parent_team_id": {
-              "type": "integer",
-              "description": "The ID of a team to set as the parent team."
-            },
-            "parent_team_slug": {
-              "type": "string",
-              "description": "The slug of a team to set as the parent team. Ignored when `parent_team_id` is also provided."
-            }
-          },
-          "required": [
-            "name"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
             "exclude": {
-              "description": "You can exclude a list of repos for this team and all repos except these repos would have this team",
+              "description": "Exclude this team from repos whose names match one of these glob patterns.",
               "type": "array",
               "items": {
                 "type": "string"
               }
             },
             "include": {
-              "description": "You can include a list of repos for this team and only those repos would have this team",
+              "description": "Apply this team only to repos whose names match one of these glob patterns.",
               "type": "array",
               "items": {
                 "type": "string"
