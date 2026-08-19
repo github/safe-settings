@@ -234,6 +234,56 @@ repository:
       })
     })
   }) // repoOverrideConfig
+
+  describe('updateRepos with a known-archived repo', () => {
+    let settings
+
+    beforeEach(() => {
+      stubConfig = { repository: { has_wiki: true }, restrictedRepos: { exclude: [] } }
+      // Built without a suborg on purpose: passing one sets subOrgConfigMap, and
+      // updateRepos then returns early for any repo outside that suborg.
+      settings = new Settings(false, stubContext, mockRepo, stubConfig, mockRef)
+      settings.subOrgConfigs = {}
+      settings.repoConfigs = {}
+      // repos.get is what archivePlugin.getState() calls. Asserting on it proves
+      // whether the archived repo was skipped before any request was made.
+      settings.github.rest.repos.get = jest.fn().mockResolvedValue({ data: { archived: true } })
+      settings.github.rest.repos.update = jest.fn().mockResolvedValue({ data: {} })
+    })
+
+    it('Skips without fetching the repo when the caller reports it archived', async () => {
+      await settings.updateRepos({ owner: 'test', repo: 'archived-repo', archived: true })
+      expect(settings.github.rest.repos.get).not.toHaveBeenCalled()
+    })
+
+    it('Still processes the repo when config asks to unarchive it', async () => {
+      settings.config.repository.archived = false
+      await settings.updateRepos({ owner: 'test', repo: 'archived-repo', archived: true })
+      expect(settings.github.rest.repos.get).toHaveBeenCalled()
+    })
+
+    it('Still processes the repo when the caller does not report archived state', async () => {
+      await settings.updateRepos({ owner: 'test', repo: 'some-repo' })
+      expect(settings.github.rest.repos.get).toHaveBeenCalled()
+    })
+
+    it('Passes the archived flag from the repository listing through to updateRepos', async () => {
+      settings.github.paginate = jest.fn().mockResolvedValue([
+        { name: 'active-repo', archived: false, owner: { login: 'test' } },
+        { name: 'archived-repo', archived: true, owner: { login: 'test' } }
+      ])
+      const seen = []
+      settings.updateRepos = jest.fn(async (repo) => { seen.push(repo) })
+
+      await settings.eachRepositoryRepos(settings.github, settings.log)
+
+      expect(seen).toEqual([
+        { owner: 'test', repo: 'active-repo', archived: false },
+        { owner: 'test', repo: 'archived-repo', archived: true }
+      ])
+    })
+  }) // updateRepos with a known-archived repo
+
   describe('loadConfigs', () => {
     describe('load suborg configs', () => {
       beforeEach(() => {
