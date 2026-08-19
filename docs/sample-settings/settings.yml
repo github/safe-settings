@@ -161,6 +161,16 @@ teams:
   - name: globalteam
     permission: push
     visibility: closed
+  - name: docs-team
+    permission: pull
+    # You can include a list of repos for this team and only those repos would have this team
+    include:
+      - actions-demo
+  - name: ops-team
+    permission: push
+    # You can exclude a list of repos for this team and all repos except these repos would have this team
+    exclude:
+      - actions-demo
 
 # Branch protection rules
 # See https://docs.github.com/en/rest/branches/branch-protection?apiVersion=2026-03-10#update-branch-protection for available options
