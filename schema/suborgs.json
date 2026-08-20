@@ -91,10 +91,37 @@
     },
     "custom_properties": {
       "description": "Custom properties",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/CustomPropertiesSettings"
-      }
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CustomPropertiesSettings"
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "include": {
+              "description": "Custom properties managed by safe-settings",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/CustomPropertiesSettings"
+              }
+            },
+            "exclude": {
+              "description": "Never clear the value of any custom property whose name matches one of these regexes",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/CustomPropertiesExcludeSettings"
+              }
+            }
+          },
+          "anyOf": [
+            { "required": ["include"] },
+            { "required": ["exclude"] }
+          ]
+        }
+      ]
     },
     "variables": {
       "description": "Repository or org-level Actions variables",
@@ -353,6 +380,15 @@
           "type": "string"
         },
         "value": {
+          "type": "string"
+        }
+      }
+    },
+    "CustomPropertiesExcludeSettings": {
+      "description": "A regex, matched against the lowercased custom property name, identifying properties safe-settings must not clear",
+      "type": "object",
+      "properties": {
+        "name": {
           "type": "string"
         }
       }

@@ -213,9 +213,25 @@ branches:
 
 # Custom properties
 # See https://docs.github.com/en/rest/repos/custom-properties?apiVersion=2026-03-10
+# A property absent from this config has its value cleared. To leave properties
+# owned by other automation untouched, use the object form shown below - see
+# "Preserving custom properties that `safe-settings` does not manage" in the README.
 custom_properties:
   - name: test
     value: test
+
+# custom_properties:
+#   include:
+#     - name: test
+#       value: test
+#   exclude:
+#     # Regexes - not globs - matched against the property name
+#     - name: ^app-
+#     # Or `.*` to manage only the properties listed under `include`
+#     - name: ^deploy-status$
+#   * The object form must contain `include`, `exclude`, or both. A malformed
+#     `custom_properties` (`{}`, say) is reported and also fails closed, leaving
+#     every property on the repo untouched.
 
 # See the docs (https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/configuring-autolinks-to-reference-external-resources) for a description of autolinks and replacement values.
 autolinks:
