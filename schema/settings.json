@@ -349,6 +349,64 @@
           "enum": ["all", "private", "selected"]
         }
       }
+    },
+    "code_scanning": {
+      "description": "Code Scanning Default Setup configuration to enforce allowed languages",
+      "type": "object",
+      "properties": {
+        "default_setup": {
+          "description": "Configuration for Code Scanning Default Setup",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Whether to enforce code scanning default setup configuration. Set to false to skip management.",
+              "type": "boolean",
+              "default": true
+            },
+            "languages": {
+              "description": "Language restrictions for code scanning",
+              "type": "object",
+              "properties": {
+                "allowed": {
+                  "description": "List of languages that are allowed to be scanned. If specified, only these languages will be permitted.",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "c-cpp",
+                      "csharp",
+                      "go",
+                      "java-kotlin",
+                      "javascript-typescript",
+                      "python",
+                      "ruby",
+                      "swift"
+                    ]
+                  }
+                },
+                "blocked": {
+                  "description": "List of languages that are explicitly blocked from being scanned.",
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "c-cpp",
+                      "csharp",
+                      "go",
+                      "java-kotlin",
+                      "javascript-typescript",
+                      "python",
+                      "ruby",
+                      "swift"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": ["enabled"]
+        }
+      }
     }
   }
 }
