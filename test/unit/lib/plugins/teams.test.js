@@ -10,6 +10,8 @@ describe('Teams', () => {
   const updatedTeamId = any.integer()
   const removedTeamName = 'removed'
   const removedTeamId = any.integer()
+  const securityManagerTeamName = 'security-manager'
+  const securityManagerTeamId = any.integer()
   const unchangedTeamName = 'unchanged'
   const unchangedTeamId = any.integer()
   const org = 'bkeepers'
@@ -89,6 +91,53 @@ describe('Teams', () => {
       })
 
       expectTeamDeleted(removedTeamName)
+    })
+
+    it('does not add configured security manager teams', async () => {
+      github.paginate.mockImplementation(async (fetch, params) => {
+        if (fetch === 'GET /orgs/{org}/security-managers') {
+          return [{ name: securityManagerTeamName }]
+        }
+
+        const response = await fetch(params)
+        return response.data
+      })
+      github.rest.repos.listTeams.mockResolvedValue({
+        data: [
+          {
+            id: securityManagerTeamId,
+            name: securityManagerTeamName,
+            slug: securityManagerTeamName,
+            permission: 'admin'
+          }
+        ]
+      })
+      const plugin = configure([
+        { name: securityManagerTeamName, permission: 'pull' }
+      ])
+
+      await plugin.sync()
+
+      expect(github.rest.teams.getByName).not.toHaveBeenCalled()
+      expect(github.rest.teams.addOrUpdateRepoPermissionsInOrg).not.toHaveBeenCalled()
+      expect(github.request).not.toHaveBeenCalled()
+    })
+
+    it('does not update or remove security manager teams', async () => {
+      const plugin = configure()
+      github.paginate.mockResolvedValue([{ name: securityManagerTeamName }])
+      const securityManagerTeam = {
+        id: securityManagerTeamId,
+        name: securityManagerTeamName,
+        slug: securityManagerTeamName,
+        permission: 'admin'
+      }
+
+      await plugin.checkSecurityManager([securityManagerTeam])
+      await plugin.update(securityManagerTeam, { name: securityManagerTeamName, permission: 'pull' })
+      await plugin.remove(securityManagerTeam)
+
+      expect(github.request).not.toHaveBeenCalled()
     })
 
     function expectTeamDeleted (teamSlug) {
