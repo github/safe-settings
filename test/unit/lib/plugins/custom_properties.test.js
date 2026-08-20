@@ -18,7 +18,7 @@ describe('CustomProperties', () => {
       request: jest.fn()
     }
 
-    log = { debug: jest.fn(), error: console.error }
+    log = { debug: jest.fn(), info: jest.fn(), error: console.error }
   })
 
   describe('Custom Properties plugin', () => {

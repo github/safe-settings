@@ -50,6 +50,7 @@ describe('Repository', () => {
           description: 'Hello World!',
           mediaType: { previews: ['nebula-preview'] }
         })
+        expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Applying repository settings changes to bkeepers/test'))
       })
     })
 
@@ -81,6 +82,7 @@ describe('Repository', () => {
             previews: ['mercy']
           }
         })
+        expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Applying topic changes to bkeepers/test'))
       })
     })
   })
