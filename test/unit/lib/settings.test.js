@@ -715,4 +715,38 @@ repository:
       expect(mockRepoSync).toHaveBeenCalledTimes(1)
     })
   }) // updateRepos - archived repo skipping
+
+  describe('handleResults', () => {
+    it('removes exact duplicates but keeps distinct entries for the same repo and plugin', async () => {
+      stubContext.octokit.rest.checks = { update: jest.fn().mockResolvedValue({}) }
+      stubContext.octokit.rest.issues = { createComment: jest.fn().mockResolvedValue({}) }
+      stubContext.payload.check_run = { id: 42, check_suite: { pull_requests: [{ number: 1 }] } }
+      stubContext.payload.repository = { owner: { login: 'test' }, name: 'test-repo' }
+      const settings = new Settings(true, stubContext, mockRepo, {}, mockRef)
+
+      const masterDiff = {
+        type: 'INFO',
+        plugin: 'Branches',
+        repo: 'test/test-repo',
+        endpoint: '',
+        body: '',
+        action: { msg: 'Changes for master', additions: {}, modifications: { a: 1 }, deletions: {} }
+      }
+      const developDiff = {
+        type: 'INFO',
+        plugin: 'Branches',
+        repo: 'test/test-repo',
+        endpoint: '',
+        body: '',
+        action: { msg: 'Changes for develop', additions: {}, modifications: { b: 2 }, deletions: {} }
+      }
+      settings.results = [masterDiff, { ...masterDiff }, developDiff]
+
+      await settings.handleResults()
+
+      // the literal duplicate goes, the distinct same-plugin same-repo entry stays
+      expect(settings.results).toHaveLength(2)
+      expect(settings.results.map(res => res.action.msg)).toEqual(['Changes for master', 'Changes for develop'])
+    })
+  }) // handleResults
 }) // Settings Tests
