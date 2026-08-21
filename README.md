@@ -549,6 +549,19 @@ You can pass environment variables; the easiest way to do it is via a `.env` fil
   ```
   BLOCK_REPO_RENAME_BY_HUMAN=true
   ```
+1. Scope the full sync to one account using `GH_ORG`. For e.g.
+  ```
+  GH_ORG=my-org
+  ```
+  If the app is installed on more than one account, a full sync (`CRON` or
+  `npm run full-sync`) picks the installation on the `GH_ORG` account and reads
+  its configuration from `GH_ORG/<ADMIN_REPO>`. If `GH_ORG` is set but the app
+  is not installed on it, the full sync fails instead of syncing a different
+  account. When `GH_ORG` is not set, the first installation returned by the API
+  is used, so setting it is recommended whenever the app is installed on more
+  than one account. Note that `GH_ORG` is also used by the
+  [manifest flow](https://docs.github.com/en/apps/sharing-github-apps/registering-a-github-app-from-a-manifest)
+  to decide which account the app is registered for.
 
 
 ### Runtime Settings
