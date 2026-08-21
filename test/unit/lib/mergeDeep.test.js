@@ -1882,4 +1882,31 @@ branches:
     expect(same.additions).toEqual({})
     expect(same.modifications).toEqual({})
   })
+
+  it('mergeDeep does not allow prototype pollution', () => {
+    const mockGitHub = jest.fn().mockReturnValue({ request: () => {} })
+    const mergeDeep = new MergeDeep(log, mockGitHub, [])
+
+    // js-yaml parses `__proto__:` as an own property and existing call sites
+    // (e.g. configManager.loadGlobalSettingsYaml -> Settings.syncAll -> mergeDeep)
+    // pass the parsed config straight into mergeDeep. Using JSON.parse here
+    // produces the same own-property shape without depending on js-yaml.
+    const malicious = JSON.parse('{"__proto__":{"polluted":"yes"},"constructor":{"poisoned":"yes"}}')
+
+    // Sanity: a fresh object must not already have these props.
+    expect({}.polluted).toBeUndefined()
+    expect({}.poisoned).toBeUndefined()
+
+    const merged = mergeDeep.mergeDeep({}, malicious)
+
+    // Object.prototype must remain clean.
+    expect({}.polluted).toBeUndefined()
+    expect({}.poisoned).toBeUndefined()
+    expect(Object.prototype.polluted).toBeUndefined()
+    expect(Object.prototype.poisoned).toBeUndefined()
+
+    // The merged result also should not carry the pollution payload.
+    expect(merged.polluted).toBeUndefined()
+    expect(merged.poisoned).toBeUndefined()
+  })
 })
