@@ -8,6 +8,7 @@ describe('Branches', () => {
   const log = jest.fn()
   log.debug = jest.fn()
   log.error = jest.fn()
+  log.info = jest.fn()
 
   function configure (config) {
     const nop = false
@@ -70,6 +71,19 @@ describe('Branches', () => {
           restrictions: null,
           headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
         })
+      })
+    })
+
+    it('logs the applied branch protection change at info level', () => {
+      const plugin = configure(
+        [{
+          name: 'master',
+          protection: { enforce_admins: true }
+        }]
+      )
+
+      return plugin.sync().then(() => {
+        expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Applying branch protection changes to master branch of bkeepers/test'))
       })
     })
 
@@ -183,7 +197,6 @@ describe('Branches', () => {
         )
 
         return plugin.sync().then(() => {
-
           expect(github.rest.repos.updateBranchProtection).toHaveBeenCalledWith(expect.objectContaining({
             owner: 'bkeepers',
             repo: 'test',
@@ -305,7 +318,6 @@ describe('Branches', () => {
         )
 
         return plugin.sync().then(() => {
-
           expect(github.rest.repos.updateBranchProtection).toHaveBeenCalledWith(expect.objectContaining({
             owner: 'bkeepers',
             repo: 'test',
