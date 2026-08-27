@@ -537,6 +537,10 @@ You can pass environment variables; the easiest way to do it is via a `.env` fil
   ```
   SETTINGS_FILE_PATH=settings.yml
   ```
+1. Read the configs from a different git ref of the admin repo during scheduled and full syncs with `CONFIG_REF` (default is the default branch). Webhook-triggered syncs are not affected. For example:
+  ```
+  CONFIG_REF=my-config-branch
+  ```
 1. Configure the deployment settings file path using `DEPLOYMENT_CONFIG_FILE` (default is `deployment-settings.yml`). For e.g.
   ```
   DEPLOYMENT_CONFIG_FILE=deployment-settings.yml
