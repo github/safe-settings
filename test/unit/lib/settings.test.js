@@ -715,4 +715,61 @@ repository:
       expect(mockRepoSync).toHaveBeenCalledTimes(1)
     })
   }) // updateRepos - archived repo skipping
+
+  describe('handleResults', () => {
+    let settings
+
+    beforeEach(() => {
+      stubContext.octokit.rest.checks = { update: jest.fn().mockResolvedValue({}) }
+      stubContext.octokit.rest.issues = { createComment: jest.fn().mockResolvedValue({}) }
+      settings = new Settings(true, stubContext, mockRepo, {}, mockRef)
+      settings.results = [
+        {
+          type: 'INFO',
+          plugin: 'Branches',
+          repo: 'test/test-repo',
+          endpoint: '',
+          body: '',
+          action: { msg: 'Changes found', additions: {}, modifications: { MY_VAR: { value: 'plain-value' } }, deletions: {} }
+        }
+      ]
+    })
+
+    describe('in nop mode without a check run in the payload (full sync)', () => {
+      it('logs a summary instead of updating a check run, keeping config values out of info', async () => {
+        // stubContext.payload only contains `installation`, like a full-sync context
+        await settings.handleResults()
+
+        expect(stubContext.log.info).toHaveBeenCalledWith(expect.stringContaining('Changes found'))
+        expect(stubContext.log.info).not.toHaveBeenCalledWith(expect.stringContaining('plain-value'))
+        expect(stubContext.log.debug).toHaveBeenCalledWith({ results: settings.results }, 'Dry-run results')
+        expect(stubContext.octokit.rest.checks.update).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('in nop mode with a check run but no repository in the payload', () => {
+      it('logs the results instead of updating a check run', async () => {
+        stubContext.payload.check_run = { id: 42, check_suite: { pull_requests: [{ number: 1 }] } }
+
+        await settings.handleResults()
+
+        expect(stubContext.log.info).toHaveBeenCalledWith(expect.stringContaining('Changes found'))
+        expect(stubContext.octokit.rest.checks.update).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('in nop mode with a check run in the payload (webhook flow)', () => {
+      it('completes the check run', async () => {
+        stubContext.payload.check_run = { id: 42, check_suite: { pull_requests: [{ number: 1 }] } }
+        stubContext.payload.repository = { owner: { login: 'test' }, name: 'test-repo' }
+
+        await settings.handleResults()
+
+        expect(stubContext.octokit.rest.checks.update).toHaveBeenCalledWith(expect.objectContaining({
+          check_run_id: 42,
+          status: 'completed'
+        }))
+      })
+    })
+  }) // handleResults
 }) // Settings Tests
