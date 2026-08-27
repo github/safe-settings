@@ -1882,4 +1882,44 @@ branches:
     expect(same.additions).toEqual({})
     expect(same.modifications).toEqual({})
   })
+
+  describe('CompareDeep bypass actors with a null actor_id (OrganizationAdmin, DeployKey)', () => {
+    // GitHub ignores actor_id for these actor types and always returns
+    // actor_id: null, so the config should carry null and still diff correctly.
+    const mergeDeep = new MergeDeep(log, jest.fn(), [])
+    const orgAdmin = { actor_id: null, actor_type: 'OrganizationAdmin', bypass_mode: 'pull_request' }
+    const deployKey = { actor_id: null, actor_type: 'DeployKey', bypass_mode: 'always' }
+    const app = { actor_id: 210920, actor_type: 'Integration', bypass_mode: 'always' }
+
+    it('deploys a config-only actor from an empty ruleset', () => {
+      const result = mergeDeep.compareDeep({ bypass_actors: [] }, { bypass_actors: [orgAdmin] })
+      expect(result.hasChanges).toEqual(true)
+      expect(result.additions.bypass_actors).toEqual([orgAdmin])
+    })
+
+    it('deploys a config-only actor alongside an existing app actor', () => {
+      const result = mergeDeep.compareDeep({ bypass_actors: [app] }, { bypass_actors: [app, orgAdmin] })
+      expect(result.hasChanges).toEqual(true)
+      expect(result.additions.bypass_actors).toEqual([orgAdmin])
+    })
+
+    it('converges once the actor is live', () => {
+      const result = mergeDeep.compareDeep({ bypass_actors: [orgAdmin] }, { bypass_actors: [orgAdmin] })
+      expect(result.hasChanges).toEqual(false)
+    })
+
+    it('converges with mixed actors and still identifies real ids by actor_id', () => {
+      const result = mergeDeep.compareDeep({ bypass_actors: [app, orgAdmin] }, { bypass_actors: [app, orgAdmin] })
+      expect(result.hasChanges).toEqual(false)
+    })
+
+    it('handles a DeployKey actor the same way, distinct from other null-id actors', () => {
+      const deploys = mergeDeep.compareDeep({ bypass_actors: [orgAdmin] }, { bypass_actors: [orgAdmin, deployKey] })
+      expect(deploys.hasChanges).toEqual(true)
+      expect(deploys.additions.bypass_actors).toEqual([deployKey])
+
+      const converged = mergeDeep.compareDeep({ bypass_actors: [orgAdmin, deployKey] }, { bypass_actors: [orgAdmin, deployKey] })
+      expect(converged.hasChanges).toEqual(false)
+    })
+  })
 })

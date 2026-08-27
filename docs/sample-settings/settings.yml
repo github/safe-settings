@@ -260,7 +260,9 @@ rulesets:
         #  - pull_request
         bypass_mode: pull_request
 
-      - actor_id: 1
+      # actor_id must be null for OrganizationAdmin: GitHub ignores the id for
+      # this actor type and returns null, so any other value never converges
+      - actor_id: null
         actor_type: OrganizationAdmin
         bypass_mode: always
 
