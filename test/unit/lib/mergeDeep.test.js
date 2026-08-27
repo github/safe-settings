@@ -809,6 +809,7 @@ entries:
         ]
       },
       modifications: {},
+      deletions: {},
       hasChanges: true
     }
     const ignorableFields = []
@@ -1881,5 +1882,38 @@ branches:
     console.log(`new diffs ${JSON.stringify(same, null, 2)}`)
     expect(same.additions).toEqual({})
     expect(same.modifications).toEqual({})
+  })
+
+  it('CompareDeep returns top-level array additions in the same shape for empty and non-empty targets', () => {
+    const mergeDeep = new MergeDeep(log, jest.fn(), [])
+    const ruleset = { name: 'first-ruleset', enforcement: 'active' }
+
+    // Target already has an entry: additions come back as an array
+    const withExisting = mergeDeep.compareDeep(
+      [{ name: 'other', enforcement: 'active' }],
+      [{ name: 'other', enforcement: 'active' }, ruleset]
+    )
+    expect(withExisting.additions).toEqual([ruleset])
+
+    // Empty target (e.g. a repo receiving its first ruleset) must produce the
+    // same shape, not an index-keyed object like { 0: { ... } }
+    const firstEntry = mergeDeep.compareDeep([], [ruleset])
+    expect(firstEntry.additions).toEqual([ruleset])
+    expect(firstEntry.hasChanges).toEqual(true)
+  })
+
+  it('CompareDeep always includes deletions in its result', () => {
+    const mergeDeep = new MergeDeep(log, jest.fn(), [])
+    const emptyTarget = mergeDeep.compareDeep([], [{ name: 'a' }])
+    expect(emptyTarget).toHaveProperty('deletions')
+  })
+
+  it('CompareDeep skips prototype pollution vectors when the target is empty', () => {
+    const mergeDeep = new MergeDeep(log, jest.fn(), [])
+    // JSON.parse creates `__proto__` as an own key, unlike object literals
+    const source = JSON.parse('{"name": "a", "__proto__": { "polluted": true }}')
+    const result = mergeDeep.compareDeep({}, source)
+    expect(result.additions).toEqual({ name: 'a' })
+    expect(result.additions.polluted).toBeUndefined()
   })
 })
