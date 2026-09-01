@@ -4,6 +4,19 @@
   "description": "Schema for .github/suborgs/*.yml — suborg-level safe-settings configuration. Defines which repos belong to the suborg and what settings to apply.",
   "type": "object",
   "properties": {
+    "ruleset_scope": {
+      "type": "string",
+      "description": "Scope for rulesets in this suborg. 'repo' (default) creates individual repository-scoped rulesets for each matched repo. 'org' creates a single organization-scoped ruleset using repository_property targeting.",
+      "enum": ["repo", "org"],
+      "default": "repo"
+    },
+    "rulesets": {
+      "type": "array",
+      "description": "Rulesets to apply to repositories in this suborg",
+      "items": {
+        "$ref": "#/$defs/RulesetSettings"
+      }
+    },
     "suborgrepos": {
       "type": "array",
       "description": "Glob patterns matching repository names. Repos whose names match any pattern are included in this suborg.",

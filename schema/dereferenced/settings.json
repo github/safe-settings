@@ -4,6 +4,15 @@
   "description": "Schema for .github/settings.yml — org-level safe-settings configuration",
   "type": "object",
   "properties": {
+    "ruleset_scope": {
+      "type": "string",
+      "description": "Default scope for rulesets in suborg files. 'repo' (default) creates individual repository-scoped rulesets. 'org' creates organization-scoped rulesets with repository_property targeting. Can be overridden per suborg.",
+      "enum": [
+        "repo",
+        "org"
+      ],
+      "default": "repo"
+    },
     "repositories": {
       "description": "Repository settings",
       "allOf": [
