@@ -8,7 +8,7 @@ describe('Variables', () => {
   const repo = 'test'
 
   function configure (nop = false, entries = [{ name: 'test', value: 'test' }]) {
-    const log = { debug: jest.fn(), error: console.error }
+    const log = { debug: jest.fn(), info: jest.fn(), error: console.error }
     const errors = []
     return new Variables(nop, github, { owner: org, repo }, entries, log, errors)
   }
@@ -101,7 +101,6 @@ describe('Variables', () => {
 
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBeGreaterThan(0)
-      // resArray contains: INFO NopCommand (flat), then [NopCommand] arrays from add/remove/update
       const flat = result.flat()
       flat.forEach(cmd => expect(cmd).toBeInstanceOf(NopCommand))
     })

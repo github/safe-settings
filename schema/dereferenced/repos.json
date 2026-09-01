@@ -177,6 +177,19 @@
               "description": "Either `true` to enable the wiki for this repository or `false` to disable it.",
               "default": true
             },
+            "has_pull_requests": {
+              "type": "boolean",
+              "description": "Either `true` to allow pull requests for this repository or `false` to prevent pull requests.",
+              "default": true
+            },
+            "pull_request_creation_policy": {
+              "type": "string",
+              "description": "The policy that controls who can create pull requests for this repository: `all` or `collaborators_only`.",
+              "enum": [
+                "all",
+                "collaborators_only"
+              ]
+            },
             "is_template": {
               "type": "boolean",
               "description": "Either `true` to make this repo available as a template repository or `false` to prevent it.",
@@ -404,65 +417,43 @@
           {
             "type": "object",
             "properties": {
+              "permission": {
+                "type": "string",
+                "description": "The permission to grant the team on this repository. We accept the following permissions to be set: `pull`, `triage`, `push`, `maintain`, `admin` and you can also specify a custom repository role name, if the owning organization has defined any. If no permission is specified, the team's `permission` attribute will be used to determine what permission to grant the team on this repository."
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
               "name": {
-                "type": "string",
-                "description": "The name of the team."
-              },
-              "description": {
-                "type": "string",
-                "description": "The description of the team."
-              },
-              "maintainers": {
-                "type": "array",
-                "description": "List GitHub usernames for organization members who will become team maintainers.",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "repo_names": {
-                "type": "array",
-                "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
-                "items": {
-                  "type": "string"
-                }
+                "description": "The name (or slug) of the team to grant access to the repo.",
+                "type": "string"
               },
               "privacy": {
+                "description": "The level of privacy the team should have when it is created by safe-settings. The options are `secret` (visible only to organization owners and members of the team) or `closed` (visible to all members of the organization).",
                 "type": "string",
-                "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
                 "enum": [
                   "secret",
                   "closed"
                 ]
               },
-              "notification_setting": {
-                "type": "string",
-                "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
-                "enum": [
-                  "notifications_enabled",
-                  "notifications_disabled"
-                ]
+              "external_group": {
+                "description": "The display name of an external IdP group to link to this team.",
+                "type": "string"
               },
-              "parent_team_id": {
-                "type": "integer",
-                "description": "The ID of a team to set as the parent team."
-              }
-            },
-            "required": [
-              "name"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
               "exclude": {
-                "description": "You can exclude a list of repos for this team and all repos except these repos would have this team",
+                "description": "Exclude this team from repos whose names match one of these glob patterns.",
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
               },
               "include": {
-                "description": "You can include a list of repos for this team and only those repos would have this team",
+                "description": "Apply this team only to repos whose names match one of these glob patterns.",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -1021,6 +1012,19 @@
               "description": "Either `true` to enable the wiki for this repository or `false` to disable it.",
               "default": true
             },
+            "has_pull_requests": {
+              "type": "boolean",
+              "description": "Either `true` to allow pull requests for this repository or `false` to prevent pull requests.",
+              "default": true
+            },
+            "pull_request_creation_policy": {
+              "type": "string",
+              "description": "The policy that controls who can create pull requests for this repository: `all` or `collaborators_only`.",
+              "enum": [
+                "all",
+                "collaborators_only"
+              ]
+            },
             "is_template": {
               "type": "boolean",
               "description": "Either `true` to make this repo available as a template repository or `false` to prevent it.",
@@ -1241,65 +1245,43 @@
         {
           "type": "object",
           "properties": {
+            "permission": {
+              "type": "string",
+              "description": "The permission to grant the team on this repository. We accept the following permissions to be set: `pull`, `triage`, `push`, `maintain`, `admin` and you can also specify a custom repository role name, if the owning organization has defined any. If no permission is specified, the team's `permission` attribute will be used to determine what permission to grant the team on this repository."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
             "name": {
-              "type": "string",
-              "description": "The name of the team."
-            },
-            "description": {
-              "type": "string",
-              "description": "The description of the team."
-            },
-            "maintainers": {
-              "type": "array",
-              "description": "List GitHub usernames for organization members who will become team maintainers.",
-              "items": {
-                "type": "string"
-              }
-            },
-            "repo_names": {
-              "type": "array",
-              "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
-              "items": {
-                "type": "string"
-              }
+              "description": "The name (or slug) of the team to grant access to the repo.",
+              "type": "string"
             },
             "privacy": {
+              "description": "The level of privacy the team should have when it is created by safe-settings. The options are `secret` (visible only to organization owners and members of the team) or `closed` (visible to all members of the organization).",
               "type": "string",
-              "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
               "enum": [
                 "secret",
                 "closed"
               ]
             },
-            "notification_setting": {
-              "type": "string",
-              "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
-              "enum": [
-                "notifications_enabled",
-                "notifications_disabled"
-              ]
+            "external_group": {
+              "description": "The display name of an external IdP group to link to this team.",
+              "type": "string"
             },
-            "parent_team_id": {
-              "type": "integer",
-              "description": "The ID of a team to set as the parent team."
-            }
-          },
-          "required": [
-            "name"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
             "exclude": {
-              "description": "You can exclude a list of repos for this team and all repos except these repos would have this team",
+              "description": "Exclude this team from repos whose names match one of these glob patterns.",
               "type": "array",
               "items": {
                 "type": "string"
               }
             },
             "include": {
-              "description": "You can include a list of repos for this team and only those repos would have this team",
+              "description": "Apply this team only to repos whose names match one of these glob patterns.",
               "type": "array",
               "items": {
                 "type": "string"
@@ -1609,7 +1591,7 @@
               "actor_id": {
                 "type": "integer",
                 "nullable": true,
-                "description": "The ID of the actor that can bypass a ruleset. Required for `Integration`, `RepositoryRole`, and `Team` actor types. If `actor_type` is `OrganizationAdmin`, `actor_id` is ignored. If `actor_type` is `DeployKey`, this should be null. `OrganizationAdmin` is not applicable for personal repositories."
+                "description": "The ID of the actor that can bypass a ruleset. Required for `Integration`, `RepositoryRole`, `Team`, and `User` actor types. If `actor_type` is `OrganizationAdmin`, `actor_id` is ignored. If `actor_type` is `DeployKey`, this should be null. `OrganizationAdmin` is not applicable for personal repositories."
               },
               "actor_type": {
                 "type": "string",
@@ -1618,7 +1600,8 @@
                   "OrganizationAdmin",
                   "RepositoryRole",
                   "Team",
-                  "DeployKey"
+                  "DeployKey",
+                  "User"
                 ],
                 "description": "The type of actor that can bypass a ruleset."
               },
@@ -1631,6 +1614,10 @@
                   "exempt"
                 ],
                 "default": "always"
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-friendly alternative to `actor_id`. The team slug, username, GitHub App slug, or repository role name (resolved using `actor_type`). Cannot be combined with `actor_id`."
               }
             }
           }
@@ -2043,6 +2030,49 @@
                         "type": "boolean",
                         "description": "New, reviewable commits pushed will dismiss previous pull request review approvals."
                       },
+                      "dismissal_restriction": {
+                        "title": "DismissalRestriction",
+                        "description": "Specify people, teams, or apps allowed to dismiss pull request reviews.",
+                        "type": "object",
+                        "properties": {
+                          "allowed_actors": {
+                            "type": "array",
+                            "description": "Specify people, teams, or apps allowed to dismiss pull request reviews.",
+                            "items": {
+                              "title": "Actor",
+                              "description": "An actor allowed to dismiss pull request reviews",
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "description": "ID of the actor that can dismiss reviews."
+                                },
+                                "type": {
+                                  "type": "string",
+                                  "description": "The type of the actor",
+                                  "enum": [
+                                    "User",
+                                    "Team",
+                                    "IntegrationInstallation",
+                                    "RepositoryRole"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "type"
+                              ]
+                            }
+                          },
+                          "enabled": {
+                            "type": "boolean",
+                            "description": "Whether to restrict review dismissal to specific actors."
+                          }
+                        },
+                        "required": [
+                          "enabled"
+                        ]
+                      },
                       "require_code_owner_review": {
                         "type": "boolean",
                         "description": "Require an approving review in pull requests that modify files that have a designated code owner."
@@ -2095,10 +2125,13 @@
                                   "enum": [
                                     "Team"
                                   ]
+                                },
+                                "slug": {
+                                  "type": "string",
+                                  "description": "Human-friendly alternative to `id`. The slug of the team that must review changes to matching files. Cannot be combined with `id`."
                                 }
                               },
                               "required": [
-                                "id",
                                 "type"
                               ]
                             }

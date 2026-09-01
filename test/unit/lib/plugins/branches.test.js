@@ -8,6 +8,7 @@ describe('Branches', () => {
   const log = jest.fn()
   log.debug = jest.fn()
   log.error = jest.fn()
+  log.info = jest.fn()
 
   function configure (config) {
     const nop = false
@@ -70,6 +71,19 @@ describe('Branches', () => {
           restrictions: null,
           headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
         })
+      })
+    })
+
+    it('logs the applied branch protection change at info level', () => {
+      const plugin = configure(
+        [{
+          name: 'master',
+          protection: { enforce_admins: true }
+        }]
+      )
+
+      return plugin.sync().then(() => {
+        expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Applying branch protection changes to master branch of bkeepers/test'))
       })
     })
 
@@ -183,7 +197,6 @@ describe('Branches', () => {
         )
 
         return plugin.sync().then(() => {
-
           expect(github.rest.repos.updateBranchProtection).toHaveBeenCalledWith(expect.objectContaining({
             owner: 'bkeepers',
             repo: 'test',
@@ -305,7 +318,6 @@ describe('Branches', () => {
         )
 
         return plugin.sync().then(() => {
-
           expect(github.rest.repos.updateBranchProtection).toHaveBeenCalledWith(expect.objectContaining({
             owner: 'bkeepers',
             repo: 'test',
@@ -358,6 +370,60 @@ describe('Branches', () => {
             restrictions: null,
             headers: { accept: 'application/vnd.github.hellcat-preview+json,application/vnd.github.luke-cage-preview+json,application/vnd.github.zzzax-preview+json' }
           })
+        })
+      })
+    })
+  })
+
+  describe('in nop mode', () => {
+    function configureNop (config) {
+      return new Branches(true, github, { owner: 'bkeepers', repo: 'test' }, config, log, [])
+    }
+
+    beforeEach(() => {
+      github.rest.repos.updateBranchProtection.endpoint = jest.fn().mockImplementation(params => {
+        return { url: 'updateBranchProtection', body: params }
+      })
+      github.rest.repos.deleteBranchProtection.endpoint = jest.fn().mockImplementation(params => {
+        return { url: 'deleteBranchProtection', body: params }
+      })
+    })
+
+    describe('when branch protection already exists', () => {
+      it('labels the NopCommand as an update and names the branch in the diff message', () => {
+        const plugin = configureNop(
+          [{
+            name: 'master',
+            protection: { enforce_admins: true }
+          }]
+        )
+
+        return plugin.sync().then(res => {
+          const messages = res.map(nopCommand => nopCommand.action.msg)
+          expect(messages).toContain('Update Branch Protection')
+          expect(messages).not.toContain('Add Branch Protection')
+          const diffMessage = messages.find(msg => typeof msg === 'string' && msg.includes('will be applied to the branch protection'))
+          expect(diffMessage).toBeDefined()
+          expect(diffMessage).toContain('for master branch')
+          expect(diffMessage).not.toContain('undefined')
+        })
+      })
+    })
+
+    describe('when branch protection does not exist yet', () => {
+      it('labels the NopCommand as an add', () => {
+        github.rest.repos.getBranchProtection = jest.fn().mockRejectedValue({ status: 404 })
+        const plugin = configureNop(
+          [{
+            name: 'master',
+            protection: { enforce_admins: true }
+          }]
+        )
+
+        return plugin.sync().then(res => {
+          const messages = res.map(nopCommand => nopCommand.action.msg)
+          expect(messages).toContain('Add Branch Protection')
+          expect(messages).not.toContain('Update Branch Protection')
         })
       })
     })

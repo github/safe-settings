@@ -4,6 +4,19 @@
   "description": "Schema for .github/suborgs/*.yml — suborg-level safe-settings configuration. Defines which repos belong to the suborg and what settings to apply.",
   "type": "object",
   "properties": {
+    "ruleset_scope": {
+      "type": "string",
+      "description": "Scope for rulesets in this suborg. 'repo' (default) creates individual repository-scoped rulesets for each matched repo. 'org' creates a single organization-scoped ruleset using repository_property targeting.",
+      "enum": ["repo", "org"],
+      "default": "repo"
+    },
+    "rulesets": {
+      "type": "array",
+      "description": "Rulesets to apply to repositories in this suborg",
+      "items": {
+        "$ref": "#/$defs/RulesetSettings"
+      }
+    },
     "suborgrepos": {
       "type": "array",
       "description": "Glob patterns matching repository names. Repos whose names match any pattern are included in this suborg.",
@@ -226,20 +239,39 @@
       "description": "A team entry",
       "allOf": [
         {
-          "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1teams/post/requestBody/content/application~1json/schema"
+          "$ref": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.2026-03-10.json#/paths/~1orgs~1{org}~1teams~1{team_slug}~1repos~1{owner}~1{repo}/put/requestBody/content/application~1json/schema"
         },
         {
           "type": "object",
+          "required": [
+            "name"
+          ],
           "properties": {
+            "name": {
+              "description": "The name (or slug) of the team to grant access to the repo.",
+              "type": "string"
+            },
+            "privacy": {
+              "description": "The level of privacy the team should have when it is created by safe-settings. The options are `secret` (visible only to organization owners and members of the team) or `closed` (visible to all members of the organization).",
+              "type": "string",
+              "enum": [
+                "secret",
+                "closed"
+              ]
+            },
+            "external_group": {
+              "description": "The display name of an external IdP group to link to this team.",
+              "type": "string"
+            },
             "exclude": {
-              "description": "You can exclude a list of repos for this team and all repos except these repos would have this team",
+              "description": "Exclude this team from repos whose names match one of these glob patterns.",
               "type": "array",
               "items": {
                 "type": "string"
               }
             },
             "include": {
-              "description": "You can include a list of repos for this team and only those repos would have this team",
+              "description": "Apply this team only to repos whose names match one of these glob patterns.",
               "type": "array",
               "items": {
                 "type": "string"
