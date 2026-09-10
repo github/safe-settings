@@ -215,7 +215,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     )
     robot.log.debug(`installations: ${JSON.stringify(installations)}`)
     if (installations.length > 0) {
-      const installation = installations[0]
+      const installation = (env.GH_ORG && installations.find(i => i.account.login === env.GH_ORG)) || installations[0]
       const github = await robot.auth(installation.id)
       const app = await github.rest.apps.getAuthenticated()
       appSlug = app.data.slug
@@ -232,7 +232,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
     )
 
     if (installations.length > 0) {
-      const installation = installations[0]
+      const installation = (env.GH_ORG && installations.find(i => i.account.login === env.GH_ORG)) || installations[0]
       const github = await robot.auth(installation.id)
       const context = {
         payload: {

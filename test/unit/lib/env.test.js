@@ -32,6 +32,11 @@ describe('env', () => {
       const FULL_SYNC_NOP = envTest.FULL_SYNC_NOP
       expect(FULL_SYNC_NOP).toEqual(false)
     })
+
+    it('loads default GH_ORG as undefined if not passed', () => {
+      const GH_ORG = envTest.GH_ORG
+      expect(GH_ORG).toBeUndefined()
+    })
   })
 
   describe('load override values', () => {
@@ -43,6 +48,7 @@ describe('env', () => {
       process.env.DEPLOYMENT_CONFIG_FILE = 'safe-settings-deployment.yml'
       process.env.CREATE_PR_COMMENT = 'false'
       process.env.FULL_SYNC_NOP = false
+      process.env.GH_ORG = 'my-org'
     })
 
     it('loads override values if passed', () => {
@@ -59,6 +65,8 @@ describe('env', () => {
       expect(CREATE_PR_COMMENT).toEqual('false')
       const FULL_SYNC_NOP = envTest.FULL_SYNC_NOP
       expect(FULL_SYNC_NOP).toEqual(false)
+      const GH_ORG = envTest.GH_ORG
+      expect(GH_ORG).toEqual('my-org')
     })
   })
 })

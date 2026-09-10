@@ -8,7 +8,7 @@
     "build:schema": "./script/build-schema",
     "dev": "nodemon --inspect",
     "start": "probot run ./index.js",
-    "full-sync": "node ./full-sync.js",
+    "full-sync": "node -r dotenv/config ./full-sync.js",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
     "lint:es": "eslint .",
     "lint:js": "standard",
