@@ -407,7 +407,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
           repo: env.ADMIN_REPO,
           path: oldPath,
           headers: {
-            'X-GitHub-Api-Version': '2022-11-28'
+            'X-GitHub-Api-Version': '2026-03-10'
           }
         })
         let content = Buffer.from(repofile.data.content, 'base64').toString()
@@ -421,7 +421,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
             repo: env.ADMIN_REPO,
             path: newPath,
             headers: {
-              'X-GitHub-Api-Version': '2022-11-28'
+              'X-GitHub-Api-Version': '2026-03-10'
             }
           })
         } catch (error) {
@@ -436,7 +436,7 @@ module.exports = (robot, { getRouter }, Settings = require('./lib/settings')) =>
               message: `Repo Renamed and safe-settings renamed the file from ${payload.changes.repository.name.from} to ${payload.repository.name}`,
               sha: repofile.data.sha,
               headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
+                'X-GitHub-Api-Version': '2026-03-10'
               }
             })
             robot.log.debug(`Created a new setting file ${newPath}`)

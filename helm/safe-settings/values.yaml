@@ -118,6 +118,8 @@ tolerations: []
 
 affinity: {}
 
+priorityClassName: ""
+
 deploymentConfig:
   restrictedRepos:
     # You can exclude certain repos from safe-settings processing
